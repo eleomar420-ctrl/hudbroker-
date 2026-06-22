@@ -6,6 +6,7 @@
 <title>HudBroker — Trading</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Raleway:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
 <link rel="stylesheet" href="/css/shared.css">
 <style>
@@ -82,6 +83,7 @@ html, body { height: 100%; overflow: hidden; }
 .sell-btn:hover { background: #ff3f6b; }
 .buy-btn i, .sell-btn i { font-size: 20px; }
 .live-clock { text-align: center; font-size: 12px; color: var(--text-faint); font-family: var(--font-mono); }
+.mobile-panel { display: none; }
 .open-trades-strip { padding: 8px 16px; border-top: 1px solid var(--border); background: var(--bg-panel); max-height: 100px; overflow-y: auto; flex-shrink: 0; }
 .trade-chip { display: inline-flex; align-items: center; gap: 8px; background: var(--bg-elevated); border-radius: 8px; padding: 6px 10px; margin: 4px 4px 0 0; font-size: 12px; font-family: var(--font-mono); }
 
@@ -163,14 +165,8 @@ html, body { height: 100%; overflow: hidden; }
 
   .trade-body { flex-direction: column; overflow-y: auto; }
   .chart-area { min-height: 280px; flex: 0 0 45vh; }
-  .trade-panel {
-    width: 100%; border-left: none; border-top: 1px solid var(--border);
-    flex-direction: row; flex-wrap: wrap; gap: 10px; padding: 12px;
-  }
-  .trade-panel > div { flex: 1 1 140px; }
-  .profit-block { width: 100%; margin: 0; flex: 1 1 100%; order: 3; }
-  .trade-buttons { flex: 1 1 100%; order: 4; }
-  .live-clock { flex: 1 1 100%; order: 5; }
+  .trade-panel { display: none; }
+  .mobile-panel { display: flex; }
 
   .open-trades-strip { padding: 6px 10px; }
 
@@ -183,6 +179,33 @@ html, body { height: 100%; overflow: hidden; }
   .asset-row-icon { width: 26px; height: 26px; font-size: 11px; }
   .asset-row-name .label { font-size: 13px; }
   .modal-box { width: 90vw; max-width: 380px; }
+
+  .mobile-panel { display: none; flex-direction: column; padding: 16px; background: #0b0b0f; border-top: 1px solid var(--border); }
+
+  .m-timer-row { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; }
+  .m-timer-label { color: #8b8b96; font-size: 14px; }
+  .m-timer-value { color: #00c896; font-weight: 700; font-size: 15px; letter-spacing: 0.5px; font-variant-numeric: tabular-nums; }
+  .m-progress-track { height: 4px; background: #2a2a35; margin-bottom: 16px; border-radius: 2px; overflow: hidden; }
+  .m-progress-fill { height: 100%; background: #00c896; width: 100%; transition: width 1s linear; border-radius: 2px; }
+
+  .m-controls-row { display: flex; background: #14141a; border-radius: 10px; overflow: hidden; }
+  .m-control-group { display: flex; align-items: center; flex: 1; }
+  .m-control-group + .m-control-group { border-left: 1px solid #232330; }
+  .m-stepper-btn { background: none; border: none; color: #8b8b96; font-size: 20px; width: 40px; height: 48px; cursor: pointer; flex-shrink: 0; }
+  .m-stepper-btn:hover { color: #fff; background: #1c1c24; }
+  .m-control-display { flex: 1; text-align: center; color: #fff; font-size: 16px; font-weight: 500; }
+
+  .m-action-row { display: flex; margin-top: 16px; border-radius: 10px; overflow: hidden; height: 56px; }
+  .m-btn-buy, .m-btn-sell {
+    flex: 1; border: none; cursor: pointer; display: flex; align-items: center;
+    justify-content: space-between; padding: 0 18px; font-size: 16px; font-weight: 700; color: #fff;
+  }
+  .m-btn-buy { background: #00c896; }
+  .m-btn-sell { background: #f0274a; }
+  .m-btn-buy .m-pct { color: rgba(0,0,0,0.35); font-weight: 600; }
+  .m-btn-sell .m-pct { color: rgba(0,0,0,0.25); font-weight: 600; }
+
+  .m-live-clock { text-align: center; font-size: 12px; color: var(--text-faint); font-family: var(--font-mono); margin-top: 12px; }
 }
 
 @media (max-width: 420px) {
@@ -236,7 +259,7 @@ html, body { height: 100%; overflow: hidden; }
 
       <div>
         <div class="panel-block">
-          <div class="stepper-value-row"><i class="ti ti-currency-dollar" aria-hidden="true" style="font-size:16px;"></i><span id="stakeValue">5,00</span></div>
+          <div class="stepper-value-row"><i class="fa fa-dollar" aria-hidden="true" style="font-size:16px;"></i><span id="stakeValue">5,00</span></div>
           <div class="stepper-btn-row">
             <button class="stepper-btn" id="stakeMinus">−</button>
             <button class="stepper-btn" id="stakePlus">+</button>
@@ -258,6 +281,42 @@ html, body { height: 100%; overflow: hidden; }
       </div>
 
       <div class="live-clock" id="liveClock">Hora atual: --:--:--</div>
+    </div>
+
+    <div class="mobile-panel" id="mobilePanel">
+      <div class="m-timer-row">
+        <span class="m-timer-label">Tempo restante:</span>
+        <span class="m-timer-value" id="m_countdownLabel">01:00</span>
+      </div>
+      <div class="m-progress-track">
+        <div class="m-progress-fill" id="m_countdownFill"></div>
+      </div>
+
+      <div class="m-controls-row">
+        <div class="m-control-group">
+          <button class="m-stepper-btn" id="m_durMinus">−</button>
+          <div class="m-control-display" id="m_durValue">1 min.</div>
+          <button class="m-stepper-btn" id="m_durPlus">+</button>
+        </div>
+        <div class="m-control-group">
+          <button class="m-stepper-btn" id="m_stakeMinus">−</button>
+          <div class="m-control-display" id="m_stakeValue">5,00</div>
+          <button class="m-stepper-btn" id="m_stakePlus">+</button>
+        </div>
+      </div>
+
+      <div class="m-action-row">
+        <button class="m-btn-buy" id="m_buyBtn">
+          <span>COMPRAR</span>
+          <span class="m-pct">85%</span>
+        </button>
+        <button class="m-btn-sell" id="m_sellBtn">
+          <span class="m-pct">85%</span>
+          <span>VENDER</span>
+        </button>
+      </div>
+
+      <div class="m-live-clock" id="m_liveClock">Hora atual: --:--:--</div>
     </div>
   </div>
 
@@ -467,11 +526,24 @@ function secondsUntilNextCandleClose(durationSec) {
   return remaining === durationSec ? durationSec : remaining;
 }
 
+function setText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+function setWidth(id, width) {
+  const el = document.getElementById(id);
+  if (el) el.style.width = width;
+}
+
 function renderPanelForActiveTab() {
   const t = getActiveTab();
   if (!t) return;
-  document.getElementById('durValue').textContent = durationOptions[t.durationIndex].label;
-  document.getElementById('stakeValue').textContent = t.stakeValue.toFixed(2).replace('.', ',');
+  const durLabel = durationOptions[t.durationIndex].label;
+  const stakeLabel = t.stakeValue.toFixed(2).replace('.', ',');
+  setText('durValue', durLabel);
+  setText('m_durValue', durLabel);
+  setText('stakeValue', stakeLabel);
+  setText('m_stakeValue', stakeLabel);
   updateProfitAmount();
   updateLiveCountdown();
 }
@@ -479,7 +551,7 @@ function renderPanelForActiveTab() {
 function updateProfitAmount() {
   const t = getActiveTab();
   if (!t) return;
-  document.getElementById('profitAmount').textContent = '+' + formatMoney(t.stakeValue * 0.85);
+  setText('profitAmount', '+' + formatMoney(t.stakeValue * 0.85));
 }
 
 function updateLiveCountdown() {
@@ -487,26 +559,36 @@ function updateLiveCountdown() {
   if (!t) return;
   const durationSeconds = durationOptions[t.durationIndex].sec;
   const remaining = secondsUntilNextCandleClose(durationSeconds);
-  document.getElementById('countdownLabel').textContent = formatCountdown(remaining);
-  document.getElementById('countdownFill').style.width = ((remaining / durationSeconds) * 100) + '%';
+  const label = formatCountdown(remaining);
+  const widthPct = ((remaining / durationSeconds) * 100) + '%';
+  setText('countdownLabel', label);
+  setText('m_countdownLabel', label);
+  setWidth('countdownFill', widthPct);
+  setWidth('m_countdownFill', widthPct);
 }
 
-document.getElementById('durMinus').onclick = () => {
+function adjustDuration(delta) {
   const t = getActiveTab(); if (!t) return;
-  if (t.durationIndex > 0) { t.durationIndex--; renderPanelForActiveTab(); }
-};
-document.getElementById('durPlus').onclick = () => {
+  const newIndex = t.durationIndex + delta;
+  if (newIndex >= 0 && newIndex < durationOptions.length) {
+    t.durationIndex = newIndex;
+    renderPanelForActiveTab();
+  }
+}
+function adjustStake(delta) {
   const t = getActiveTab(); if (!t) return;
-  if (t.durationIndex < durationOptions.length - 1) { t.durationIndex++; renderPanelForActiveTab(); }
-};
-document.getElementById('stakeMinus').onclick = () => {
-  const t = getActiveTab(); if (!t) return;
-  if (t.stakeValue > 1) { t.stakeValue = Math.max(1, t.stakeValue - 1); renderPanelForActiveTab(); }
-};
-document.getElementById('stakePlus').onclick = () => {
-  const t = getActiveTab(); if (!t) return;
-  t.stakeValue += 1; renderPanelForActiveTab();
-};
+  t.stakeValue = Math.max(1, t.stakeValue + delta);
+  renderPanelForActiveTab();
+}
+
+document.getElementById('durMinus').onclick = () => adjustDuration(-1);
+document.getElementById('durPlus').onclick = () => adjustDuration(1);
+document.getElementById('stakeMinus').onclick = () => adjustStake(-1);
+document.getElementById('stakePlus').onclick = () => adjustStake(1);
+document.getElementById('m_durMinus').onclick = () => adjustDuration(-1);
+document.getElementById('m_durPlus').onclick = () => adjustDuration(1);
+document.getElementById('m_stakeMinus').onclick = () => adjustStake(-1);
+document.getElementById('m_stakePlus').onclick = () => adjustStake(1);
 
 function connectPriceFeed() {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
@@ -586,7 +668,9 @@ setInterval(() => {
     if (diff === 0) setTimeout(() => { refreshOpenTrades(); refreshBalance(); }, 1500);
   });
   const now = new Date();
-  document.getElementById('liveClock').textContent = 'Hora atual: ' + now.toLocaleTimeString('pt-BR');
+  const clockText = 'Hora atual: ' + now.toLocaleTimeString('pt-BR');
+  setText('liveClock', clockText);
+  setText('m_liveClock', clockText);
 }, 1000);
 
 async function openTrade(direction) {
@@ -616,6 +700,8 @@ async function openTrade(direction) {
 
 document.getElementById('buyBtn').onclick = () => openTrade('up');
 document.getElementById('sellBtn').onclick = () => openTrade('down');
+document.getElementById('m_buyBtn').onclick = () => openTrade('up');
+document.getElementById('m_sellBtn').onclick = () => openTrade('down');
 
 document.getElementById('depositBtn').onclick = () => {
   if (activeAccount === 'demo') {
