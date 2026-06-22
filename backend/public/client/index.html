@@ -16,20 +16,45 @@ html, body { height: 100%; overflow: hidden; }
   padding: 0 16px; height: 56px; border-bottom: 1px solid var(--border);
   background: var(--bg-panel); flex-shrink: 0;
 }
-.asset-pill {
-  display: flex; align-items: center; gap: 8px; background: var(--bg-elevated);
-  border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; cursor: pointer;
-}
-.asset-pill .icon { width: 22px; height: 22px; border-radius: 50%; background: var(--brand); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #1a1208; }
-.asset-pill .name { font-weight: 600; font-size: 13px; }
-.asset-pill .sub { font-size: 11px; color: var(--text-faint); }
-.asset-dropdown { display: none; position: absolute; top: 56px; left: 16px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 6px; z-index: 50; min-width: 200px; }
-.asset-dropdown.open { display: block; }
-.asset-option { padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-family: var(--font-mono); }
-.asset-option:hover { background: var(--bg-elevated); }
 
-.trade-body { flex: 1; display: flex; min-height: 0; }
-#tv_chart { flex: 1; min-width: 0; }
+.trade-body { flex: 1; display: flex; min-height: 0; position: relative; }
+.chart-area { flex: 1; min-width: 0; display: flex; flex-direction: column; position: relative; }
+#tv_chart { flex: 1; min-height: 0; }
+
+.hamburger-btn { width: 36px; height: 36px; border-radius: 8px; border: none; background: var(--bg-elevated); color: var(--text); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.hamburger-btn:hover { background: var(--border); }
+
+.chart-asset-bar { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--bg-panel); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.asset-search { flex: 1; max-width: 220px; display: flex; align-items: center; gap: 8px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 13px; }
+.asset-search i { color: var(--text-faint); font-size: 16px; }
+.asset-add-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.asset-add-btn:hover { background: var(--border); }
+
+.asset-popover {
+  display: none; position: absolute; top: 56px; left: 12px; width: 260px; max-height: 360px; overflow-y: auto;
+  background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 8px; z-index: 70;
+}
+.asset-popover.open { display: block; }
+.asset-popover-title { font-size: 12px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.05em; padding: 6px 10px; }
+.asset-option { padding: 10px; border-radius: 8px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+.asset-option:hover { background: var(--bg-elevated); }
+.asset-option i { font-size: 16px; color: var(--brand); }
+.asset-sym { margin-left: auto; color: var(--text-faint); font-size: 12px; font-family: var(--font-mono); }
+
+.side-menu-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
+.side-menu-overlay.open { display: block; }
+.side-menu {
+  width: 220px; height: 100%; background: var(--bg-panel); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; padding: 16px 0; overflow-y: auto;
+}
+.menu-item {
+  display: flex; align-items: center; gap: 10px; padding: 12px 20px; background: none; border: none;
+  color: var(--text-dim); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; text-decoration: none;
+}
+.menu-item:hover { background: var(--bg-elevated); color: var(--text); }
+.menu-item i { font-size: 18px; }
+.menu-item-deposit { color: #08B774; }
+.menu-item-logout { color: var(--down); margin-top: auto; }
 
 .trade-panel {
   width: 280px; flex-shrink: 0; background: var(--bg-panel);
@@ -105,21 +130,9 @@ html, body { height: 100%; overflow: hidden; }
 <body>
 <div class="trade-shell">
   <div class="trade-topbar">
-    <div style="display:flex; align-items:center; gap:16px; position:relative;">
+    <div style="display:flex; align-items:center; gap:16px;">
+      <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menu"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
       <div class="brand"><span class="dot"></span>Hud<span class="tag">Broker</span></div>
-      <div class="asset-pill" id="assetPill">
-        <div class="icon" id="assetIcon">B</div>
-        <div>
-          <div class="name" id="assetName">Bitcoin</div>
-          <div class="sub">Crypto</div>
-        </div>
-      </div>
-      <div class="asset-dropdown" id="assetDropdown">
-        <div class="asset-option" data-asset="BTCUSDT" data-name="Bitcoin" data-icon="B">Bitcoin (BTC/USDT)</div>
-        <div class="asset-option" data-asset="ETHUSDT" data-name="Ethereum" data-icon="E">Ethereum (ETH/USDT)</div>
-        <div class="asset-option" data-asset="SOLUSDT" data-name="Solana" data-icon="S">Solana (SOL/USDT)</div>
-        <div class="asset-option" data-asset="BNBUSDT" data-name="BNB" data-icon="B">BNB (BNB/USDT)</div>
-      </div>
     </div>
     <div style="display:flex; align-items:center; gap:16px;">
       <div class="account-pill" id="accountPill">
@@ -144,7 +157,32 @@ html, body { height: 100%; overflow: hidden; }
   </div>
 
   <div class="trade-body">
-    <div id="tv_chart"></div>
+    <div class="chart-area">
+      <div class="chart-asset-bar">
+        <div class="asset-search" id="assetSearchBar">
+          <i class="ti ti-search" aria-hidden="true"></i>
+          <span id="assetSearchLabel">BTC/USDT</span>
+        </div>
+        <button class="asset-add-btn" id="assetAddBtn" aria-label="Escolher ativo"><i class="ti ti-plus" aria-hidden="true"></i></button>
+      </div>
+      <div id="tv_chart"></div>
+    </div>
+
+    <div class="asset-popover" id="assetPopover">
+      <div class="asset-popover-title">Selecionar ativo</div>
+      <div class="asset-option" data-asset="BTCUSDT" data-name="Bitcoin" data-symbol="BTC/USDT">
+        <i class="ti ti-currency-bitcoin" aria-hidden="true"></i> Bitcoin <span class="asset-sym">BTC/USDT</span>
+      </div>
+      <div class="asset-option" data-asset="ETHUSDT" data-name="Ethereum" data-symbol="ETH/USDT">
+        <i class="ti ti-coin" aria-hidden="true"></i> Ethereum <span class="asset-sym">ETH/USDT</span>
+      </div>
+      <div class="asset-option" data-asset="SOLUSDT" data-name="Solana" data-symbol="SOL/USDT">
+        <i class="ti ti-coin" aria-hidden="true"></i> Solana <span class="asset-sym">SOL/USDT</span>
+      </div>
+      <div class="asset-option" data-asset="BNBUSDT" data-name="BNB" data-symbol="BNB/USDT">
+        <i class="ti ti-coin" aria-hidden="true"></i> BNB <span class="asset-sym">BNB/USDT</span>
+      </div>
+    </div>
 
     <div class="trade-panel">
       <div>
@@ -188,6 +226,25 @@ html, body { height: 100%; overflow: hidden; }
 
   <div class="open-trades-strip" id="openTradesStrip">
     <span style="font-size:12px; color:var(--text-faint);">Nenhuma operação em andamento</span>
+  </div>
+</div>
+
+<div class="side-menu-overlay" id="sideMenuOverlay">
+  <div class="side-menu" id="sideMenu">
+    <button class="menu-item menu-item-deposit" data-action="deposit"><i class="ti ti-currency-dollar" aria-hidden="true"></i> Depositar</button>
+    <button class="menu-item" data-action="assets"><i class="ti ti-plus" aria-hidden="true"></i> Ativos</button>
+    <button class="menu-item" data-action="layout"><i class="ti ti-layout-grid" aria-hidden="true"></i> Layout</button>
+    <button class="menu-item" data-action="charts"><i class="ti ti-chart-bar" aria-hidden="true"></i> Gráficos</button>
+    <a class="menu-item" href="/client/history.html"><i class="ti ti-history" aria-hidden="true"></i> Histórico</a>
+    <a class="menu-item" href="/client/account.html"><i class="ti ti-user" aria-hidden="true"></i> Minha Conta</a>
+    <button class="menu-item" data-action="promotions"><i class="ti ti-speakerphone" aria-hidden="true"></i> Promoções</button>
+    <button class="menu-item" data-action="ranking"><i class="ti ti-crown" aria-hidden="true"></i> Ranking</button>
+    <button class="menu-item" data-action="tournaments"><i class="ti ti-trophy" aria-hidden="true"></i> Torneios</button>
+    <button class="menu-item" data-action="copytrade"><i class="ti ti-broadcast" aria-hidden="true"></i> Copy Trade</button>
+    <button class="menu-item" data-action="signals"><i class="ti ti-antenna" aria-hidden="true"></i> Sinais</button>
+    <button class="menu-item" data-action="promocode"><i class="ti ti-ticket" aria-hidden="true"></i> Código</button>
+    <button class="menu-item" data-action="support"><i class="ti ti-message-circle" aria-hidden="true"></i> Suporte</button>
+    <button class="menu-item menu-item-logout" id="sideMenuLogout"><i class="ti ti-logout" aria-hidden="true"></i> Sair</button>
   </div>
 </div>
 
@@ -246,17 +303,40 @@ function loadChart(symbol) {
   });
 }
 
-document.getElementById('assetPill').onclick = () => {
-  document.getElementById('assetDropdown').classList.toggle('open');
+document.getElementById('assetAddBtn').onclick = () => {
+  document.getElementById('assetPopover').classList.toggle('open');
+};
+document.getElementById('assetSearchBar').onclick = () => {
+  document.getElementById('assetPopover').classList.toggle('open');
 };
 document.querySelectorAll('.asset-option').forEach(opt => {
   opt.onclick = () => {
     currentAsset = opt.dataset.asset;
-    document.getElementById('assetName').textContent = opt.dataset.name;
-    document.getElementById('assetIcon').textContent = opt.dataset.icon;
-    document.getElementById('assetDropdown').classList.remove('open');
+    document.getElementById('assetSearchLabel').textContent = opt.dataset.symbol;
+    document.getElementById('assetPopover').classList.remove('open');
     loadChart(currentAsset);
     updateProfitAmount();
+  };
+});
+
+document.getElementById('hamburgerBtn').onclick = () => {
+  document.getElementById('sideMenuOverlay').classList.add('open');
+};
+document.getElementById('sideMenuOverlay').onclick = (e) => {
+  if (e.target.id === 'sideMenuOverlay') e.target.classList.remove('open');
+};
+document.getElementById('sideMenuLogout').onclick = () => logout();
+document.querySelectorAll('.menu-item[data-action]').forEach(item => {
+  item.onclick = () => {
+    const action = item.dataset.action;
+    document.getElementById('sideMenuOverlay').classList.remove('open');
+    if (action === 'deposit') {
+      document.getElementById('depositBtn').click();
+    } else if (action === 'assets') {
+      document.getElementById('assetPopover').classList.add('open');
+    } else {
+      showToast('Em breve');
+    }
   };
 });
 
