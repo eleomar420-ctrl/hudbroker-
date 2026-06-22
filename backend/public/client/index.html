@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HudBroker — Trading</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Raleway:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Raleway:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="/css/shared.css">
 <style>
 html, body { height: 100%; overflow: hidden; }
@@ -38,16 +39,24 @@ html, body { height: 100%; overflow: hidden; }
 .panel-block { background: var(--bg-elevated); border-radius: 10px; padding: 14px; }
 .panel-label-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-dim); margin-bottom: 10px; }
 .panel-label-row i { font-size: 16px; color: var(--text-faint); }
-.stepper { display: flex; align-items: center; justify-content: space-between; }
-.stepper-btn { width: 36px; height: 36px; border-radius: 8px; border: none; background: var(--bg); color: var(--text); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.stepper-btn:hover { background: var(--border); }
-.stepper-value { font-size: 18px; font-weight: 600; }
+.stepper { display: flex; align-items: center; justify-content: space-between; height: 34.5px; }
+.stepper-btn {
+  width: 107.8px; height: 34.5px; border-radius: 8px; border: none;
+  background: #00000033; color: #FFFFFFB3; font-family: 'Raleway', sans-serif;
+  font-size: 30px; padding: 0 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.stepper-btn:hover { background: #00000055; }
+.stepper-value {
+  font-family: 'Raleway', sans-serif; font-size: 20px; color: #FFFFFFCC;
+  padding: 10px; display: flex; align-items: center; gap: 4px;
+}
 .countdown-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 10px; overflow: hidden; }
 .countdown-fill { height: 100%; background: var(--up); width: 100%; transition: width 1s linear; }
-.profit-row { display: flex; align-items: baseline; justify-content: space-between; }
+.profit-block { width: 220.02px; min-height: 71.69px; margin: 10px auto; padding: 10px; border: 2px solid var(--border); border-radius: 8px; text-align: center; }
+.profit-row { display: flex; align-items: baseline; justify-content: center; gap: 8px; }
 .profit-label { font-size: 13px; color: var(--text-dim); }
-.profit-pct { font-size: 18px; font-weight: 700; color: var(--up); margin-left: 6px; }
-.profit-amount { color: var(--up); font-size: 22px; font-weight: 600; text-align: right; margin-top: 4px; }
+.profit-pct { font-family: Arial, sans-serif; font-size: 25px; font-weight: 700; color: #08B774; }
+.profit-amount { font-family: Arial, sans-serif; color: #08B774; font-size: 20px; margin-top: 4px; }
 .buy-btn, .sell-btn {
   width: 100%; height: 71px; padding: 15px 10px; border-radius: 10px; border: none;
   font-weight: 700; font-size: 16px; cursor: pointer;
@@ -149,13 +158,13 @@ html, body { height: 100%; overflow: hidden; }
         <div class="panel-block">
           <div class="stepper">
             <button class="stepper-btn" id="stakeMinus">−</button>
-            <div class="stepper-value"><i class="ti ti-currency-dollar" aria-hidden="true" style="font-size:16px; margin-right:2px;"></i><span id="stakeValue">5,00</span></div>
+            <div class="stepper-value"><i class="fa fa-dollar" aria-hidden="true" style="font-size:16px;"></i><span id="stakeValue">5,00</span></div>
             <button class="stepper-btn" id="stakePlus">+</button>
           </div>
         </div>
       </div>
 
-      <div class="panel-block">
+      <div class="profit-block">
         <div class="profit-row">
           <span class="profit-label">Lucro</span>
           <span class="profit-pct">85%</span>
@@ -221,8 +230,11 @@ function loadChart(symbol) {
     toolbar_bg: '#131720',
     enable_publishing: false,
     hide_top_toolbar: false,
+    hide_side_toolbar: false,
     hide_legend: false,
-    save_image: false
+    save_image: false,
+    withdateranges: true,
+    studies: ['MASimple@tv-basicstudies']
   });
 }
 
