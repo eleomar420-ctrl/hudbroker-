@@ -251,6 +251,8 @@ html, body { height: 100%; overflow: hidden; }
   .m-asset-drawer-item .icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0; }
   .m-asset-drawer-item .name { color: #fff; font-size: 14px; font-weight: 500; }
   .m-asset-drawer-item .sym { margin-left: auto; color: var(--text-faint); font-size: 12px; font-family: var(--font-mono); }
+  .m-asset-drawer-remove { background: none; border: none; color: var(--text-faint); font-size: 16px; cursor: pointer; padding: 4px 6px; margin-left: 6px; flex-shrink: 0; }
+  .m-asset-drawer-remove:hover { color: var(--down); }
 }
 
 @media (max-width: 420px) {
@@ -452,12 +454,12 @@ html, body { height: 100%; overflow: hidden; }
 requireAuth();
 
 const ASSET_CATALOG = [
-  { asset: 'BTCUSDT', name: 'Bitcoin', symbol: 'BTC/USDT', category: 'crypto', color: '#F7931A', initial: 'B' },
-  { asset: 'ETHUSDT', name: 'Ethereum', symbol: 'ETH/USDT', category: 'crypto', color: '#627EEA', initial: 'E' },
-  { asset: 'SOLUSDT', name: 'Solana', symbol: 'SOL/USDT', category: 'crypto', color: '#14F195', initial: 'S' },
-  { asset: 'BNBUSDT', name: 'BNB', symbol: 'BNB/USDT', category: 'crypto', color: '#F3BA2F', initial: 'B' },
-  { asset: 'LTCUSDT', name: 'Litecoin', symbol: 'LTC/USDT', category: 'crypto', color: '#345D9D', initial: 'L' },
-  { asset: 'ADAUSDT', name: 'Cardano', symbol: 'ADA/USDT', category: 'crypto', color: '#0033AD', initial: 'A' }
+  { asset: 'BTCUSDT', name: 'Bitcoin', symbol: 'BTC/USDT', category: 'crypto', color: '#F7931A', initial: 'B', icon: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/btc.svg' },
+  { asset: 'ETHUSDT', name: 'Ethereum', symbol: 'ETH/USDT', category: 'crypto', color: '#627EEA', initial: 'E', icon: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/eth.svg' },
+  { asset: 'SOLUSDT', name: 'Solana', symbol: 'SOL/USDT', category: 'crypto', color: '#14F195', initial: 'S', icon: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/sol.svg' },
+  { asset: 'BNBUSDT', name: 'BNB', symbol: 'BNB/USDT', category: 'crypto', color: '#F3BA2F', initial: 'B', icon: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/bnb.svg' },
+  { asset: 'LTCUSDT', name: 'Litecoin', symbol: 'LTC/USDT', category: 'crypto', color: '#345D9D', initial: 'L', icon: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/ltc.svg' },
+  { asset: 'ADAUSDT', name: 'Cardano', symbol: 'ADA/USDT', category: 'crypto', color: '#0033AD', initial: 'A', icon: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/ada.svg' }
 ];
 
 let livePrices = {};
@@ -467,6 +469,12 @@ let tabCounter = 0;
 
 function findCatalog(asset) {
   return ASSET_CATALOG.find(a => a.asset === asset);
+}
+
+// Renderiza o logo real do ativo (via CDN); se a imagem falhar ao carregar,
+// volta automaticamente para o círculo colorido com a inicial.
+function assetIconHtml(catalog, sizePx) {
+  return `<img src="${catalog.icon}" alt="${catalog.name}" style="width:${sizePx}px; height:${sizePx}px; border-radius:50%; flex-shrink:0; background:${catalog.color};" onerror="this.onerror=null; this.outerHTML='<div style=&quot;width:${sizePx}px;height:${sizePx}px;border-radius:50%;background:${catalog.color};display:flex;align-items:center;justify-content:center;font-size:${Math.round(sizePx * 0.45)}px;font-weight:700;color:#fff;flex-shrink:0;&quot;>${catalog.initial}</div>'">`;
 }
 
 function createTab(asset) {
@@ -521,7 +529,7 @@ function renderTabsRow() {
   const row = document.getElementById('assetTabsRow');
   row.innerHTML = tabs.map(t => `
     <div class="asset-tab ${t.id === activeTabId ? 'active' : ''}" data-tab="${t.id}">
-      <div class="icon" style="background:${t.catalog.color};">${t.catalog.initial}</div>
+      ${assetIconHtml(t.catalog, 24)}
       <div class="info">
         <div class="name">${t.catalog.name}</div>
         <div class="sub">Crypto</div>
@@ -616,8 +624,7 @@ function renderPanelForActiveTab() {
   setText('m_assetName', t.catalog.name);
   const iconEl = document.getElementById('m_assetIcon');
   if (iconEl) {
-    iconEl.textContent = t.catalog.initial;
-    iconEl.style.background = t.catalog.color;
+    iconEl.outerHTML = assetIconHtml(t.catalog, 26).replace('<img ', '<img id="m_assetIcon" class="m-asset-icon" ');
   }
   updateProfitAmount();
   updateLiveCountdown();
@@ -922,22 +929,56 @@ document.getElementById('assetsCloseBtn').onclick = closeAssetsScreen;
 document.getElementById('m_assetRow').onclick = openMobileAssetDrawer;
 document.getElementById('mAssetDrawerClose').onclick = closeMobileAssetDrawer;
 
+function getHiddenAssets() {
+  try {
+    return JSON.parse(localStorage.getItem('hb_hidden_assets') || '[]');
+  } catch (e) {
+    return [];
+  }
+}
+function hideAsset(asset) {
+  const hidden = getHiddenAssets();
+  if (!hidden.includes(asset)) {
+    hidden.push(asset);
+    localStorage.setItem('hb_hidden_assets', JSON.stringify(hidden));
+  }
+}
+
 function openMobileAssetDrawer() {
   document.getElementById('mobilePanel').style.display = 'none';
   const drawer = document.getElementById('mAssetDrawer');
   drawer.classList.add('open');
+  renderMobileAssetDrawerList();
+}
+
+function renderMobileAssetDrawerList() {
+  const hidden = getHiddenAssets();
+  const visible = ASSET_CATALOG.filter(a => !hidden.includes(a.asset));
   const list = document.getElementById('mAssetDrawerList');
-  list.innerHTML = ASSET_CATALOG.map(a => `
+  if (visible.length === 0) {
+    list.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-faint); font-size:13px;">Nenhum ativo disponível</div>';
+    return;
+  }
+  list.innerHTML = visible.map(a => `
     <div class="m-asset-drawer-item" data-asset="${a.asset}">
-      <div class="icon" style="background:${a.color};">${a.initial}</div>
+      ${assetIconHtml(a, 28)}
       <span class="name">${a.name}</span>
       <span class="sym">${a.symbol}</span>
+      <button class="m-asset-drawer-remove" data-remove="${a.asset}" aria-label="Remover ${a.name} da lista"><i class="ti ti-x" aria-hidden="true"></i></button>
     </div>
   `).join('');
   list.querySelectorAll('.m-asset-drawer-item').forEach(item => {
-    item.onclick = () => {
+    item.onclick = (e) => {
+      if (e.target.closest('[data-remove]')) return; // clique no X não seleciona
       createTab(item.dataset.asset);
       closeMobileAssetDrawer();
+    };
+  });
+  list.querySelectorAll('[data-remove]').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      hideAsset(btn.dataset.remove);
+      renderMobileAssetDrawerList();
     };
   });
 }
@@ -961,10 +1002,11 @@ document.getElementById('assetsSearchInput').oninput = (e) => {
 
 function renderAssetsTable(category, search) {
   const term = (search || '').toLowerCase();
+  const hidden = getHiddenAssets();
   const filtered = ASSET_CATALOG.filter(a => {
     const matchesCategory = category === 'all' || a.category === category;
     const matchesSearch = !term || a.name.toLowerCase().includes(term) || a.symbol.toLowerCase().includes(term);
-    return matchesCategory && matchesSearch;
+    return matchesCategory && matchesSearch && !hidden.includes(a.asset);
   });
   const tbody = document.getElementById('assetsTableBody');
   tbody.innerHTML = filtered.map(a => {
@@ -974,7 +1016,7 @@ function renderAssetsTable(category, search) {
       <tr class="asset-row" data-asset="${a.asset}">
         <td>
           <div class="asset-row-name">
-            <div class="asset-row-icon" style="background:${a.color};">${a.initial}</div>
+            ${assetIconHtml(a, 32)}
             <div>
               <div class="label">${a.name}</div>
               <div class="sub">Crypto</div>
