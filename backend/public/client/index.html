@@ -20,7 +20,8 @@ html, body { height: 100%; overflow: hidden; }
 .hamburger-btn { width: 36px; height: 36px; border-radius: 8px; border: none; background: var(--bg-elevated); color: var(--text); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .hamburger-btn:hover { background: var(--border); }
 
-.asset-tabs-row { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; overflow-x: auto; }
+.asset-tabs-row { display: flex; align-items: center; gap: 6px; min-width: 0; overflow-x: auto; flex-shrink: 1; }
+.topbar-spacer { flex: 1; min-width: 8px; }
 .asset-tab {
   display: flex; align-items: center; gap: 8px; background: var(--bg-elevated);
   border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; cursor: pointer; flex-shrink: 0;
@@ -114,10 +115,10 @@ html, body { height: 100%; overflow: hidden; }
 
 .side-menu-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
 .side-menu-overlay.open { display: block; }
-.side-menu { width: 220px; height: 100%; background: var(--bg-panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 16px 0; overflow-y: auto; }
-.menu-item { display: flex; align-items: center; gap: 10px; padding: 12px 20px; background: none; border: none; color: var(--text-dim); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; text-decoration: none; }
+.side-menu { width: 180px; height: 100%; background: var(--bg-panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 12px 0; overflow-y: auto; }
+.menu-item { display: flex; align-items: center; gap: 8px; padding: 9px 16px; background: none; border: none; color: var(--text-dim); font-size: 13px; font-weight: 500; cursor: pointer; text-align: left; text-decoration: none; }
 .menu-item:hover { background: var(--bg-elevated); color: var(--text); }
-.menu-item i { font-size: 18px; }
+.menu-item i { font-size: 15px; }
 .menu-item-deposit { color: #08B774; }
 .menu-item-logout { color: var(--down); margin-top: auto; }
 
@@ -151,6 +152,8 @@ html, body { height: 100%; overflow: hidden; }
     <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menu"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
     <div class="asset-tabs-row" id="assetTabsRow"></div>
     <button class="asset-add-square" id="assetAddSquare" aria-label="Adicionar ativo"><i class="ti ti-plus" aria-hidden="true"></i></button>
+
+    <div class="topbar-spacer"></div>
 
     <div class="account-pill" id="accountPill">
       <div>
