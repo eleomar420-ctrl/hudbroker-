@@ -1,16 +1,16 @@
 :root {
-  --bg: #0b0e11;
-  --bg-panel: #131720;
-  --bg-elevated: #1a1f2b;
-  --border: #232938;
+  --bg: #000000;
+  --bg-panel: #0d0d0d;
+  --bg-elevated: #161616;
+  --border: #232323;
   --text: #e8eaed;
   --text-dim: #8b92a3;
   --text-faint: #5a6178;
   --brand: #e8a23d;
   --brand-dim: #4a3a1f;
-  --up: #1fb574;
+  --up: #08B774;
   --up-dim: #0f3326;
-  --down: #e2475a;
+  --down: #F92757;
   --down-dim: #3a1820;
   --font-display: 'Space Grotesk', sans-serif;
   --font-body: 'Inter', sans-serif;

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HudBroker — Minha Conta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/shared.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
+<style>
+.account-layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 56px); }
+.account-nav { border-right: 1px solid var(--border); background: var(--bg-panel); padding: 20px 0; }
+.account-nav a { display: flex; align-items: center; gap: 10px; padding: 12px 20px; color: var(--text-dim); font-size: 14px; font-weight: 500; border-left: 2px solid transparent; cursor: pointer; }
+.account-nav a:hover { color: var(--text); background: var(--bg-elevated); }
+.account-nav a.active { color: var(--brand); border-left-color: var(--brand); background: var(--bg-elevated); }
+.account-nav i { font-size: 18px; }
+.section { display: none; }
+.section.active { display: block; }
+.avatar-circle { width: 96px; height: 96px; border-radius: 50%; background: var(--bg-elevated); display: flex; align-items: center; justify-content: center; font-size: 40px; color: var(--text-faint); overflow: hidden; }
+.avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+.section-card-title { background: var(--text-faint); color: var(--bg); font-weight: 600; padding: 10px 16px; border-radius: 10px 10px 0 0; font-size: 13px; }
+.section-card-body { background: var(--bg-panel); border: 1px solid var(--border); border-top: none; border-radius: 0 0 10px 10px; padding: 24px; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><span class="dot"></span>Hud<span class="tag">Broker</span></div>
+  <div class="topbar-right">
+    <a href="/client/index.html" class="btn">Voltar ao trading</a>
+  </div>
+</div>
+
+<div class="account-layout">
+  <div class="account-nav">
+    <h2 style="padding: 0 20px 16px; font-family: var(--font-display); font-size: 16px;">Minha Conta</h2>
+    <a data-section="dados" class="active"><i class="ti ti-user" aria-hidden="true"></i> Meus Dados</a>
+    <a data-section="depositos"><i class="ti ti-arrow-up" aria-hidden="true"></i> Depósitos</a>
+    <a data-section="saques"><i class="ti ti-arrow-down" aria-hidden="true"></i> Saques</a>
+    <a data-section="verificar"><i class="ti ti-shield-check" aria-hidden="true"></i> Verificar Conta</a>
+    <a data-section="foto"><i class="ti ti-photo" aria-hidden="true"></i> Alterar Foto</a>
+    <a data-section="senha"><i class="ti ti-lock" aria-hidden="true"></i> Mudar Senha</a>
+    <a data-section="config"><i class="ti ti-settings" aria-hidden="true"></i> Configurações</a>
+    <a id="navLogout"><i class="ti ti-logout" aria-hidden="true"></i> Sair</a>
+  </div>
+
+  <div class="main">
+    <div id="section-dados" class="section active">
+      <div class="card">
+        <div class="card-title">Meus dados</div>
+        <div class="grid-2">
+          <div><label>Nome</label><input type="text" id="dataName" disabled></div>
+          <div><label>Sobrenome</label><input type="text" id="dataLastName" disabled></div>
+        </div>
+        <div class="grid-2" style="margin-top:14px;">
+          <div><label>E-mail</label><input type="text" id="dataEmail" disabled></div>
+          <div><label>Moeda da conta</label><input type="text" id="dataCurrency" disabled></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="section-depositos" class="section">
+      <div class="card">
+        <div class="card-title">Histórico de depósitos</div>
+        <table>
+          <thead><tr><th>Data</th><th>Valor</th><th>Status</th></tr></thead>
+          <tbody id="depositsBody"><tr><td colspan="3" class="empty-state">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="section-saques" class="section">
+      <div class="card">
+        <div class="card-title">Solicitar saque</div>
+        <div style="display:flex; gap:10px; align-items:flex-end; max-width:400px;">
+          <div style="flex:1;"><label>Valor (R$)</label><input type="number" id="withdrawAmount" min="1"></div>
+          <button class="btn btn-primary" id="withdrawBtn">Solicitar</button>
+        </div>
+        <p style="margin-top:12px; font-size:12px; color:var(--text-faint);">Saques são da conta principal e passam por análise do backoffice.</p>
+      </div>
+    </div>
+
+    <div id="section-verificar" class="section">
+      <div class="card">
+        <div class="card-title">Verificação de identidade (KYC)</div>
+        <div id="kycStatusBlock"></div>
+      </div>
+    </div>
+
+    <div id="section-foto" class="section">
+      <div class="section-card-title">Foto de Perfil</div>
+      <div class="section-card-body" style="text-align:center;">
+        <div class="avatar-circle" style="margin: 0 auto 20px;" id="avatarPreview"><i class="ti ti-user" aria-hidden="true"></i></div>
+        <input type="file" id="avatarInput" accept="image/*" style="display:none;">
+        <button class="btn" style="width:100%; max-width:400px;" id="changePhotoBtn">Alterar foto</button>
+      </div>
+    </div>
+
+    <div id="section-senha" class="section">
+      <div class="card">
+        <div class="card-title">Mudar senha</div>
+        <form id="passwordForm" style="max-width:400px;">
+          <div class="field"><label>Senha atual</label><input type="password" id="currentPassword" required></div>
+          <div class="field"><label>Nova senha</label><input type="password" id="newPassword" required minlength="6"></div>
+          <button type="submit" class="btn btn-primary">Atualizar senha</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="section-config" class="section">
+      <div class="card">
+        <div class="card-title">Configurações</div>
+        <p style="color:var(--text-faint); font-size:13px;">Preferências de notificação e conta em breve.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+requireAuth();
+
+document.querySelectorAll('.account-nav a[data-section]').forEach(link => {
+  link.onclick = () => {
+    document.querySelectorAll('.account-nav a').forEach(a => a.classList.remove('active'));
+    link.classList.add('active');
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('section-' + link.dataset.section).classList.add('active');
+  };
+});
+document.getElementById('navLogout').onclick = () => logout();
+
+async function loadAccountData() {
+  const me = await apiFetch('/trading/me');
+  document.getElementById('dataName').value = me.name || '';
+  document.getElementById('dataLastName').value = me.last_name || '';
+  document.getElementById('dataEmail').value = me.email || '';
+  document.getElementById('dataCurrency').value = me.currency || 'BRL';
+
+  const kycBlock = document.getElementById('kycStatusBlock');
+  const statusMap = { pending: ['Pendente', 'badge-pending'], approved: ['Aprovado', 'badge-up'], rejected: ['Rejeitado', 'badge-down'] };
+  const [label, cls] = statusMap[me.kyc_status] || statusMap.pending;
+  kycBlock.innerHTML = `<span class="badge ${cls}">${label}</span><p style="margin-top:12px; font-size:13px; color:var(--text-faint);">Envie seus documentos para liberar saques na conta principal.</p>`;
+
+  if (me.avatar_url) {
+    document.getElementById('avatarPreview').innerHTML = `<img src="${me.avatar_url}" alt="">`;
+  }
+}
+
+document.getElementById('withdrawBtn').onclick = async () => {
+  const amount = Number(document.getElementById('withdrawAmount').value);
+  if (!amount) return showToast('Informe um valor', 'error');
+  showToast('Solicitação de saque enviada para análise');
+};
+
+document.getElementById('changePhotoBtn').onclick = () => document.getElementById('avatarInput').click();
+document.getElementById('avatarInput').onchange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    document.getElementById('avatarPreview').innerHTML = `<img src="${ev.target.result}" alt="">`;
+    showToast('Foto atualizada (apenas nesta sessão)');
+  };
+  reader.readAsDataURL(file);
+};
+
+document.getElementById('passwordForm').onsubmit = (e) => {
+  e.preventDefault();
+  showToast('Funcionalidade de troca de senha em breve');
+};
+
+loadAccountData();
+</script>
+</body>
+</html>

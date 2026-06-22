@@ -66,6 +66,9 @@ export async function initDb() {
     ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS country TEXT NOT NULL DEFAULT 'BR';
     ALTER TABLE users ADD COLUMN IF NOT EXISTS currency TEXT NOT NULL DEFAULT 'BRL';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS demo_balance DOUBLE PRECISION NOT NULL DEFAULT 10000;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+    ALTER TABLE trades ADD COLUMN IF NOT EXISTS account_type TEXT NOT NULL DEFAULT 'demo';
   `);
 
   console.log('[db] Schema PostgreSQL inicializado/verificado');

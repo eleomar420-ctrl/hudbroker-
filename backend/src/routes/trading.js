@@ -20,9 +20,10 @@ router.get('/prices/:asset', (req, res) => {
 
 router.post('/trades', authRequired, async (req, res) => {
   try {
-    const { asset, direction, stake, durationSeconds, payoutPct } = req.body;
+    const { asset, direction, stake, durationSeconds, payoutPct, accountType } = req.body;
     const result = await openTrade({
       userId: req.auth.id,
+      accountType: accountType === 'real' ? 'real' : 'demo',
       asset: asset.toUpperCase(),
       direction,
       stake: Number(stake),
@@ -36,18 +37,22 @@ router.post('/trades', authRequired, async (req, res) => {
 });
 
 router.get('/trades/open', authRequired, async (req, res) => {
-  res.json(await getOpenTrades(req.auth.id));
+  res.json(await getOpenTrades(req.auth.id, req.query.accountType));
 });
 
 router.get('/trades/history', authRequired, async (req, res) => {
-  res.json(await getTradeHistory(req.auth.id));
+  res.json(await getTradeHistory(req.auth.id, req.query.accountType));
 });
 
 router.get('/me', authRequired, async (req, res) => {
-  const user = await queryOne('SELECT id, name, email, balance, kyc_status FROM users WHERE id = $1', [req.auth.id]);
+  const user = await queryOne(
+    'SELECT id, name, last_name, email, balance, demo_balance, currency, avatar_url, kyc_status FROM users WHERE id = $1',
+    [req.auth.id]
+  );
   res.json(user);
 });
 
+// Depósito real (conta principal) — em modo demo/sandbox, apenas credita; gera CPA de afiliado
 router.post('/deposit', authRequired, async (req, res) => {
   try {
     const { amount } = req.body;
@@ -66,6 +71,22 @@ router.post('/deposit', authRequired, async (req, res) => {
   } catch (err) {
     console.error('[trading/deposit]', err);
     res.status(500).json({ error: 'Erro interno ao processar depósito' });
+  }
+});
+
+// Depósito virtual (conta demo) — recarrega saldo demo, sem gerar comissão nem transação real
+router.post('/deposit-demo', authRequired, async (req, res) => {
+  try {
+    const { amount } = req.body;
+    if (!amount || amount <= 0) return res.status(400).json({ error: 'Valor inválido' });
+
+    await run('UPDATE users SET demo_balance = demo_balance + $1 WHERE id = $2', [amount, req.auth.id]);
+
+    const user = await queryOne('SELECT demo_balance FROM users WHERE id = $1', [req.auth.id]);
+    res.json({ demoBalance: user.demo_balance });
+  } catch (err) {
+    console.error('[trading/deposit-demo]', err);
+    res.status(500).json({ error: 'Erro interno ao processar depósito virtual' });
   }
 });
 

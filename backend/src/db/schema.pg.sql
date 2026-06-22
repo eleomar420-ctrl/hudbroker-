@@ -23,7 +23,9 @@ CREATE TABLE IF NOT EXISTS users (
   country TEXT NOT NULL DEFAULT 'BR',
   currency TEXT NOT NULL DEFAULT 'BRL',
   password_hash TEXT NOT NULL,
-  balance DOUBLE PRECISION NOT NULL DEFAULT 10000,
+  balance DOUBLE PRECISION NOT NULL DEFAULT 0,
+  demo_balance DOUBLE PRECISION NOT NULL DEFAULT 10000,
+  avatar_url TEXT,
   affiliate_id TEXT REFERENCES affiliates(id),
   kyc_status TEXT NOT NULL DEFAULT 'pending',
   role TEXT NOT NULL DEFAULT 'client',
@@ -45,6 +47,7 @@ CREATE TABLE IF NOT EXISTS clicks (
 CREATE TABLE IF NOT EXISTS trades (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL REFERENCES users(id),
+  account_type TEXT NOT NULL DEFAULT 'demo',
   asset TEXT NOT NULL,
   direction TEXT NOT NULL,
   stake DOUBLE PRECISION NOT NULL,
