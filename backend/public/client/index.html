@@ -62,9 +62,10 @@ html, body { height: 100%; overflow: hidden; }
   font-weight: 700; font-size: 16px; cursor: pointer;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
 }
-.buy-btn { background: #08B774; color: #ffffff; border-radius: 10px 10px 0 0; }
+.trade-buttons { display: flex; flex-direction: column; gap: 8px; }
+.buy-btn { background: #08B774; color: #ffffff; border-radius: 10px; }
 .buy-btn:hover { background: #0acf82; }
-.sell-btn { background: #F92757; color: #ffffff; border-radius: 0 0 10px 10px; }
+.sell-btn { background: #F92757; color: #ffffff; border-radius: 10px; }
 .sell-btn:hover { background: #ff3f6b; }
 .buy-btn i, .sell-btn i { font-size: 20px; }
 .live-clock { text-align: center; font-size: 12px; color: var(--text-faint); font-family: var(--font-mono); }
@@ -176,8 +177,10 @@ html, body { height: 100%; overflow: hidden; }
         <div class="profit-amount" id="profitAmount">+R$ 4,25</div>
       </div>
 
-      <button class="buy-btn" id="buyBtn"><i class="ti ti-trending-up" aria-hidden="true"></i> COMPRAR</button>
-      <button class="sell-btn" id="sellBtn"><i class="ti ti-trending-down" aria-hidden="true"></i> VENDER</button>
+      <div class="trade-buttons">
+        <button class="buy-btn" id="buyBtn"><i class="ti ti-trending-up" aria-hidden="true"></i> COMPRAR</button>
+        <button class="sell-btn" id="sellBtn"><i class="ti ti-trending-down" aria-hidden="true"></i> VENDER</button>
+      </div>
 
       <div class="live-clock" id="liveClock">Hora atual: --:--:--</div>
     </div>
