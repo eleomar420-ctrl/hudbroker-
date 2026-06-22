@@ -149,20 +149,17 @@ html, body { height: 100%; overflow: hidden; }
 
 /* ===== Responsivo: mobile (telas até 768px) ===== */
 @media (max-width: 768px) {
-  .trade-topbar { padding: 0 10px; gap: 8px; height: 52px; }
-  .hamburger-btn { width: 32px; height: 32px; font-size: 18px; }
+  .trade-topbar { padding: 0 10px; gap: 8px; height: 52px; justify-content: space-between; }
+  .hamburger-btn { display: none; }
+  .asset-tabs-row { display: none; }
+  .asset-add-square { display: none; }
+  .topbar-spacer { display: none; }
 
-  .asset-tabs-row { gap: 4px; }
-  .asset-tab { padding: 5px 8px; gap: 6px; }
-  .asset-tab .info .sub { display: none; }
-  .asset-tab .info .name { font-size: 12px; }
-  .asset-tab .icon { width: 20px; height: 20px; font-size: 10px; }
-  .asset-add-square { width: 32px; height: 32px; font-size: 16px; }
-
-  .account-pill .label { display: none; }
-  .account-pill .value { font-size: 14px; }
-  .btn-deposit { font-size: 13px; padding: 0 10px; }
-  .avatar-btn { width: 30px; height: 30px; }
+  .avatar-btn { order: 1; width: 34px; height: 34px; }
+  .account-pill { order: 2; flex: 1; min-width: 0; max-width: 200px; justify-content: center; background: var(--bg-elevated); border-radius: 8px; padding: 0 10px; }
+  .account-pill .label { display: block; font-size: 10px; }
+  .account-pill .value { font-size: 13px; }
+  .btn-deposit { order: 3; font-size: 13px; padding: 0 12px; }
 
   .trade-body { flex-direction: column; overflow-y: auto; }
   .chart-area { min-height: 280px; flex: 1 1 auto; }
@@ -246,9 +243,7 @@ html, body { height: 100%; overflow: hidden; }
   .m-asset-drawer-remove:hover { color: var(--down); }
 }
 
-@media (max-width: 420px) {
-  .account-pill { display: none; }
-}
+
 </style>
 </head>
 <body>
@@ -803,7 +798,13 @@ document.getElementById('depositModal').onclick = (e) => {
   if (e.target.id === 'depositModal') e.target.classList.remove('open');
 };
 
-document.getElementById('avatarBtn').onclick = () => window.location.href = '/client/account.html';
+document.getElementById('avatarBtn').onclick = () => {
+  if (window.innerWidth <= 768) {
+    document.getElementById('sideMenuOverlay').classList.add('open');
+  } else {
+    window.location.href = '/client/account.html';
+  }
+};
 
 document.getElementById('hamburgerBtn').onclick = () => {
   document.getElementById('sideMenuOverlay').classList.add('open');
