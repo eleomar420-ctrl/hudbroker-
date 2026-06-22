@@ -515,18 +515,23 @@ async function refreshBalance() {
 async function refreshOpenTrades() {
   const t = getActiveTab();
   if (!t) return;
-  const trades = await apiFetch('/trading/trades/open?accountType=' + activeAccount);
   const strip = document.getElementById('openTradesStrip');
-  if (trades.length === 0) {
+  try {
+    const trades = await apiFetch('/trading/trades/open?accountType=' + activeAccount);
+    if (!Array.isArray(trades) || trades.length === 0) {
+      strip.innerHTML = '<span style="font-size:12px; color:var(--text-faint);">Nenhuma operação em andamento</span>';
+      return;
+    }
+    strip.innerHTML = trades.map(tr => `
+      <span class="trade-chip">
+        ${tr.asset} <span style="color:${tr.direction === 'up' ? 'var(--up)' : 'var(--down)'}">${tr.direction === 'up' ? '↑' : '↓'}</span>
+        ${formatMoney(tr.stake)} <span class="countdown" data-expires="${tr.expires_at}">--</span>
+      </span>
+    `).join('');
+  } catch (err) {
+    console.error('[refreshOpenTrades]', err);
     strip.innerHTML = '<span style="font-size:12px; color:var(--text-faint);">Nenhuma operação em andamento</span>';
-    return;
   }
-  strip.innerHTML = trades.map(tr => `
-    <span class="trade-chip">
-      ${tr.asset} <span style="color:${tr.direction === 'up' ? 'var(--up)' : 'var(--down)'}">${tr.direction === 'up' ? '↑' : '↓'}</span>
-      ${formatMoney(tr.stake)} <span class="countdown" data-expires="${tr.expires_at}">--</span>
-    </span>
-  `).join('');
 }
 
 setInterval(() => {
