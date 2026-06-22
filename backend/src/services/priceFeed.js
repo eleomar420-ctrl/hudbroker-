@@ -2,7 +2,7 @@ import WebSocket from 'ws';
 import { EventEmitter } from 'events';
 
 // Ativos cripto suportados (24/7 - mercado real, sem necessidade de sintetizar nada)
-const CRYPTO_ASSETS = ['btcusdt', 'ethusdt', 'solusdt', 'bnbusdt'];
+const CRYPTO_ASSETS = ['btcusdt', 'ethusdt', 'solusdt', 'bnbusdt', 'ltcusdt', 'adausdt'];
 
 class PriceFeed extends EventEmitter {
   constructor() {

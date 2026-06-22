@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Raleway:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
 <link rel="stylesheet" href="/css/shared.css">
 <style>
 html, body { height: 100%; overflow: hidden; }
@@ -14,47 +15,34 @@ html, body { height: 100%; overflow: hidden; }
 .trade-topbar {
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 16px; height: 56px; border-bottom: 1px solid var(--border);
-  background: var(--bg-panel); flex-shrink: 0;
+  background: var(--bg-panel); flex-shrink: 0; gap: 16px;
 }
-
-.trade-body { flex: 1; display: flex; min-height: 0; position: relative; }
-.chart-area { flex: 1; min-width: 0; display: flex; flex-direction: column; position: relative; }
-#tv_chart { flex: 1; min-height: 0; }
-
-.hamburger-btn { width: 36px; height: 36px; border-radius: 8px; border: none; background: var(--bg-elevated); color: var(--text); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.hamburger-btn { width: 36px; height: 36px; border-radius: 8px; border: none; background: var(--bg-elevated); color: var(--text); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .hamburger-btn:hover { background: var(--border); }
 
-.chart-asset-bar { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--bg-panel); border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.asset-search { flex: 1; max-width: 220px; display: flex; align-items: center; gap: 8px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 13px; }
-.asset-search i { color: var(--text-faint); font-size: 16px; }
-.asset-add-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-elevated); color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.asset-add-btn:hover { background: var(--border); }
+.asset-tabs-row { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; overflow-x: auto; }
+.asset-tab {
+  display: flex; align-items: center; gap: 8px; background: var(--bg-elevated);
+  border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; cursor: pointer; flex-shrink: 0;
+}
+.asset-tab.active { border-color: var(--brand); }
+.asset-tab .icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.asset-tab .info .name { font-size: 13px; font-weight: 600; }
+.asset-tab .info .sub { font-size: 10px; color: var(--text-faint); }
+.asset-tab .close-x { color: var(--text-faint); font-size: 14px; margin-left: 4px; }
+.asset-tab .close-x:hover { color: var(--down); }
+.asset-add-square {
+  width: 38px; height: 38px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--bg-elevated); color: var(--text); cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+.asset-add-square:hover { background: var(--border); }
 
-.asset-popover {
-  display: none; position: absolute; top: 56px; left: 12px; width: 260px; max-height: 360px; overflow-y: auto;
-  background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 8px; z-index: 70;
-}
-.asset-popover.open { display: block; }
-.asset-popover-title { font-size: 12px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.05em; padding: 6px 10px; }
-.asset-option { padding: 10px; border-radius: 8px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px; }
-.asset-option:hover { background: var(--bg-elevated); }
-.asset-option i { font-size: 16px; color: var(--brand); }
-.asset-sym { margin-left: auto; color: var(--text-faint); font-size: 12px; font-family: var(--font-mono); }
-
-.side-menu-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
-.side-menu-overlay.open { display: block; }
-.side-menu {
-  width: 220px; height: 100%; background: var(--bg-panel); border-right: 1px solid var(--border);
-  display: flex; flex-direction: column; padding: 16px 0; overflow-y: auto;
-}
-.menu-item {
-  display: flex; align-items: center; gap: 10px; padding: 12px 20px; background: none; border: none;
-  color: var(--text-dim); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; text-decoration: none;
-}
-.menu-item:hover { background: var(--bg-elevated); color: var(--text); }
-.menu-item i { font-size: 18px; }
-.menu-item-deposit { color: #08B774; }
-.menu-item-logout { color: var(--down); margin-top: auto; }
+.trade-body { flex: 1; display: flex; min-height: 0; position: relative; }
+.chart-area { flex: 1; min-width: 0; position: relative; }
+.chart-instance { position: absolute; inset: 0; display: none; }
+.chart-instance.active { display: block; }
+.chart-instance iframe, .chart-instance > div { width: 100%; height: 100%; }
 
 .trade-panel {
   width: 280px; flex-shrink: 0; background: var(--bg-panel);
@@ -82,26 +70,25 @@ html, body { height: 100%; overflow: hidden; }
 .profit-label { font-size: 13px; color: var(--text-dim); }
 .profit-pct { font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; color: #08B774; }
 .profit-amount { font-family: Arial, sans-serif; color: #08B774; font-size: 26px; font-weight: 700; margin-top: 4px; }
+.trade-buttons { display: flex; flex-direction: column; gap: 8px; }
 .buy-btn, .sell-btn {
   width: 100%; height: 71px; padding: 15px 10px; border-radius: 10px; border: none;
   font-weight: 700; font-size: 16px; cursor: pointer;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
 }
-.trade-buttons { display: flex; flex-direction: column; gap: 8px; }
-.buy-btn { background: #08B774; color: #ffffff; border-radius: 10px; }
+.buy-btn { background: #08B774; color: #ffffff; }
 .buy-btn:hover { background: #0acf82; }
-.sell-btn { background: #F92757; color: #ffffff; border-radius: 10px; }
+.sell-btn { background: #F92757; color: #ffffff; }
 .sell-btn:hover { background: #ff3f6b; }
 .buy-btn i, .sell-btn i { font-size: 20px; }
 .live-clock { text-align: center; font-size: 12px; color: var(--text-faint); font-family: var(--font-mono); }
 .open-trades-strip { padding: 8px 16px; border-top: 1px solid var(--border); background: var(--bg-panel); max-height: 100px; overflow-y: auto; flex-shrink: 0; }
 .trade-chip { display: inline-flex; align-items: center; gap: 8px; background: var(--bg-elevated); border-radius: 8px; padding: 6px 10px; margin: 4px 4px 0 0; font-size: 12px; font-family: var(--font-mono); }
 
-.account-pill { display: flex; align-items: center; gap: 6px; cursor: pointer; position: relative; height: 36px; }
+.account-pill { display: flex; align-items: center; gap: 6px; cursor: pointer; position: relative; height: 36px; flex-shrink: 0; }
 .account-pill .label { font-size: 11px; color: var(--text-faint); display: block; line-height: 1.2; }
 .account-pill .value { font-size: 18px; font-weight: 700; color: #08B774; font-family: var(--font-display); display: block; line-height: 1.2; }
 .account-pill .value.demo { color: var(--brand); }
-.account-pill i { font-size: 14px; color: var(--text-faint); }
 .account-dropdown { display: none; position: absolute; top: 44px; right: 0; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 6px; z-index: 60; min-width: 200px; }
 .account-dropdown.open { display: block; }
 .account-option { padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; display: flex; justify-content: space-between; }
@@ -111,13 +98,12 @@ html, body { height: 100%; overflow: hidden; }
 .btn-deposit {
   font-family: 'Raleway', var(--font-body); font-size: 16px; font-weight: 600;
   background: transparent; color: #08B774; border: 1px solid #08B774;
-  border-radius: 8px; padding: 0 15px; height: 36px; cursor: pointer;
+  border-radius: 8px; padding: 0 15px; height: 36px; cursor: pointer; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
 }
 .btn-deposit:hover { background: #08B774; color: #ffffff; }
 
-.avatar-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--bg-elevated); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; border: 1px solid var(--border); }
-.avatar-btn img { width: 100%; height: 100%; object-fit: cover; }
+.avatar-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--bg-elevated); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; border: 1px solid var(--border); flex-shrink: 0; }
 .avatar-btn i { font-size: 18px; color: var(--text-faint); }
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 100; }
@@ -125,64 +111,68 @@ html, body { height: 100%; overflow: hidden; }
 .modal-box { width: 380px; background: var(--bg-panel); border-radius: 10px; overflow: hidden; }
 .modal-title { background: var(--text-faint); color: var(--bg); font-weight: 600; padding: 12px 18px; font-size: 14px; }
 .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+
+.side-menu-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
+.side-menu-overlay.open { display: block; }
+.side-menu { width: 220px; height: 100%; background: var(--bg-panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 16px 0; overflow-y: auto; }
+.menu-item { display: flex; align-items: center; gap: 10px; padding: 12px 20px; background: none; border: none; color: var(--text-dim); font-size: 14px; font-weight: 500; cursor: pointer; text-align: left; text-decoration: none; }
+.menu-item:hover { background: var(--bg-elevated); color: var(--text); }
+.menu-item i { font-size: 18px; }
+.menu-item-deposit { color: #08B774; }
+.menu-item-logout { color: var(--down); margin-top: auto; }
+
+.assets-screen { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 95; flex-direction: column; }
+.assets-screen.open { display: flex; }
+.assets-screen-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.assets-screen-header h1 { font-family: var(--font-display); font-size: 20px; }
+.assets-close-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border); background: none; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.assets-close-btn:hover { background: var(--bg-elevated); }
+.assets-screen-body { flex: 1; display: flex; min-height: 0; }
+.assets-categories { width: 200px; flex-shrink: 0; border-right: 1px solid var(--border); padding: 16px 0; }
+.category-item { display: flex; align-items: center; gap: 10px; padding: 12px 20px; font-size: 14px; color: var(--text-dim); cursor: pointer; }
+.category-item:hover { background: var(--bg-elevated); }
+.category-item.active { background: var(--bg-elevated); color: var(--brand); }
+.assets-list-area { flex: 1; padding: 16px 24px; overflow-y: auto; }
+.assets-search-input { width: 100%; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; margin-bottom: 16px; }
+.assets-table { width: 100%; border-collapse: collapse; }
+.assets-table th { text-align: left; font-size: 12px; color: var(--text-faint); font-weight: 500; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+.assets-table td { padding: 12px; border-bottom: 1px solid var(--border); }
+.asset-row { cursor: pointer; }
+.asset-row:hover { background: var(--bg-elevated); }
+.asset-row-name { display: flex; align-items: center; gap: 10px; }
+.asset-row-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; }
+.asset-row-name .label { font-weight: 600; font-size: 14px; }
+.asset-row-name .sub { font-size: 11px; color: var(--text-faint); }
 </style>
 </head>
 <body>
 <div class="trade-shell">
   <div class="trade-topbar">
-    <div style="display:flex; align-items:center; gap:16px;">
-      <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menu"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
-      <div class="brand"><span class="dot"></span>Hud<span class="tag">Broker</span></div>
-    </div>
-    <div style="display:flex; align-items:center; gap:16px;">
-      <div class="account-pill" id="accountPill">
-        <div>
-          <span class="label" id="accountLabel">Conta Principal</span>
-          <span class="value" id="balanceDisplay">--</span>
-        </div>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF82" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;">
-          <polyline points="7 9 12 4 17 9"></polyline>
-          <polyline points="7 15 12 20 17 15"></polyline>
-        </svg>
-      </div>
-      <div class="account-dropdown" id="accountDropdown">
-        <div class="account-option active" data-account="real">Conta Principal <i class="ti ti-check" aria-hidden="true" style="display:none;"></i></div>
-        <div class="account-option" data-account="demo">Conta Demo</div>
-      </div>
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menu"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
+    <div class="asset-tabs-row" id="assetTabsRow"></div>
+    <button class="asset-add-square" id="assetAddSquare" aria-label="Adicionar ativo"><i class="ti ti-plus" aria-hidden="true"></i></button>
 
-      <div class="avatar-btn" id="avatarBtn"><i class="ti ti-user" aria-hidden="true"></i></div>
-
-      <button class="btn-deposit" id="depositBtn">Depositar</button>
+    <div class="account-pill" id="accountPill">
+      <div>
+        <span class="label" id="accountLabel">Conta Principal</span>
+        <span class="value" id="balanceDisplay">--</span>
+      </div>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF82" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;">
+        <polyline points="7 9 12 4 17 9"></polyline>
+        <polyline points="7 15 12 20 17 15"></polyline>
+      </svg>
     </div>
+    <div class="account-dropdown" id="accountDropdown">
+      <div class="account-option active" data-account="real">Conta Principal</div>
+      <div class="account-option" data-account="demo">Conta Demo</div>
+    </div>
+
+    <div class="avatar-btn" id="avatarBtn"><i class="ti ti-user" aria-hidden="true"></i></div>
+    <button class="btn-deposit" id="depositBtn">Depositar</button>
   </div>
 
   <div class="trade-body">
-    <div class="chart-area">
-      <div class="chart-asset-bar">
-        <div class="asset-search" id="assetSearchBar">
-          <i class="ti ti-search" aria-hidden="true"></i>
-          <span id="assetSearchLabel">BTC/USDT</span>
-        </div>
-        <button class="asset-add-btn" id="assetAddBtn" aria-label="Escolher ativo"><i class="ti ti-plus" aria-hidden="true"></i></button>
-      </div>
-      <div id="tv_chart"></div>
-    </div>
-
-    <div class="asset-popover" id="assetPopover">
-      <div class="asset-popover-title">Selecionar ativo</div>
-      <div class="asset-option" data-asset="BTCUSDT" data-name="Bitcoin" data-symbol="BTC/USDT">
-        <i class="ti ti-currency-bitcoin" aria-hidden="true"></i> Bitcoin <span class="asset-sym">BTC/USDT</span>
-      </div>
-      <div class="asset-option" data-asset="ETHUSDT" data-name="Ethereum" data-symbol="ETH/USDT">
-        <i class="ti ti-coin" aria-hidden="true"></i> Ethereum <span class="asset-sym">ETH/USDT</span>
-      </div>
-      <div class="asset-option" data-asset="SOLUSDT" data-name="Solana" data-symbol="SOL/USDT">
-        <i class="ti ti-coin" aria-hidden="true"></i> Solana <span class="asset-sym">SOL/USDT</span>
-      </div>
-      <div class="asset-option" data-asset="BNBUSDT" data-name="BNB" data-symbol="BNB/USDT">
-        <i class="ti ti-coin" aria-hidden="true"></i> BNB <span class="asset-sym">BNB/USDT</span>
-      </div>
-    </div>
+    <div class="chart-area" id="chartArea"></div>
 
     <div class="trade-panel">
       <div>
@@ -248,6 +238,26 @@ html, body { height: 100%; overflow: hidden; }
   </div>
 </div>
 
+<div class="assets-screen" id="assetsScreen">
+  <div class="assets-screen-header">
+    <h1>Ativos</h1>
+    <button class="assets-close-btn" id="assetsCloseBtn" aria-label="Fechar"><i class="ti ti-x" aria-hidden="true"></i></button>
+  </div>
+  <div class="assets-screen-body">
+    <div class="assets-categories">
+      <div class="category-item active" data-category="all"><i class="ti ti-grid-dots" aria-hidden="true"></i> Todos</div>
+      <div class="category-item" data-category="crypto"><i class="ti ti-currency-bitcoin" aria-hidden="true"></i> Cripto</div>
+    </div>
+    <div class="assets-list-area">
+      <input type="text" class="assets-search-input" id="assetsSearchInput" placeholder="Pesquisar um ativo...">
+      <table class="assets-table">
+        <thead><tr><th>Ativo</th><th>Último Preço</th><th>Lucro</th></tr></thead>
+        <tbody id="assetsTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="depositModal">
   <div class="modal-box">
     <div class="modal-title">Depósito Virtual</div>
@@ -263,86 +273,130 @@ html, body { height: 100%; overflow: hidden; }
 
 <script src="/js/api.js"></script>
 <script src="https://s3.tradingview.com/tv.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css"></script>
 <script>
 requireAuth();
 
-let currentAsset = 'BTCUSDT';
-let stakeValue = 5;
-let durationSeconds = 60;
-let livePrices = {};
-
-const durationOptions = [
-  { sec: 30, label: '30 seg.' },
-  { sec: 60, label: '1 min.' },
-  { sec: 300, label: '5 min.' },
-  { sec: 900, label: '15 min.' }
+const ASSET_CATALOG = [
+  { asset: 'BTCUSDT', name: 'Bitcoin', symbol: 'BTC/USDT', category: 'crypto', color: '#F7931A', initial: 'B' },
+  { asset: 'ETHUSDT', name: 'Ethereum', symbol: 'ETH/USDT', category: 'crypto', color: '#627EEA', initial: 'E' },
+  { asset: 'SOLUSDT', name: 'Solana', symbol: 'SOL/USDT', category: 'crypto', color: '#14F195', initial: 'S' },
+  { asset: 'BNBUSDT', name: 'BNB', symbol: 'BNB/USDT', category: 'crypto', color: '#F3BA2F', initial: 'B' },
+  { asset: 'LTCUSDT', name: 'Litecoin', symbol: 'LTC/USDT', category: 'crypto', color: '#345D9D', initial: 'L' },
+  { asset: 'ADAUSDT', name: 'Cardano', symbol: 'ADA/USDT', category: 'crypto', color: '#0033AD', initial: 'A' }
 ];
-let durationIndex = 1;
 
-function loadChart(symbol) {
-  document.getElementById('tv_chart').innerHTML = '';
-  new TradingView.widget({
-    container_id: 'tv_chart',
-    autosize: true,
-    symbol: `BINANCE:${symbol}`,
-    interval: '1',
-    timezone: 'America/Sao_Paulo',
-    theme: 'dark',
-    style: '1',
-    locale: 'br',
-    toolbar_bg: '#131720',
-    enable_publishing: false,
-    hide_top_toolbar: false,
-    hide_side_toolbar: false,
-    hide_legend: false,
-    save_image: true,
-    withdateranges: true,
-    allow_symbol_change: true,
-    studies: ['MASimple@tv-basicstudies']
+let livePrices = {};
+let tabs = [];
+let activeTabId = null;
+let tabCounter = 0;
+
+function findCatalog(asset) {
+  return ASSET_CATALOG.find(a => a.asset === asset);
+}
+
+function createTab(asset) {
+  const existing = tabs.find(t => t.asset === asset);
+  if (existing) {
+    setActiveTab(existing.id);
+    return;
+  }
+  const catalog = findCatalog(asset);
+  const id = 'tab_' + (++tabCounter);
+  const tab = {
+    id, asset, catalog,
+    stakeValue: 5,
+    durationIndex: 1,
+    chartLoaded: false
+  };
+  tabs.push(tab);
+  renderTabsRow();
+  setActiveTab(id);
+}
+
+function closeTab(id, event) {
+  if (event) event.stopPropagation();
+  const idx = tabs.findIndex(t => t.id === id);
+  if (idx === -1) return;
+  const chartEl = document.getElementById('chart_' + id);
+  if (chartEl) chartEl.remove();
+  tabs.splice(idx, 1);
+  if (tabs.length === 0) {
+    createTab('BTCUSDT');
+    return;
+  }
+  if (activeTabId === id) {
+    setActiveTab(tabs[Math.max(0, idx - 1)].id);
+  }
+  renderTabsRow();
+}
+
+function setActiveTab(id) {
+  activeTabId = id;
+  renderTabsRow();
+  renderChartArea();
+  renderPanelForActiveTab();
+  refreshOpenTrades();
+}
+
+function getActiveTab() {
+  return tabs.find(t => t.id === activeTabId);
+}
+
+function renderTabsRow() {
+  const row = document.getElementById('assetTabsRow');
+  row.innerHTML = tabs.map(t => `
+    <div class="asset-tab ${t.id === activeTabId ? 'active' : ''}" data-tab="${t.id}">
+      <div class="icon" style="background:${t.catalog.color};">${t.catalog.initial}</div>
+      <div class="info">
+        <div class="name">${t.catalog.name}</div>
+        <div class="sub">Crypto</div>
+      </div>
+      <i class="ti ti-x close-x" data-close="${t.id}" aria-hidden="true"></i>
+    </div>
+  `).join('');
+  row.querySelectorAll('.asset-tab').forEach(el => {
+    el.onclick = () => setActiveTab(el.dataset.tab);
+  });
+  row.querySelectorAll('.close-x').forEach(el => {
+    el.onclick = (e) => closeTab(el.dataset.close, e);
   });
 }
 
-document.getElementById('assetAddBtn').onclick = () => {
-  document.getElementById('assetPopover').classList.toggle('open');
-};
-document.getElementById('assetSearchBar').onclick = () => {
-  document.getElementById('assetPopover').classList.toggle('open');
-};
-document.querySelectorAll('.asset-option').forEach(opt => {
-  opt.onclick = () => {
-    currentAsset = opt.dataset.asset;
-    document.getElementById('assetSearchLabel').textContent = opt.dataset.symbol;
-    document.getElementById('assetPopover').classList.remove('open');
-    loadChart(currentAsset);
-    updateProfitAmount();
-  };
-});
-
-document.getElementById('hamburgerBtn').onclick = () => {
-  document.getElementById('sideMenuOverlay').classList.add('open');
-};
-document.getElementById('sideMenuOverlay').onclick = (e) => {
-  if (e.target.id === 'sideMenuOverlay') e.target.classList.remove('open');
-};
-document.getElementById('sideMenuLogout').onclick = () => logout();
-document.querySelectorAll('.menu-item[data-action]').forEach(item => {
-  item.onclick = () => {
-    const action = item.dataset.action;
-    document.getElementById('sideMenuOverlay').classList.remove('open');
-    if (action === 'deposit') {
-      document.getElementById('depositBtn').click();
-    } else if (action === 'assets') {
-      document.getElementById('assetPopover').classList.add('open');
-    } else {
-      showToast('Em breve');
+function renderChartArea() {
+  const area = document.getElementById('chartArea');
+  tabs.forEach(t => {
+    let el = document.getElementById('chart_' + t.id);
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'chart_' + t.id;
+      el.className = 'chart-instance';
+      area.appendChild(el);
     }
-  };
-});
-
-function updateDurationDisplay() {
-  document.getElementById('durValue').textContent = durationOptions[durationIndex].label;
-  durationSeconds = durationOptions[durationIndex].sec;
+    el.classList.toggle('active', t.id === activeTabId);
+  });
+  const activeTab = getActiveTab();
+  if (activeTab && !activeTab.chartLoaded) {
+    activeTab.chartLoaded = true;
+    new TradingView.widget({
+      container_id: 'chart_' + activeTab.id,
+      autosize: true,
+      symbol: `BINANCE:${activeTab.asset}`,
+      interval: '1',
+      timezone: 'America/Sao_Paulo',
+      theme: 'dark',
+      style: '1',
+      locale: 'br',
+      toolbar_bg: '#131720',
+      enable_publishing: false,
+      hide_top_toolbar: false,
+      hide_side_toolbar: false,
+      hide_legend: false,
+      save_image: true,
+      withdateranges: true,
+      allow_symbol_change: true,
+      studies: ['MASimple@tv-basicstudies']
+    });
+  }
 }
 
 function formatCountdown(totalSeconds) {
@@ -351,9 +405,13 @@ function formatCountdown(totalSeconds) {
   return `${m}:${s}`;
 }
 
-// Calcula quanto tempo falta até o próximo "fechamento de vela" alinhado ao relógio.
-// Ex: duração 60s -> conta até o próximo minuto cheio (14:32:45 -> faltam 15s para 14:33:00).
-// Duração 300s (5min) -> próximo múltiplo de 5 minutos. Duração 900s (15min) -> próximo múltiplo de 15min.
+const durationOptions = [
+  { sec: 30, label: '30 seg.' },
+  { sec: 60, label: '1 min.' },
+  { sec: 300, label: '5 min.' },
+  { sec: 900, label: '15 min.' }
+];
+
 function secondsUntilNextCandleClose(durationSec) {
   const now = new Date();
   const epochSeconds = Math.floor(now.getTime() / 1000);
@@ -362,23 +420,46 @@ function secondsUntilNextCandleClose(durationSec) {
   return remaining === durationSec ? durationSec : remaining;
 }
 
+function renderPanelForActiveTab() {
+  const t = getActiveTab();
+  if (!t) return;
+  document.getElementById('durValue').textContent = durationOptions[t.durationIndex].label;
+  document.getElementById('stakeValue').textContent = t.stakeValue.toFixed(2).replace('.', ',');
+  updateProfitAmount();
+  updateLiveCountdown();
+}
+
+function updateProfitAmount() {
+  const t = getActiveTab();
+  if (!t) return;
+  document.getElementById('profitAmount').textContent = '+' + formatMoney(t.stakeValue * 0.85);
+}
+
 function updateLiveCountdown() {
+  const t = getActiveTab();
+  if (!t) return;
+  const durationSeconds = durationOptions[t.durationIndex].sec;
   const remaining = secondsUntilNextCandleClose(durationSeconds);
   document.getElementById('countdownLabel').textContent = formatCountdown(remaining);
   document.getElementById('countdownFill').style.width = ((remaining / durationSeconds) * 100) + '%';
 }
-document.getElementById('durMinus').onclick = () => { if (durationIndex > 0) { durationIndex--; updateDurationDisplay(); } };
-document.getElementById('durPlus').onclick = () => { if (durationIndex < durationOptions.length - 1) { durationIndex++; updateDurationDisplay(); } };
 
-function updateStakeDisplay() {
-  document.getElementById('stakeValue').textContent = stakeValue.toFixed(2).replace('.', ',');
-  updateProfitAmount();
-}
-function updateProfitAmount() {
-  document.getElementById('profitAmount').textContent = '+' + formatMoney(stakeValue * 0.85);
-}
-document.getElementById('stakeMinus').onclick = () => { if (stakeValue > 1) { stakeValue = Math.max(1, stakeValue - 1); updateStakeDisplay(); } };
-document.getElementById('stakePlus').onclick = () => { stakeValue += 1; updateStakeDisplay(); };
+document.getElementById('durMinus').onclick = () => {
+  const t = getActiveTab(); if (!t) return;
+  if (t.durationIndex > 0) { t.durationIndex--; renderPanelForActiveTab(); }
+};
+document.getElementById('durPlus').onclick = () => {
+  const t = getActiveTab(); if (!t) return;
+  if (t.durationIndex < durationOptions.length - 1) { t.durationIndex++; renderPanelForActiveTab(); }
+};
+document.getElementById('stakeMinus').onclick = () => {
+  const t = getActiveTab(); if (!t) return;
+  if (t.stakeValue > 1) { t.stakeValue = Math.max(1, t.stakeValue - 1); renderPanelForActiveTab(); }
+};
+document.getElementById('stakePlus').onclick = () => {
+  const t = getActiveTab(); if (!t) return;
+  t.stakeValue += 1; renderPanelForActiveTab();
+};
 
 function connectPriceFeed() {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
@@ -391,7 +472,6 @@ function connectPriceFeed() {
   ws.onclose = () => setTimeout(connectPriceFeed, 2000);
 }
 
-// Conta ativa: 'real' (Conta Principal) ou 'demo' (Conta Demo). Persiste durante a sessão.
 let activeAccount = localStorage.getItem('hb_active_account') || 'demo';
 let cachedUser = null;
 
@@ -430,16 +510,18 @@ async function refreshBalance() {
 }
 
 async function refreshOpenTrades() {
+  const t = getActiveTab();
+  if (!t) return;
   const trades = await apiFetch('/trading/trades/open?accountType=' + activeAccount);
   const strip = document.getElementById('openTradesStrip');
   if (trades.length === 0) {
     strip.innerHTML = '<span style="font-size:12px; color:var(--text-faint);">Nenhuma operação em andamento</span>';
     return;
   }
-  strip.innerHTML = trades.map(t => `
+  strip.innerHTML = trades.map(tr => `
     <span class="trade-chip">
-      ${t.asset} <span style="color:${t.direction === 'up' ? 'var(--up)' : 'var(--down)'}">${t.direction === 'up' ? '↑' : '↓'}</span>
-      ${formatMoney(t.stake)} <span class="countdown" data-expires="${t.expires_at}">--</span>
+      ${tr.asset} <span style="color:${tr.direction === 'up' ? 'var(--up)' : 'var(--down)'}">${tr.direction === 'up' ? '↑' : '↓'}</span>
+      ${formatMoney(tr.stake)} <span class="countdown" data-expires="${tr.expires_at}">--</span>
     </span>
   `).join('');
 }
@@ -456,14 +538,17 @@ setInterval(() => {
 }, 1000);
 
 async function openTrade(direction) {
+  const t = getActiveTab();
+  if (!t) return;
   try {
+    const durationSeconds = durationOptions[t.durationIndex].sec;
     const syncedDuration = secondsUntilNextCandleClose(durationSeconds);
     await apiFetch('/trading/trades', {
       method: 'POST',
       body: JSON.stringify({
-        asset: currentAsset,
+        asset: t.asset,
         direction,
-        stake: stakeValue,
+        stake: t.stakeValue,
         durationSeconds: syncedDuration,
         payoutPct: 0.85,
         accountType: activeAccount
@@ -480,8 +565,6 @@ async function openTrade(direction) {
 document.getElementById('buyBtn').onclick = () => openTrade('up');
 document.getElementById('sellBtn').onclick = () => openTrade('down');
 
-// Botão Depositar: se a conta ativa é demo, abre o modal de depósito virtual.
-// Se for a conta principal, abre o fluxo de depósito real (placeholder neste modo demo/sandbox).
 document.getElementById('depositBtn').onclick = () => {
   if (activeAccount === 'demo') {
     document.getElementById('depositModal').classList.add('open');
@@ -512,14 +595,88 @@ document.getElementById('depositModal').onclick = (e) => {
 
 document.getElementById('avatarBtn').onclick = () => window.location.href = '/client/account.html';
 
-updateDurationDisplay();
-updateStakeDisplay();
-updateLiveCountdown();
-loadChart(currentAsset);
+document.getElementById('hamburgerBtn').onclick = () => {
+  document.getElementById('sideMenuOverlay').classList.add('open');
+};
+document.getElementById('sideMenuOverlay').onclick = (e) => {
+  if (e.target.id === 'sideMenuOverlay') e.target.classList.remove('open');
+};
+document.getElementById('sideMenuLogout').onclick = () => logout();
+document.querySelectorAll('.menu-item[data-action]').forEach(item => {
+  item.onclick = () => {
+    const action = item.dataset.action;
+    document.getElementById('sideMenuOverlay').classList.remove('open');
+    if (action === 'deposit') {
+      document.getElementById('depositBtn').click();
+    } else if (action === 'assets') {
+      openAssetsScreen();
+    } else {
+      showToast('Em breve');
+    }
+  };
+});
+
+function openAssetsScreen() {
+  document.getElementById('assetsScreen').classList.add('open');
+  renderAssetsTable('all', '');
+}
+function closeAssetsScreen() {
+  document.getElementById('assetsScreen').classList.remove('open');
+}
+document.getElementById('assetAddSquare').onclick = openAssetsScreen;
+document.getElementById('assetsCloseBtn').onclick = closeAssetsScreen;
+
+document.querySelectorAll('.category-item').forEach(item => {
+  item.onclick = () => {
+    document.querySelectorAll('.category-item').forEach(c => c.classList.remove('active'));
+    item.classList.add('active');
+    renderAssetsTable(item.dataset.category, document.getElementById('assetsSearchInput').value);
+  };
+});
+document.getElementById('assetsSearchInput').oninput = (e) => {
+  const activeCategory = document.querySelector('.category-item.active').dataset.category;
+  renderAssetsTable(activeCategory, e.target.value);
+};
+
+function renderAssetsTable(category, search) {
+  const term = (search || '').toLowerCase();
+  const filtered = ASSET_CATALOG.filter(a => {
+    const matchesCategory = category === 'all' || a.category === category;
+    const matchesSearch = !term || a.name.toLowerCase().includes(term) || a.symbol.toLowerCase().includes(term);
+    return matchesCategory && matchesSearch;
+  });
+  const tbody = document.getElementById('assetsTableBody');
+  tbody.innerHTML = filtered.map(a => {
+    const priceData = livePrices[a.asset];
+    const price = priceData ? priceData.price.toLocaleString('en-US', { maximumFractionDigits: 4 }) : '--';
+    return `
+      <tr class="asset-row" data-asset="${a.asset}">
+        <td>
+          <div class="asset-row-name">
+            <div class="asset-row-icon" style="background:${a.color};">${a.initial}</div>
+            <div>
+              <div class="label">${a.name}</div>
+              <div class="sub">Crypto</div>
+            </div>
+          </div>
+        </td>
+        <td>${price}</td>
+        <td style="color:#08B774; font-weight:600;">85%</td>
+      </tr>
+    `;
+  }).join('');
+  tbody.querySelectorAll('.asset-row').forEach(row => {
+    row.onclick = () => {
+      createTab(row.dataset.asset);
+      closeAssetsScreen();
+    };
+  });
+}
+
+createTab('BTCUSDT');
 connectPriceFeed();
 setActiveAccount(activeAccount);
 refreshBalance().then(renderBalance);
-refreshOpenTrades();
 setInterval(refreshOpenTrades, 5000);
 setInterval(refreshBalance, 8000);
 </script>

@@ -116,4 +116,3 @@ frontend/public/
 1. Trocar as senhas demo (`admin123`, `afiliado123`) imediatamente após o primeiro deploy
 2. Adicionar rate limiting nas rotas de auth
 3. Avaliar jurisdição e licenciamento antes de conectar dinheiro real
-
