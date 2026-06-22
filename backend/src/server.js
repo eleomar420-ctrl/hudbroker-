@@ -25,7 +25,7 @@ async function bootstrap() {
   app.use(cors());
   app.use(express.json());
 
-  app.use(express.static(path.join(__dirname, '../../frontend/public')));
+  app.use(express.static(path.join(__dirname, '../public')));
 
   app.use('/api/auth', authRoutes);
   app.use('/api/trading', tradingRoutes);
