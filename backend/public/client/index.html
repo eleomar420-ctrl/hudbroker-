@@ -36,27 +36,27 @@ html, body { height: 100%; overflow: hidden; }
   border-left: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 16px;
   overflow-y: auto;
 }
-.panel-block { background: var(--bg-elevated); border-radius: 10px; padding: 14px; }
+.panel-block { background: var(--bg-elevated); border-radius: 10px; padding: 12px; overflow: hidden; }
 .panel-label-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-dim); margin-bottom: 10px; }
 .panel-label-row i { font-size: 16px; color: var(--text-faint); }
-.stepper { display: flex; align-items: center; justify-content: space-between; height: 34.5px; }
+.stepper-value-row {
+  font-family: 'Raleway', sans-serif; font-size: 20px; color: #FFFFFFCC;
+  display: flex; align-items: center; justify-content: center; gap: 4px; padding: 4px 0 10px;
+}
+.stepper-btn-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .stepper-btn {
-  width: 107.8px; height: 34.5px; border-radius: 8px; border: none;
+  flex: 1; max-width: 110px; height: 34.5px; border-radius: 8px; border: none;
   background: #00000033; color: #FFFFFFB3; font-family: 'Raleway', sans-serif;
-  font-size: 30px; padding: 0 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  font-size: 26px; cursor: pointer; display: flex; align-items: center; justify-content: center;
 }
 .stepper-btn:hover { background: #00000055; }
-.stepper-value {
-  font-family: 'Raleway', sans-serif; font-size: 20px; color: #FFFFFFCC;
-  padding: 10px; display: flex; align-items: center; gap: 4px;
-}
 .countdown-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 10px; overflow: hidden; }
-.countdown-fill { height: 100%; background: var(--up); width: 100%; transition: width 1s linear; }
+.countdown-fill { height: 100%; background: var(--up); width: 100%; transition: width 1s linear; border-radius: 2px; }
 .profit-block { width: 220.02px; min-height: 71.69px; margin: 10px auto; padding: 10px; border: 2px solid var(--border); border-radius: 8px; text-align: center; }
 .profit-row { display: flex; align-items: baseline; justify-content: center; gap: 8px; }
 .profit-label { font-size: 13px; color: var(--text-dim); }
-.profit-pct { font-family: Arial, sans-serif; font-size: 25px; font-weight: 700; color: #08B774; }
-.profit-amount { font-family: Arial, sans-serif; color: #08B774; font-size: 20px; margin-top: 4px; }
+.profit-pct { font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; color: #08B774; }
+.profit-amount { font-family: Arial, sans-serif; color: #08B774; font-size: 26px; font-weight: 700; margin-top: 4px; }
 .buy-btn, .sell-btn {
   width: 100%; height: 71px; padding: 15px 10px; border-radius: 10px; border: none;
   font-weight: 700; font-size: 16px; cursor: pointer;
@@ -125,7 +125,7 @@ html, body { height: 100%; overflow: hidden; }
           <span class="label" id="accountLabel">Conta Principal</span>
           <span class="value" id="balanceDisplay">--</span>
         </div>
-        <i class="ti ti-chevron-down" aria-hidden="true"></i>
+        <i class="ti ti-arrows-vertical" aria-hidden="true" style="color:#FFFFFF82;"></i>
       </div>
       <div class="account-dropdown" id="accountDropdown">
         <div class="account-option active" data-account="real">Conta Principal <i class="ti ti-check" aria-hidden="true" style="display:none;"></i></div>
@@ -145,9 +145,9 @@ html, body { height: 100%; overflow: hidden; }
       <div>
         <div class="panel-label-row"><i class="ti ti-clock" aria-hidden="true"></i> Tempo restante: <span style="margin-left:auto; color:var(--up); font-weight:600;" id="countdownLabel">01:00</span></div>
         <div class="panel-block">
-          <div class="stepper">
+          <div class="stepper-value-row" id="durValue">1 min.</div>
+          <div class="stepper-btn-row">
             <button class="stepper-btn" id="durMinus">−</button>
-            <div class="stepper-value" id="durValue">1 min.</div>
             <button class="stepper-btn" id="durPlus">+</button>
           </div>
           <div class="countdown-bar"><div class="countdown-fill" id="countdownFill"></div></div>
@@ -156,9 +156,9 @@ html, body { height: 100%; overflow: hidden; }
 
       <div>
         <div class="panel-block">
-          <div class="stepper">
+          <div class="stepper-value-row"><i class="fa fa-dollar" aria-hidden="true" style="font-size:16px;"></i><span id="stakeValue">5,00</span></div>
+          <div class="stepper-btn-row">
             <button class="stepper-btn" id="stakeMinus">−</button>
-            <div class="stepper-value"><i class="fa fa-dollar" aria-hidden="true" style="font-size:16px;"></i><span id="stakeValue">5,00</span></div>
             <button class="stepper-btn" id="stakePlus">+</button>
           </div>
         </div>
@@ -255,7 +255,6 @@ document.querySelectorAll('.asset-option').forEach(opt => {
 function updateDurationDisplay() {
   document.getElementById('durValue').textContent = durationOptions[durationIndex].label;
   durationSeconds = durationOptions[durationIndex].sec;
-  resetCountdownDisplay();
 }
 
 function formatCountdown(totalSeconds) {
@@ -264,9 +263,21 @@ function formatCountdown(totalSeconds) {
   return `${m}:${s}`;
 }
 
-function resetCountdownDisplay() {
-  document.getElementById('countdownLabel').textContent = formatCountdown(durationSeconds);
-  document.getElementById('countdownFill').style.width = '100%';
+// Calcula quanto tempo falta até o próximo "fechamento de vela" alinhado ao relógio.
+// Ex: duração 60s -> conta até o próximo minuto cheio (14:32:45 -> faltam 15s para 14:33:00).
+// Duração 300s (5min) -> próximo múltiplo de 5 minutos. Duração 900s (15min) -> próximo múltiplo de 15min.
+function secondsUntilNextCandleClose(durationSec) {
+  const now = new Date();
+  const epochSeconds = Math.floor(now.getTime() / 1000);
+  const elapsedInCycle = epochSeconds % durationSec;
+  const remaining = durationSec - elapsedInCycle;
+  return remaining === durationSec ? durationSec : remaining;
+}
+
+function updateLiveCountdown() {
+  const remaining = secondsUntilNextCandleClose(durationSeconds);
+  document.getElementById('countdownLabel').textContent = formatCountdown(remaining);
+  document.getElementById('countdownFill').style.width = ((remaining / durationSeconds) * 100) + '%';
 }
 document.getElementById('durMinus').onclick = () => { if (durationIndex > 0) { durationIndex--; updateDurationDisplay(); } };
 document.getElementById('durPlus').onclick = () => { if (durationIndex < durationOptions.length - 1) { durationIndex++; updateDurationDisplay(); } };
@@ -346,6 +357,7 @@ async function refreshOpenTrades() {
 }
 
 setInterval(() => {
+  updateLiveCountdown();
   document.querySelectorAll('.countdown').forEach(el => {
     const diff = Math.max(0, Math.floor((new Date(el.dataset.expires) - new Date()) / 1000));
     el.textContent = diff > 0 ? `${diff}s` : '...';
@@ -357,13 +369,14 @@ setInterval(() => {
 
 async function openTrade(direction) {
   try {
+    const syncedDuration = secondsUntilNextCandleClose(durationSeconds);
     await apiFetch('/trading/trades', {
       method: 'POST',
       body: JSON.stringify({
         asset: currentAsset,
         direction,
         stake: stakeValue,
-        durationSeconds,
+        durationSeconds: syncedDuration,
         payoutPct: 0.85,
         accountType: activeAccount
       })
@@ -413,6 +426,7 @@ document.getElementById('avatarBtn').onclick = () => window.location.href = '/cl
 
 updateDurationDisplay();
 updateStakeDisplay();
+updateLiveCountdown();
 loadChart(currentAsset);
 connectPriceFeed();
 setActiveAccount(activeAccount);
