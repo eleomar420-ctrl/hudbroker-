@@ -71,9 +71,9 @@ html, body { height: 100%; overflow: hidden; }
 .open-trades-strip { padding: 8px 16px; border-top: 1px solid var(--border); background: var(--bg-panel); max-height: 100px; overflow-y: auto; flex-shrink: 0; }
 .trade-chip { display: inline-flex; align-items: center; gap: 8px; background: var(--bg-elevated); border-radius: 8px; padding: 6px 10px; margin: 4px 4px 0 0; font-size: 12px; font-family: var(--font-mono); }
 
-.account-pill { display: flex; align-items: center; gap: 6px; cursor: pointer; position: relative; }
-.account-pill .label { font-size: 11px; color: var(--text-faint); display: block; }
-.account-pill .value { font-size: 18px; font-weight: 700; color: #08B774; font-family: var(--font-display); }
+.account-pill { display: flex; align-items: center; gap: 6px; cursor: pointer; position: relative; height: 36px; }
+.account-pill .label { font-size: 11px; color: var(--text-faint); display: block; line-height: 1.2; }
+.account-pill .value { font-size: 18px; font-weight: 700; color: #08B774; font-family: var(--font-display); display: block; line-height: 1.2; }
 .account-pill .value.demo { color: var(--brand); }
 .account-pill i { font-size: 14px; color: var(--text-faint); }
 .account-dropdown { display: none; position: absolute; top: 44px; right: 0; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 6px; z-index: 60; min-width: 200px; }
@@ -85,7 +85,8 @@ html, body { height: 100%; overflow: hidden; }
 .btn-deposit {
   font-family: 'Raleway', var(--font-body); font-size: 16px; font-weight: 600;
   background: transparent; color: #08B774; border: 1px solid #08B774;
-  border-radius: 8px; padding: 11px 15px; cursor: pointer;
+  border-radius: 8px; padding: 0 15px; height: 36px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
 }
 .btn-deposit:hover { background: rgba(8,183,116,0.1); }
 
@@ -125,7 +126,10 @@ html, body { height: 100%; overflow: hidden; }
           <span class="label" id="accountLabel">Conta Principal</span>
           <span class="value" id="balanceDisplay">--</span>
         </div>
-        <i class="ti ti-arrows-vertical" aria-hidden="true" style="color:#FFFFFF82;"></i>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF82" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0;">
+          <polyline points="7 9 12 4 17 9"></polyline>
+          <polyline points="7 15 12 20 17 15"></polyline>
+        </svg>
       </div>
       <div class="account-dropdown" id="accountDropdown">
         <div class="account-option active" data-account="real">Conta Principal <i class="ti ti-check" aria-hidden="true" style="display:none;"></i></div>
