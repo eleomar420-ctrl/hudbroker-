@@ -194,10 +194,10 @@ html, body { height: 100%; overflow: hidden; }
   .m-stepper-btn:hover { color: #fff; background: #1c1c24; }
   .m-stepper-display { flex: 1; text-align: center; color: #fff; font-size: 16px; font-weight: 500; }
 
-  /* Linha 5: Comprar à esquerda, Vender à direita, separados */
-  .m-action-row { display: flex; gap: 10px; }
+  /* Linha 5: Comprar e Vender colados, retangulo unico sem arredondamento */
+  .m-action-row { display: flex; gap: 0; }
   .m-btn-buy, .m-btn-sell {
-    flex: 1; border: none; border-radius: 10px; cursor: pointer; height: 52px;
+    flex: 1; border: none; border-radius: 0; cursor: pointer; height: 52px;
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 16px; font-size: 15px; font-weight: 700; color: #fff;
   }
