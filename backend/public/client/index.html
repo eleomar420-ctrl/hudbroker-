@@ -62,9 +62,9 @@ html, body { height: 100%; overflow: hidden; }
   font-weight: 700; font-size: 16px; cursor: pointer;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
 }
-.buy-btn { background: #08B774; color: #ffffff; margin: 0 0 5px; }
+.buy-btn { background: #08B774; color: #ffffff; border-radius: 10px 10px 0 0; }
 .buy-btn:hover { background: #0acf82; }
-.sell-btn { background: #F92757; color: #ffffff; }
+.sell-btn { background: #F92757; color: #ffffff; border-radius: 0 0 10px 10px; }
 .sell-btn:hover { background: #ff3f6b; }
 .buy-btn i, .sell-btn i { font-size: 20px; }
 .live-clock { text-align: center; font-size: 12px; color: var(--text-faint); font-family: var(--font-mono); }
@@ -148,13 +148,13 @@ html, body { height: 100%; overflow: hidden; }
     <div class="trade-panel">
       <div>
         <div class="panel-label-row"><i class="ti ti-clock" aria-hidden="true"></i> Tempo restante: <span style="margin-left:auto; color:var(--up); font-weight:600;" id="countdownLabel">01:00</span></div>
-        <div class="panel-block">
+        <div class="countdown-bar"><div class="countdown-fill" id="countdownFill"></div></div>
+        <div class="panel-block" style="margin-top:10px;">
           <div class="stepper-value-row" id="durValue">1 min.</div>
           <div class="stepper-btn-row">
             <button class="stepper-btn" id="durMinus">−</button>
             <button class="stepper-btn" id="durPlus">+</button>
           </div>
-          <div class="countdown-bar"><div class="countdown-fill" id="countdownFill"></div></div>
         </div>
       </div>
 
