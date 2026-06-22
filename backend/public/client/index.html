@@ -41,16 +41,6 @@ html, body { height: 100%; overflow: hidden; }
 
 .trade-body { flex: 1; display: flex; min-height: 0; position: relative; }
 .chart-area { flex: 1; min-width: 0; position: relative; }
-.order-overlay-layer { position: absolute; inset: 0; pointer-events: none; z-index: 20; overflow: hidden; }
-.order-marker { position: absolute; left: 0; right: 56px; display: flex; align-items: center; transform: translateY(-50%); }
-.order-marker-line { flex: 1; height: 1px; border-top: 1.5px dashed; }
-.order-marker-line.up { border-color: #08B774; }
-.order-marker-line.down { border-color: #F92757; }
-.order-marker-badges { position: absolute; right: -56px; display: flex; align-items: center; transform: translateX(100%); }
-.order-marker-time { background: #ffffff; color: #111; font-family: var(--font-mono); font-size: 11px; font-weight: 700; padding: 3px 6px; border-radius: 4px 0 0 4px; white-space: nowrap; }
-.order-marker-value { font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: #fff; padding: 3px 6px; border-radius: 0 4px 4px 0; white-space: nowrap; }
-.order-marker-value.up { background: #08B774; }
-.order-marker-value.down { background: #F92757; }
 .chart-instance { position: absolute; inset: 0; display: none; }
 .chart-instance.active { display: block; }
 .chart-instance iframe, .chart-instance > div { width: 100%; height: 100%; }
@@ -289,9 +279,7 @@ html, body { height: 100%; overflow: hidden; }
   </div>
 
   <div class="trade-body">
-    <div class="chart-area" id="chartArea">
-      <div class="order-overlay-layer" id="orderOverlayLayer"></div>
-    </div>
+    <div class="chart-area" id="chartArea"></div>
 
     <div class="trade-panel">
       <div>
@@ -672,45 +660,13 @@ document.getElementById('m_durPlus').onclick = () => adjustDuration(1);
 document.getElementById('m_stakeMinus').onclick = () => adjustStake(-1);
 document.getElementById('m_stakePlus').onclick = () => adjustStake(1);
 
-// Histórico recente de preço por ativo, usado para estimar a faixa visível do gráfico
-// (aproximação: não temos acesso às coordenadas reais do widget TradingView).
-const priceHistory = {}; // asset -> [{ price, ts }]
-const PRICE_HISTORY_WINDOW_MS = 3 * 60 * 1000; // últimos 3 minutos, aproxima o que está visível no gráfico de 1m
-
-function trackPriceHistory(asset, price) {
-  if (!priceHistory[asset]) priceHistory[asset] = [];
-  const now = Date.now();
-  priceHistory[asset].push({ price, ts: now });
-  priceHistory[asset] = priceHistory[asset].filter(p => now - p.ts < PRICE_HISTORY_WINDOW_MS);
-}
-
-function getEstimatedPriceRange(asset) {
-  const hist = priceHistory[asset];
-  if (!hist || hist.length < 2) {
-    const current = livePrices[asset] ? livePrices[asset].price : null;
-    if (!current) return null;
-    // Sem histórico suficiente: assume uma faixa pequena em torno do preço atual
-    return { min: current * 0.998, max: current * 1.002 };
-  }
-  const prices = hist.map(p => p.price);
-  const min = Math.min(...prices);
-  const max = Math.max(...prices);
-  const padding = (max - min) * 0.15 || max * 0.001; // margem extra, como o gráfico real costuma ter
-  return { min: min - padding, max: max + padding };
-}
-
 function connectPriceFeed() {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   const ws = new WebSocket(`${proto}://${location.host}/ws/prices`);
   ws.onmessage = (event) => {
     const msg = JSON.parse(event.data);
-    if (msg.type === 'snapshot') {
-      livePrices = msg.prices;
-      Object.keys(livePrices).forEach(asset => trackPriceHistory(asset, livePrices[asset].price));
-    } else if (msg.type === 'price') {
-      livePrices[msg.symbol] = { price: msg.price, timestamp: msg.timestamp };
-      trackPriceHistory(msg.symbol, msg.price);
-    }
+    if (msg.type === 'snapshot') livePrices = msg.prices;
+    else if (msg.type === 'price') livePrices[msg.symbol] = { price: msg.price, timestamp: msg.timestamp };
   };
   ws.onclose = () => setTimeout(connectPriceFeed, 2000);
 }
@@ -760,7 +716,6 @@ async function refreshOpenTrades() {
     const trades = await apiFetch('/trading/trades/open?accountType=' + activeAccount);
     if (!Array.isArray(trades) || trades.length === 0) {
       strip.innerHTML = '<span style="font-size:12px; color:var(--text-faint);">Nenhuma operação em andamento</span>';
-      renderOrderMarkers([], t.asset);
       return;
     }
     strip.innerHTML = trades.map(tr => `
@@ -769,51 +724,12 @@ async function refreshOpenTrades() {
         ${formatMoney(tr.stake)} <span class="countdown" data-expires="${tr.expires_at}">--</span>
       </span>
     `).join('');
-    renderOrderMarkers(trades, t.asset);
   } catch (err) {
     console.error('[refreshOpenTrades]', err);
     strip.innerHTML = '<span style="font-size:12px; color:var(--text-faint);">Nenhuma operação em andamento</span>';
   }
 }
 
-// Desenha, sobre o gráfico ativo, uma linha no preço de entrada de cada operação aberta
-// daquele ativo, com caixinha de tempo restante (branca) e valor (verde se compra, vermelho se venda).
-// Aproximação visual: a posição vertical é estimada pela faixa recente de preço observada
-// via WebSocket, já que o widget gratuito do TradingView não expõe as coordenadas reais do gráfico.
-function renderOrderMarkers(allTrades, currentAsset) {
-  const layer = document.getElementById('orderOverlayLayer');
-  if (!layer) return;
-  const trades = allTrades.filter(tr => tr.asset === currentAsset);
-  if (trades.length === 0) {
-    layer.innerHTML = '';
-    return;
-  }
-  const range = getEstimatedPriceRange(currentAsset);
-  if (!range) {
-    layer.innerHTML = '';
-    return;
-  }
-  const layerHeight = layer.clientHeight || layer.parentElement.clientHeight;
-  const spread = range.max - range.min;
-
-  layer.innerHTML = trades.map(tr => {
-    const entryPrice = tr.entry_price;
-    const clamped = Math.min(range.max, Math.max(range.min, entryPrice));
-    const ratio = spread > 0 ? (range.max - clamped) / spread : 0.5; // 0 = topo, 1 = base
-    const topPx = Math.round(ratio * layerHeight);
-    const isUp = tr.direction === 'up';
-    const remainingSec = Math.max(0, Math.floor((new Date(tr.expires_at) - new Date()) / 1000));
-    return `
-      <div class="order-marker" style="top:${topPx}px;" data-trade-id="${tr.id}">
-        <div class="order-marker-line ${isUp ? 'up' : 'down'}"></div>
-        <div class="order-marker-badges">
-          <div class="order-marker-time">${remainingSec}s</div>
-          <div class="order-marker-value ${isUp ? 'up' : 'down'}">${formatMoney(tr.stake)}</div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
 
 setInterval(() => {
   updateLiveCountdown();
@@ -821,14 +737,6 @@ setInterval(() => {
     const diff = Math.max(0, Math.floor((new Date(el.dataset.expires) - new Date()) / 1000));
     el.textContent = diff > 0 ? `${diff}s` : '...';
     if (diff === 0) setTimeout(() => { refreshOpenTrades(); refreshBalance(); }, 1500);
-  });
-  document.querySelectorAll('.order-marker-time').forEach(el => {
-    const marker = el.closest('.order-marker');
-    const tradeId = marker ? marker.dataset.tradeId : null;
-    if (!tradeId) return;
-    // O texto já foi calculado no último render; aqui só decrementamos visualmente
-    const current = parseInt(el.textContent, 10);
-    if (!isNaN(current) && current > 0) el.textContent = (current - 1) + 's';
   });
   const now = new Date();
   const clockText = 'Hora atual: ' + now.toLocaleTimeString('pt-BR');
