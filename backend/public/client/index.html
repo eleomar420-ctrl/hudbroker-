@@ -188,14 +188,17 @@ html, body { height: 100%; overflow: hidden; }
   .m-progress-track { height: 4px; background: #2a2a35; border-radius: 2px; overflow: hidden; }
   .m-progress-fill { height: 100%; background: #00c896; width: 100%; transition: width 1s linear; border-radius: 2px; }
 
-  /* Linhas 3 e 4: cada uma é "menos | valor | mais", cheia, numa linha só */
-  .m-stepper-row { display: flex; align-items: center; background: #14141a; border-radius: 10px; overflow: hidden; }
-  .m-stepper-btn { background: none; border: none; color: #8b8b96; font-size: 22px; width: 44px; height: 48px; cursor: pointer; flex-shrink: 0; }
+  /* Linhas 3 e 4 juntas: tempo e valor lado a lado, cada um com -/+ colados à esquerda */
+  .m-stepper-pair-row { display: flex; gap: 10px; }
+  .m-stepper-row { flex: 1; display: flex; align-items: center; background: #14141a; border-radius: 10px; overflow: hidden; }
+  .m-stepper-btns { display: flex; flex-shrink: 0; }
+  .m-stepper-btn { background: none; border: none; color: #8b8b96; font-size: 20px; width: 36px; height: 48px; cursor: pointer; flex-shrink: 0; }
   .m-stepper-btn:hover { color: #fff; background: #1c1c24; }
-  .m-stepper-display { flex: 1; text-align: center; color: #fff; font-size: 16px; font-weight: 500; }
+  .m-stepper-btns .m-stepper-btn:first-child { border-right: 1px solid #232330; }
+  .m-stepper-display { flex: 1; text-align: center; color: #fff; font-size: 15px; font-weight: 500; padding-right: 8px; }
 
-  /* Linha 5: Comprar e Vender colados, retangulo unico sem arredondamento */
-  .m-action-row { display: flex; gap: 0; }
+  /* Linha 5: Comprar e Vender colados, arredondado só nas pontas externas */
+  .m-action-row { display: flex; gap: 0; border-radius: 10px; overflow: hidden; }
   .m-btn-buy, .m-btn-sell {
     flex: 1; border: none; border-radius: 0; cursor: pointer; height: 52px;
     display: flex; align-items: center; justify-content: space-between;
@@ -303,16 +306,22 @@ html, body { height: 100%; overflow: hidden; }
         <div class="m-progress-fill" id="m_countdownFill"></div>
       </div>
 
-      <div class="m-stepper-row">
-        <button class="m-stepper-btn" id="m_durMinus">−</button>
-        <div class="m-stepper-display" id="m_durValue">1 min.</div>
-        <button class="m-stepper-btn" id="m_durPlus">+</button>
-      </div>
+      <div class="m-stepper-pair-row">
+        <div class="m-stepper-row">
+          <div class="m-stepper-btns">
+            <button class="m-stepper-btn" id="m_durMinus">−</button>
+            <button class="m-stepper-btn" id="m_durPlus">+</button>
+          </div>
+          <div class="m-stepper-display" id="m_durValue">1 min.</div>
+        </div>
 
-      <div class="m-stepper-row">
-        <button class="m-stepper-btn" id="m_stakeMinus">−</button>
-        <div class="m-stepper-display"><i class="fa fa-dollar" aria-hidden="true" style="font-size:14px;"></i> <span id="m_stakeValue">5,00</span></div>
-        <button class="m-stepper-btn" id="m_stakePlus">+</button>
+        <div class="m-stepper-row">
+          <div class="m-stepper-btns">
+            <button class="m-stepper-btn" id="m_stakeMinus">−</button>
+            <button class="m-stepper-btn" id="m_stakePlus">+</button>
+          </div>
+          <div class="m-stepper-display"><i class="fa fa-dollar" aria-hidden="true" style="font-size:13px;"></i> <span id="m_stakeValue">5,00</span></div>
+        </div>
       </div>
 
       <div class="m-action-row">
@@ -321,8 +330,8 @@ html, body { height: 100%; overflow: hidden; }
           <span class="m-pct">85%</span>
         </button>
         <button class="m-btn-sell" id="m_sellBtn">
-          <span>VENDER</span>
           <span class="m-pct">85%</span>
+          <span>VENDER</span>
         </button>
       </div>
 
