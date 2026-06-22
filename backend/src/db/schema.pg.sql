@@ -17,7 +17,11 @@ CREATE TABLE IF NOT EXISTS affiliates (
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
+  last_name TEXT,
   email TEXT UNIQUE NOT NULL,
+  phone TEXT,
+  country TEXT NOT NULL DEFAULT 'BR',
+  currency TEXT NOT NULL DEFAULT 'BRL',
   password_hash TEXT NOT NULL,
   balance DOUBLE PRECISION NOT NULL DEFAULT 10000,
   affiliate_id TEXT REFERENCES affiliates(id),

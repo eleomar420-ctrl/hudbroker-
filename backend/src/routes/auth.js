@@ -9,9 +9,9 @@ const router = Router();
 
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, clickId } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Nome, email e senha são obrigatórios' });
+    const { name, lastName, email, phone, country, password, clickId } = req.body;
+    if (!name || !lastName || !email || !phone || !password) {
+      return res.status(400).json({ error: 'Nome, sobrenome, email, telefone e senha são obrigatórios' });
     }
 
     const existing = await queryOne('SELECT id FROM users WHERE email = $1', [email]);
@@ -21,8 +21,9 @@ router.post('/register', async (req, res) => {
     const passwordHash = await bcrypt.hash(password, 10);
 
     await run(
-      `INSERT INTO users (id, name, email, password_hash, balance) VALUES ($1, $2, $3, $4, 10000)`,
-      [id, name, email, passwordHash]
+      `INSERT INTO users (id, name, last_name, email, phone, country, currency, password_hash, balance)
+       VALUES ($1, $2, $3, $4, $5, $6, 'BRL', $7, 10000)`,
+      [id, name, lastName, email, phone, country || 'BR', passwordHash]
     );
 
     if (clickId) {
@@ -30,7 +31,7 @@ router.post('/register', async (req, res) => {
     }
 
     const token = signToken({ id, email, role: 'client' });
-    res.json({ token, user: { id, name, email, balance: 10000 } });
+    res.json({ token, user: { id, name, lastName, email, balance: 10000, currency: 'BRL' } });
   } catch (err) {
     console.error('[auth/register]', err);
     res.status(500).json({ error: 'Erro interno ao cadastrar' });

@@ -8,118 +8,143 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/shared.css">
 <style>
-.trade-layout { display: grid; grid-template-columns: 1fr 320px; gap: 16px; }
-#tv_chart { height: 520px; border-radius: 12px; overflow: hidden; }
-.asset-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
-.asset-tab {
-  padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border);
-  background: var(--bg-elevated); cursor: pointer; font-size: 13px; font-family: var(--font-mono);
+html, body { height: 100%; overflow: hidden; }
+.trade-shell { display: flex; flex-direction: column; height: 100vh; }
+.trade-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px; height: 56px; border-bottom: 1px solid var(--border);
+  background: var(--bg-panel); flex-shrink: 0;
 }
-.asset-tab.active { border-color: var(--brand); color: var(--brand); }
-.direction-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
-.dir-btn { padding: 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-elevated); cursor: pointer; text-align: center; font-weight: 600; }
-.dir-btn.up { color: var(--up); }
-.dir-btn.down { color: var(--down); }
-.dir-btn.selected.up { background: var(--up-dim); border-color: var(--up); }
-.dir-btn.selected.down { background: var(--down-dim); border-color: var(--down); }
-.live-price { font-family: var(--font-mono); font-size: 28px; font-weight: 500; }
-.payout-note { color: var(--text-faint); font-size: 12px; margin-top: 8px; }
-.duration-row { display: flex; gap: 8px; margin-bottom: 14px; }
-.duration-btn { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-elevated); cursor: pointer; font-size: 12px; font-family: var(--font-mono); }
-.duration-btn.active { border-color: var(--brand); color: var(--brand); }
-.countdown { font-family: var(--font-mono); color: var(--brand); }
+.asset-pill {
+  display: flex; align-items: center; gap: 8px; background: var(--bg-elevated);
+  border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; cursor: pointer;
+}
+.asset-pill .icon { width: 22px; height: 22px; border-radius: 50%; background: var(--brand); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #1a1208; }
+.asset-pill .name { font-weight: 600; font-size: 13px; }
+.asset-pill .sub { font-size: 11px; color: var(--text-faint); }
+.asset-dropdown { display: none; position: absolute; top: 56px; left: 16px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 6px; z-index: 50; min-width: 200px; }
+.asset-dropdown.open { display: block; }
+.asset-option { padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-family: var(--font-mono); }
+.asset-option:hover { background: var(--bg-elevated); }
+
+.trade-body { flex: 1; display: flex; min-height: 0; }
+#tv_chart { flex: 1; min-width: 0; }
+
+.trade-panel {
+  width: 280px; flex-shrink: 0; background: var(--bg-panel);
+  border-left: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 16px;
+  overflow-y: auto;
+}
+.panel-block { background: var(--bg-elevated); border-radius: 10px; padding: 14px; }
+.panel-label { font-size: 11px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.stepper { display: flex; align-items: center; justify-content: space-between; }
+.stepper-btn { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.stepper-value { font-family: var(--font-mono); font-size: 18px; font-weight: 600; }
+.countdown-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+.countdown-fill { height: 100%; background: var(--up); width: 100%; transition: width 1s linear; }
+.profit-block { text-align: center; }
+.profit-pct { font-size: 22px; font-weight: 700; color: var(--up); }
+.profit-amount { font-family: var(--font-mono); color: var(--up); font-size: 14px; margin-top: 4px; }
+.buy-btn, .sell-btn { width: 100%; padding: 16px; border-radius: 10px; border: none; font-weight: 700; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.buy-btn { background: var(--up); color: #06150f; }
+.buy-btn:hover { background: #26c987; }
+.sell-btn { background: var(--down); color: #1f0a0d; }
+.sell-btn:hover { background: #ea5b6c; }
+.live-clock { text-align: center; font-size: 12px; color: var(--text-faint); font-family: var(--font-mono); }
+.open-trades-strip { padding: 8px 16px; border-top: 1px solid var(--border); background: var(--bg-panel); max-height: 100px; overflow-y: auto; flex-shrink: 0; }
+.trade-chip { display: inline-flex; align-items: center; gap: 8px; background: var(--bg-elevated); border-radius: 8px; padding: 6px 10px; margin: 4px 4px 0 0; font-size: 12px; font-family: var(--font-mono); }
 </style>
 </head>
 <body>
-<div class="topbar">
-  <div class="brand"><span class="dot"></span>Hud<span class="tag">Broker</span></div>
-  <div class="topbar-right">
-    <div class="balance-pill"><span class="label">Saldo</span><span id="balanceDisplay">--</span></div>
-    <button class="btn" id="depositBtn">Depositar</button>
-    <button class="btn" id="logoutBtn">Sair</button>
-  </div>
-</div>
-
-<div class="layout">
-  <div class="sidebar">
-    <a href="/client/index.html" class="active">Trading</a>
-    <a href="/client/history.html">Histórico</a>
-    <a href="/affiliates/index.html">Painel de afiliados</a>
-    <a href="/admin/index.html">Painel admin</a>
-    <a href="/backoffice/index.html">Backoffice</a>
-  </div>
-
-  <div class="main">
-    <div class="asset-tabs">
-      <div class="asset-tab active" data-asset="BTCUSDT">BTC/USDT</div>
-      <div class="asset-tab" data-asset="ETHUSDT">ETH/USDT</div>
-      <div class="asset-tab" data-asset="SOLUSDT">SOL/USDT</div>
-      <div class="asset-tab" data-asset="BNBUSDT">BNB/USDT</div>
+<div class="trade-shell">
+  <div class="trade-topbar">
+    <div style="display:flex; align-items:center; gap:16px; position:relative;">
+      <div class="brand"><span class="dot"></span>Hud<span class="tag">Broker</span></div>
+      <div class="asset-pill" id="assetPill">
+        <div class="icon" id="assetIcon">B</div>
+        <div>
+          <div class="name" id="assetName">Bitcoin</div>
+          <div class="sub">Crypto</div>
+        </div>
+      </div>
+      <div class="asset-dropdown" id="assetDropdown">
+        <div class="asset-option" data-asset="BTCUSDT" data-name="Bitcoin" data-icon="B">Bitcoin (BTC/USDT)</div>
+        <div class="asset-option" data-asset="ETHUSDT" data-name="Ethereum" data-icon="E">Ethereum (ETH/USDT)</div>
+        <div class="asset-option" data-asset="SOLUSDT" data-name="Solana" data-icon="S">Solana (SOL/USDT)</div>
+        <div class="asset-option" data-asset="BNBUSDT" data-name="BNB" data-icon="B">BNB (BNB/USDT)</div>
+      </div>
     </div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div class="balance-pill"><span class="label">Conta Principal</span><span id="balanceDisplay">--</span></div>
+      <button class="btn" id="historyBtn">Histórico</button>
+      <button class="btn" id="depositBtn">Depositar</button>
+      <button class="btn" id="logoutBtn">Sair</button>
+    </div>
+  </div>
 
-    <div class="trade-layout">
-      <div class="card" style="padding: 0;">
-        <div id="tv_chart"></div>
+  <div class="trade-body">
+    <div id="tv_chart"></div>
+
+    <div class="trade-panel">
+      <div>
+        <div class="panel-label">Tempo restante</div>
+        <div class="panel-block">
+          <div class="stepper">
+            <button class="stepper-btn" id="durMinus">−</button>
+            <div class="stepper-value" id="durValue">1 min</div>
+            <button class="stepper-btn" id="durPlus">+</button>
+          </div>
+          <div class="countdown-bar"><div class="countdown-fill" id="countdownFill"></div></div>
+        </div>
       </div>
 
       <div>
-        <div class="card">
-          <div class="stat-label">Preço ao vivo</div>
-          <div class="live-price" id="livePrice">--</div>
-        </div>
-
-        <div class="card">
-          <div class="card-title">Nova operação</div>
-
-          <label>Valor da operação (USD)</label>
-          <input type="number" id="stakeInput" value="100" min="1" step="1">
-
-          <div style="margin-top: 14px;">
-            <label>Tempo de expiração</label>
-            <div class="duration-row">
-              <div class="duration-btn" data-sec="30">30s</div>
-              <div class="duration-btn active" data-sec="60">1min</div>
-              <div class="duration-btn" data-sec="300">5min</div>
-              <div class="duration-btn" data-sec="900">15min</div>
-            </div>
+        <div class="panel-label">Valor (R$)</div>
+        <div class="panel-block">
+          <div class="stepper">
+            <button class="stepper-btn" id="stakeMinus">−</button>
+            <div class="stepper-value" id="stakeValue">R$ 5,00</div>
+            <button class="stepper-btn" id="stakePlus">+</button>
           </div>
-
-          <div class="direction-row">
-            <div class="dir-btn up selected" id="dirUp">↑ Subir</div>
-            <div class="dir-btn down" id="dirDown">↓ Cair</div>
-          </div>
-
-          <button class="btn btn-primary" id="openTradeBtn" style="width: 100%; padding: 14px; font-size: 15px;">
-            Abrir operação
-          </button>
-          <div class="payout-note">Payout de 85% se a previsão estiver correta</div>
         </div>
       </div>
-    </div>
 
-    <div class="card" style="margin-top: 16px;">
-      <div class="card-title">Operações em andamento</div>
-      <table>
-        <thead>
-          <tr><th>Ativo</th><th>Direção</th><th>Valor</th><th>Entrada</th><th>Expira em</th></tr>
-        </thead>
-        <tbody id="openTradesBody">
-          <tr><td colspan="5" class="empty-state">Nenhuma operação em andamento</td></tr>
-        </tbody>
-      </table>
+      <div class="panel-block profit-block">
+        <div class="panel-label" style="text-align:left;">Lucro</div>
+        <div class="profit-pct">85%</div>
+        <div class="profit-amount" id="profitAmount">+R$ 4,25</div>
+      </div>
+
+      <button class="buy-btn" id="buyBtn"><i class="ti ti-trending-up" aria-hidden="true"></i> COMPRAR</button>
+      <button class="sell-btn" id="sellBtn"><i class="ti ti-trending-down" aria-hidden="true"></i> VENDER</button>
+
+      <div class="live-clock" id="liveClock">Hora atual: --:--:--</div>
     </div>
+  </div>
+
+  <div class="open-trades-strip" id="openTradesStrip">
+    <span style="font-size:12px; color:var(--text-faint);">Nenhuma operação em andamento</span>
   </div>
 </div>
 
 <script src="/js/api.js"></script>
 <script src="https://s3.tradingview.com/tv.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css"></script>
 <script>
 requireAuth();
 
 let currentAsset = 'BTCUSDT';
-let selectedDirection = 'up';
-let selectedDuration = 60;
+let stakeValue = 5;
+let durationSeconds = 60;
 let livePrices = {};
+
+const durationOptions = [
+  { sec: 30, label: '30 seg' },
+  { sec: 60, label: '1 min' },
+  { sec: 300, label: '5 min' },
+  { sec: 900, label: '15 min' }
+];
+let durationIndex = 1;
 
 function loadChart(symbol) {
   document.getElementById('tv_chart').innerHTML = '';
@@ -140,100 +165,89 @@ function loadChart(symbol) {
   });
 }
 
+document.getElementById('assetPill').onclick = () => {
+  document.getElementById('assetDropdown').classList.toggle('open');
+};
+document.querySelectorAll('.asset-option').forEach(opt => {
+  opt.onclick = () => {
+    currentAsset = opt.dataset.asset;
+    document.getElementById('assetName').textContent = opt.dataset.name;
+    document.getElementById('assetIcon').textContent = opt.dataset.icon;
+    document.getElementById('assetDropdown').classList.remove('open');
+    loadChart(currentAsset);
+    updateProfitAmount();
+  };
+});
+
+function updateDurationDisplay() {
+  document.getElementById('durValue').textContent = durationOptions[durationIndex].label;
+  durationSeconds = durationOptions[durationIndex].sec;
+}
+document.getElementById('durMinus').onclick = () => { if (durationIndex > 0) { durationIndex--; updateDurationDisplay(); } };
+document.getElementById('durPlus').onclick = () => { if (durationIndex < durationOptions.length - 1) { durationIndex++; updateDurationDisplay(); } };
+
+function updateStakeDisplay() {
+  document.getElementById('stakeValue').textContent = formatMoney(stakeValue);
+  updateProfitAmount();
+}
+function updateProfitAmount() {
+  document.getElementById('profitAmount').textContent = '+' + formatMoney(stakeValue * 0.85);
+}
+document.getElementById('stakeMinus').onclick = () => { if (stakeValue > 1) { stakeValue = Math.max(1, stakeValue - 1); updateStakeDisplay(); } };
+document.getElementById('stakePlus').onclick = () => { stakeValue += 1; updateStakeDisplay(); };
+
 function connectPriceFeed() {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
   const ws = new WebSocket(`${proto}://${location.host}/ws/prices`);
-
   ws.onmessage = (event) => {
     const msg = JSON.parse(event.data);
-    if (msg.type === 'snapshot') {
-      livePrices = msg.prices;
-    } else if (msg.type === 'price') {
-      livePrices[msg.symbol] = { price: msg.price, timestamp: msg.timestamp };
-    }
-    updateLivePrice();
+    if (msg.type === 'snapshot') livePrices = msg.prices;
+    else if (msg.type === 'price') livePrices[msg.symbol] = { price: msg.price, timestamp: msg.timestamp };
   };
-
   ws.onclose = () => setTimeout(connectPriceFeed, 2000);
 }
-
-function updateLivePrice() {
-  const entry = livePrices[currentAsset];
-  document.getElementById('livePrice').textContent = entry ? `$${entry.price.toLocaleString('en-US', { maximumFractionDigits: 2 })}` : 'Aguardando...';
-}
-
-document.querySelectorAll('.asset-tab').forEach(tab => {
-  tab.onclick = () => {
-    document.querySelectorAll('.asset-tab').forEach(t => t.classList.remove('active'));
-    tab.classList.add('active');
-    currentAsset = tab.dataset.asset;
-    loadChart(currentAsset);
-    updateLivePrice();
-  };
-});
-
-document.querySelectorAll('.duration-btn').forEach(btn => {
-  btn.onclick = () => {
-    document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    selectedDuration = Number(btn.dataset.sec);
-  };
-});
-
-document.getElementById('dirUp').onclick = () => {
-  selectedDirection = 'up';
-  document.getElementById('dirUp').classList.add('selected');
-  document.getElementById('dirDown').classList.remove('selected');
-};
-document.getElementById('dirDown').onclick = () => {
-  selectedDirection = 'down';
-  document.getElementById('dirDown').classList.add('selected');
-  document.getElementById('dirUp').classList.remove('selected');
-};
 
 async function refreshBalance() {
   try {
     const me = await apiFetch('/trading/me');
     document.getElementById('balanceDisplay').textContent = formatMoney(me.balance);
-  } catch (err) { /* token inválido, etc */ }
+  } catch (err) {}
 }
 
 async function refreshOpenTrades() {
   const trades = await apiFetch('/trading/trades/open');
-  const tbody = document.getElementById('openTradesBody');
+  const strip = document.getElementById('openTradesStrip');
   if (trades.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhuma operação em andamento</td></tr>';
+    strip.innerHTML = '<span style="font-size:12px; color:var(--text-faint);">Nenhuma operação em andamento</span>';
     return;
   }
-  tbody.innerHTML = trades.map(t => `
-    <tr>
-      <td>${t.asset}</td>
-      <td><span class="badge ${t.direction === 'up' ? 'badge-up' : 'badge-down'}">${t.direction === 'up' ? '↑ Subir' : '↓ Cair'}</span></td>
-      <td>${formatMoney(t.stake)}</td>
-      <td>${t.entry_price.toLocaleString('en-US')}</td>
-      <td class="countdown" data-expires="${t.expires_at}">--</td>
-    </tr>
+  strip.innerHTML = trades.map(t => `
+    <span class="trade-chip">
+      ${t.asset} <span style="color:${t.direction === 'up' ? 'var(--up)' : 'var(--down)'}">${t.direction === 'up' ? '↑' : '↓'}</span>
+      ${formatMoney(t.stake)} <span class="countdown" data-expires="${t.expires_at}">--</span>
+    </span>
   `).join('');
 }
 
 setInterval(() => {
   document.querySelectorAll('.countdown').forEach(el => {
     const diff = Math.max(0, Math.floor((new Date(el.dataset.expires) - new Date()) / 1000));
-    el.textContent = diff > 0 ? `${diff}s` : 'Resolvendo...';
+    el.textContent = diff > 0 ? `${diff}s` : '...';
     if (diff === 0) setTimeout(() => { refreshOpenTrades(); refreshBalance(); }, 1500);
   });
+  const now = new Date();
+  document.getElementById('liveClock').textContent = 'Hora atual: ' + now.toLocaleTimeString('pt-BR');
 }, 1000);
 
-document.getElementById('openTradeBtn').onclick = async () => {
+async function openTrade(direction) {
   try {
-    const stake = Number(document.getElementById('stakeInput').value);
     await apiFetch('/trading/trades', {
       method: 'POST',
       body: JSON.stringify({
         asset: currentAsset,
-        direction: selectedDirection,
-        stake,
-        durationSeconds: selectedDuration,
+        direction,
+        stake: stakeValue,
+        durationSeconds,
         payoutPct: 0.85
       })
     });
@@ -243,10 +257,13 @@ document.getElementById('openTradeBtn').onclick = async () => {
   } catch (err) {
     showToast(err.message, 'error');
   }
-};
+}
+
+document.getElementById('buyBtn').onclick = () => openTrade('up');
+document.getElementById('sellBtn').onclick = () => openTrade('down');
 
 document.getElementById('depositBtn').onclick = async () => {
-  const amount = prompt('Valor do depósito demo (USD):', '500');
+  const amount = prompt('Valor do depósito demo (R$):', '500');
   if (!amount) return;
   try {
     await apiFetch('/trading/deposit', { method: 'POST', body: JSON.stringify({ amount: Number(amount) }) });
@@ -256,9 +273,11 @@ document.getElementById('depositBtn').onclick = async () => {
     showToast(err.message, 'error');
   }
 };
-
+document.getElementById('historyBtn').onclick = () => window.location.href = '/client/history.html';
 document.getElementById('logoutBtn').onclick = () => logout();
 
+updateDurationDisplay();
+updateStakeDisplay();
 loadChart(currentAsset);
 connectPriceFeed();
 refreshBalance();

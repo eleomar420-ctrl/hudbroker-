@@ -33,7 +33,7 @@ function logout(redirectTo = '/client/login.html') {
 }
 
 function formatMoney(value) {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'USD' }).format(value);
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 }
 
 function formatDate(iso) {

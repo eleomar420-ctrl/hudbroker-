@@ -58,6 +58,16 @@ export async function withTransaction(fn) {
 export async function initDb() {
   const schema = fs.readFileSync(path.join(__dirname, 'schema.pg.sql'), 'utf-8');
   await pool.query(schema);
+
+  // Migrações incrementais: adicionam colunas novas a bancos já existentes
+  // (CREATE TABLE IF NOT EXISTS não altera tabelas que já existem).
+  await pool.query(`
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS last_name TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS country TEXT NOT NULL DEFAULT 'BR';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS currency TEXT NOT NULL DEFAULT 'BRL';
+  `);
+
   console.log('[db] Schema PostgreSQL inicializado/verificado');
 }
 
