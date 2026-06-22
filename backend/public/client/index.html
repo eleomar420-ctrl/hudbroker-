@@ -156,10 +156,13 @@ html, body { height: 100%; overflow: hidden; }
   .topbar-spacer { display: none; }
 
   .avatar-btn { order: 1; width: 34px; height: 34px; }
-  .account-pill { order: 2; flex: 1; min-width: 0; max-width: 200px; justify-content: center; background: var(--bg-elevated); border-radius: 8px; padding: 0 10px; }
-  .account-pill .label { display: block; font-size: 10px; }
+  .account-pill { order: 2; flex: 1; min-width: 0; max-width: 170px; justify-content: center; gap: 4px; background: var(--bg-elevated); border-radius: 8px; padding: 0 8px; }
+  .account-pill .label { display: block; font-size: 9px; }
   .account-pill .value { font-size: 13px; }
-  .btn-deposit { order: 3; font-size: 13px; padding: 0 12px; }
+  .btn-deposit {
+    order: 3; font-size: 14px; font-weight: 700; padding: 0 18px; height: 40px;
+    background: #08B774; color: #ffffff; border-color: #08B774;
+  }
 
   .trade-body { flex-direction: column; overflow-y: auto; }
   .chart-area { min-height: 280px; flex: 1 1 auto; }
