@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HudBroker — Histórico</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/shared.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><span class="dot"></span>Hud<span class="tag">Broker</span></div>
+  <div class="topbar-right">
+    <div class="balance-pill"><span class="label">Saldo</span><span id="balanceDisplay">--</span></div>
+    <button class="btn" id="logoutBtn">Sair</button>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <a href="/client/index.html">Trading</a>
+    <a href="/client/history.html" class="active">Histórico</a>
+    <a href="/affiliates/index.html">Painel de afiliados</a>
+    <a href="/admin/index.html">Painel admin</a>
+    <a href="/backoffice/index.html">Backoffice</a>
+  </div>
+
+  <div class="main">
+    <div class="card">
+      <div class="card-title">Histórico de operações</div>
+      <table>
+        <thead>
+          <tr><th>Data</th><th>Ativo</th><th>Direção</th><th>Valor</th><th>Entrada</th><th>Saída</th><th>Resultado</th></tr>
+        </thead>
+        <tbody id="historyBody"><tr><td colspan="7" class="empty-state">Carregando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+requireAuth();
+
+async function load() {
+  const me = await apiFetch('/trading/me');
+  document.getElementById('balanceDisplay').textContent = formatMoney(me.balance);
+
+  const history = await apiFetch('/trading/trades/history');
+  const tbody = document.getElementById('historyBody');
+  if (history.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Nenhuma operação concluída ainda</td></tr>';
+    return;
+  }
+  tbody.innerHTML = history.map(t => {
+    const won = t.result_amount > 0;
+    return `
+      <tr>
+        <td>${formatDate(t.opened_at)}</td>
+        <td>${t.asset}</td>
+        <td><span class="badge ${t.direction === 'up' ? 'badge-up' : 'badge-down'}">${t.direction === 'up' ? '↑' : '↓'}</span></td>
+        <td>${formatMoney(t.stake)}</td>
+        <td>${t.entry_price.toLocaleString('en-US')}</td>
+        <td>${t.exit_price ? t.exit_price.toLocaleString('en-US') : '--'}</td>
+        <td style="color: ${won ? 'var(--up)' : 'var(--down)'}">${won ? '+' : ''}${formatMoney(t.result_amount)}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+document.getElementById('logoutBtn').onclick = () => logout();
+load();
+</script>
+</body>
+</html>
