@@ -196,25 +196,25 @@ html, body { height: 100%; overflow: hidden; }
 
   .mobile-panel { display: flex; flex-direction: column; padding: 10px 10%; background: #000000; border-top: 1px solid var(--border); gap: 8px; }
 
-  .m-timer-row { display: flex; justify-content: space-between; align-items: center; }
+  .m-timer-row { display: flex; justify-content: space-between; align-items: center; width: 100%; }
   .m-timer-label { color: #8b8b96; font-size: 13px; }
   .m-timer-value { color: #00c896; font-weight: 700; font-size: 14px; letter-spacing: 0.5px; font-variant-numeric: tabular-nums; }
-  .m-progress-track { height: 3px; background: #2a2a35; border-radius: 2px; overflow: hidden; }
+  .m-progress-track { height: 3px; background: #2a2a35; border-radius: 2px; overflow: hidden; width: 100%; }
   .m-progress-fill { height: 100%; background: #00c896; width: 100%; transition: width 1s linear; border-radius: 2px; }
 
   /* Linhas 3 e 4 juntas: tempo e valor lado a lado, cada um com -/+ colados à esquerda */
-  .m-stepper-pair-row { display: flex; gap: 0; }
-  .m-stepper-row { flex: 1; display: flex; align-items: center; background: #1c1c1c; border-radius: 0; overflow: hidden; }
+  .m-stepper-pair-row { display: flex; gap: 0; width: 100%; }
+  .m-stepper-row { flex: 1 1 0; min-width: 0; display: flex; align-items: center; background: #1c1c1c; border-radius: 0; overflow: hidden; }
   .m-stepper-btns { display: flex; flex-shrink: 0; }
   .m-stepper-btn { background: #1a1a1a; border: none; color: #8b8b96; font-size: 18px; width: 34px; height: 38px; cursor: pointer; flex-shrink: 0; }
   .m-stepper-btn:hover { color: #fff; background: #242424; }
   .m-stepper-btns .m-stepper-btn:first-child { border-right: 1px solid #000000; }
-  .m-stepper-display { flex: 1; text-align: center; color: #fff; font-size: 14px; font-weight: 500; padding-right: 8px; }
+  .m-stepper-display { flex: 1 1 0; min-width: 0; text-align: center; color: #fff; font-size: 14px; font-weight: 500; padding-right: 8px; }
 
   /* Linha 5: Comprar e Vender colados, arredondado só nas pontas externas */
-  .m-action-row { display: flex; gap: 0; border-radius: 10px; overflow: hidden; }
+  .m-action-row { display: flex; gap: 0; border-radius: 10px; overflow: hidden; width: 100%; }
   .m-btn-buy, .m-btn-sell {
-    flex: 1; border: none; border-radius: 0; cursor: pointer; height: 44px;
+    flex: 1 1 0; min-width: 0; border: none; border-radius: 0; cursor: pointer; height: 44px;
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 16px; font-size: 14px; font-weight: 700; color: #fff;
   }
