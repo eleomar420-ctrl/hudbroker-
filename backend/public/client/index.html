@@ -21,6 +21,20 @@ html, body { height: 100%; overflow: hidden; }
 .hamburger-btn { width: 36px; height: 36px; border-radius: 8px; border: none; background: var(--bg-elevated); color: var(--text); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .hamburger-btn:hover { background: var(--border); }
 
+.success-popup {
+  position: fixed; top: 56px; left: 50%; transform: translateX(-50%) translateY(-12px);
+  background: #08B774; color: #ffffff; border-radius: 0 0 10px 10px;
+  padding: 12px 22px; display: flex; align-items: center; gap: 10px;
+  font-size: 14px; font-weight: 600; box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+  opacity: 0; z-index: 200; transition: opacity 0.25s ease, transform 0.25s ease; pointer-events: none;
+}
+.success-popup.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.success-popup-check {
+  display: flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,0.25);
+  color: #ffffff; font-size: 12px; font-weight: 700; flex-shrink: 0;
+}
+
 .asset-tabs-row { display: flex; align-items: center; gap: 6px; min-width: 0; overflow-x: auto; flex-shrink: 1; }
 .topbar-spacer { flex: 1; min-width: 8px; }
 .asset-tab {
@@ -776,12 +790,31 @@ async function openTrade(direction) {
         accountType: activeAccount
       })
     });
-    showToast('Operação aberta com sucesso');
+    showSuccessPopup('Transação efetuada com sucesso!');
     refreshBalance();
     refreshOpenTrades();
   } catch (err) {
     showToast(err.message, 'error');
   }
+}
+
+// Popup de sucesso específico para abertura de operação: aparece logo abaixo
+// da área de avatar/saldo/depositar, em vez do toast genérico do canto da tela.
+function showSuccessPopup(message) {
+  const existing = document.getElementById('successPopup');
+  if (existing) existing.remove();
+
+  const el = document.createElement('div');
+  el.id = 'successPopup';
+  el.className = 'success-popup';
+  el.innerHTML = `<span class="success-popup-check">✓</span><span>${message}</span>`;
+  document.body.appendChild(el);
+
+  setTimeout(() => el.classList.add('show'), 10);
+  setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => el.remove(), 250);
+  }, 2200);
 }
 
 document.getElementById('buyBtn').onclick = () => openTrade('up');
