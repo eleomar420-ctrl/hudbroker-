@@ -119,19 +119,19 @@ html, body { height: 100%; overflow: hidden; }
 .side-menu-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
 .side-menu-overlay.open { display: block; }
 .side-menu {
-  width: 150px; height: 100%; background: var(--bg-panel); border-right: 1px solid var(--border);
+  width: 110px; height: 100%; background: var(--bg-panel); border-right: 1px solid var(--border);
   display: flex; flex-direction: column; gap: 6px;
-  padding: 16px 10px; overflow-y: auto;
+  padding: 16px 8px; overflow-y: auto;
 }
 .menu-item {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  width: 100%; background-color: #1a1a1a; border: none; border-radius: 6px;
-  padding: 12px 8px; margin-bottom: 6px;
+  width: 100%; background: none; border: none; border-radius: 0;
+  padding: 10px 6px; margin-bottom: 0;
   color: var(--text-dim); font-weight: 500; cursor: pointer; text-align: center; text-decoration: none;
 }
 .menu-item .material-icons-outlined { font-size: 14px; margin-bottom: 4px; }
 .menu-item span:last-child { font-size: 12px; }
-.menu-item:hover { background-color: #242424; color: var(--text); }
+.menu-item:hover { background: none; color: var(--text); }
 .menu-item-deposit { color: #08B774; }
 .menu-item-logout { color: var(--down); }
 
@@ -184,7 +184,7 @@ html, body { height: 100%; overflow: hidden; }
   .mobile-panel { padding-bottom: 0; }
   .m-asset-row { border-radius: 0; margin-bottom: 0; }
 
-  .side-menu { width: 50vw; max-width: 180px; }
+  .side-menu { width: 38vw; max-width: 140px; }
   .assets-screen-body { flex-direction: column; }
   .assets-categories { width: 100%; display: flex; overflow-x: auto; padding: 8px 0; border-right: none; border-bottom: 1px solid var(--border); }
   .category-item { white-space: nowrap; }
