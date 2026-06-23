@@ -40,32 +40,19 @@ function formatDate(iso) {
   return new Date(iso).toLocaleString('pt-BR');
 }
 
-// Som de clique curto e sutil, gerado via Web Audio API (sem depender de arquivo externo).
-// Reaproveita um único AudioContext para não criar um novo a cada clique.
-let _clickAudioCtx = null;
+// Som de clique real (arquivo de áudio), pré-carregado uma vez.
+// Usa .cloneNode() a cada clique para permitir cliques rápidos/sobrepostos sem cortar o som anterior.
+const _clickSoundBase = new Audio('/sounds/click.mp3');
+_clickSoundBase.volume = 0.5;
 function playClickSound() {
   try {
-    if (!_clickAudioCtx) {
-      _clickAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    const ctx = _clickAudioCtx;
-    if (ctx.state === 'suspended') ctx.resume();
-
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(900, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(500, ctx.currentTime + 0.05);
-
-    gain.gain.setValueAtTime(0.12, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.07);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.08);
+    const sound = _clickSoundBase.cloneNode();
+    sound.volume = _clickSoundBase.volume;
+    sound.play().catch(() => {
+      // Navegadores que bloqueiam áudio sem interação prévia do usuário: ignora silenciosamente.
+    });
   } catch (err) {
-    // Navegadores que bloqueiam áudio sem interação prévia, ou sem suporte: ignora silenciosamente.
+    // Sem suporte a áudio: ignora silenciosamente.
   }
 }
 
