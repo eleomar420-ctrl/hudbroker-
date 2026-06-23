@@ -119,19 +119,19 @@ html, body { height: 100%; overflow: hidden; }
 .side-menu-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; }
 .side-menu-overlay.open { display: block; }
 .side-menu {
-  width: 280px; height: 100%; background: var(--bg-panel); border-right: 1px solid var(--border);
-  display: grid; grid-template-columns: repeat(2, 92px); justify-content: center; gap: 12px 16px;
-  padding: 20px 16px; overflow-y: auto; align-content: start;
+  width: 220px; height: 100%; background: var(--bg-panel); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 20px 16px; overflow-y: auto;
 }
 .menu-item {
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
-  width: 92px; height: 80px; background: var(--bg-elevated); border: none; border-radius: 12px;
-  color: var(--text-dim); font-size: 11px; font-weight: 500; cursor: pointer; text-align: center; text-decoration: none;
+  width: 100%; padding: 14px; background: var(--bg-elevated); border: none; border-radius: 10px;
+  color: var(--text-dim); font-size: 12px; font-weight: 500; cursor: pointer; text-align: center; text-decoration: none;
 }
 .menu-item:hover { background: #1c2230; color: var(--text); }
-.menu-item .material-icons-outlined { font-size: 24px; }
+.menu-item .material-icons-outlined { font-size: 22px; flex-shrink: 0; }
 .menu-item-deposit { color: #08B774; }
-.menu-item-logout { color: var(--down); grid-column: span 2; width: 100%; }
+.menu-item-logout { color: var(--down); }
 
 .assets-screen { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 95; flex-direction: column; }
 .assets-screen.open { display: flex; }
@@ -182,7 +182,7 @@ html, body { height: 100%; overflow: hidden; }
   .mobile-panel { padding-bottom: 0; }
   .m-asset-row { border-radius: 0; margin-bottom: 0; }
 
-  .side-menu { width: 85vw; max-width: 320px; }
+  .side-menu { width: 70vw; max-width: 260px; }
   .assets-screen-body { flex-direction: column; }
   .assets-categories { width: 100%; display: flex; overflow-x: auto; padding: 8px 0; border-right: none; border-bottom: 1px solid var(--border); }
   .category-item { white-space: nowrap; }
