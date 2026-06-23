@@ -124,12 +124,14 @@ html, body { height: 100%; overflow: hidden; }
   padding: 20px 16px; overflow-y: auto;
 }
 .menu-item {
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
-  width: 100%; padding: 14px; background: var(--bg-elevated); border: none; border-radius: 10px;
-  color: var(--text-dim); font-size: 12px; font-weight: 500; cursor: pointer; text-align: center; text-decoration: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  width: 100%; background-color: #1a1a1a; border: none; border-radius: 6px;
+  padding: 12px 8px; margin-bottom: 6px;
+  color: var(--text-dim); font-weight: 500; cursor: pointer; text-align: center; text-decoration: none;
 }
-.menu-item:hover { background: #1c2230; color: var(--text); }
-.menu-item .material-icons-outlined { font-size: 22px; flex-shrink: 0; }
+.menu-item .material-icons-outlined { font-size: 14px; margin-bottom: 4px; }
+.menu-item span:last-child { font-size: 12px; }
+.menu-item:hover { background-color: #242424; color: var(--text); }
 .menu-item-deposit { color: #08B774; }
 .menu-item-logout { color: var(--down); }
 
