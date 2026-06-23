@@ -1,8 +1,8 @@
 :root {
-  --bg: #000000;
-  --bg-panel: #0d0d0d;
-  --bg-elevated: #161616;
-  --border: #232323;
+  --bg: #212529;
+  --bg-panel: #2a2e33;
+  --bg-elevated: #343a40;
+  --border: #3a4046;
   --text: #e8eaed;
   --text-dim: #8b92a3;
   --text-faint: #5a6178;
