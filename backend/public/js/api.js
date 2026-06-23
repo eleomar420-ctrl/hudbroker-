@@ -42,10 +42,17 @@ function formatDate(iso) {
 
 // Dois sons distintos: um exclusivo para os botões Comprar/Vender (#buyBtn, #sellBtn, #m_buyBtn, #m_sellBtn),
 // e outro genérico para o restante dos cliques na interface.
+// preload + load() força o navegador a buscar/decodificar o áudio assim que a página carrega,
+// evitando o atraso perceptível que aconteceria só no primeiro clique de cada som.
 const _tradeSoundBase = new Audio('/sounds/click.mp3');
 _tradeSoundBase.volume = 0.5;
+_tradeSoundBase.preload = 'auto';
+_tradeSoundBase.load();
+
 const _genericSoundBase = new Audio('/sounds/botaoclick.mp3');
 _genericSoundBase.volume = 0.5;
+_genericSoundBase.preload = 'auto';
+_genericSoundBase.load();
 
 function _playSound(base) {
   try {
