@@ -157,10 +157,24 @@ document.getElementById('changePhotoBtn').onclick = () => document.getElementByI
 document.getElementById('avatarInput').onchange = (e) => {
   const file = e.target.files[0];
   if (!file) return;
+
+  // Limite de ~500KB no arquivo original, para a imagem em base64 não passar do limite do servidor
+  if (file.size > 500 * 1024) {
+    showToast('Imagem muito grande. Escolha um arquivo menor que 500KB.', 'error');
+    e.target.value = '';
+    return;
+  }
+
   const reader = new FileReader();
-  reader.onload = (ev) => {
-    document.getElementById('avatarPreview').innerHTML = `<img src="${ev.target.result}" alt="">`;
-    showToast('Foto atualizada (apenas nesta sessão)');
+  reader.onload = async (ev) => {
+    const dataUrl = ev.target.result;
+    document.getElementById('avatarPreview').innerHTML = `<img src="${dataUrl}" alt="">`;
+    try {
+      await apiFetch('/trading/avatar', { method: 'POST', body: JSON.stringify({ avatarDataUrl: dataUrl }) });
+      showToast('Foto de perfil atualizada');
+    } catch (err) {
+      showToast(err.message || 'Erro ao salvar a foto', 'error');
+    }
   };
   reader.readAsDataURL(file);
 };

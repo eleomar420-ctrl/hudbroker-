@@ -52,6 +52,30 @@ router.get('/me', authRequired, async (req, res) => {
   res.json(user);
 });
 
+// Salva a foto de perfil do usuário (base64), validando tamanho para não sobrecarregar o banco.
+router.post('/avatar', authRequired, async (req, res) => {
+  try {
+    const { avatarDataUrl } = req.body;
+    if (!avatarDataUrl || typeof avatarDataUrl !== 'string') {
+      return res.status(400).json({ error: 'Imagem não informada' });
+    }
+    if (!avatarDataUrl.startsWith('data:image/')) {
+      return res.status(400).json({ error: 'Formato de imagem inválido' });
+    }
+    // Limite de ~700KB em base64 (equivale a ~500KB de imagem real), suficiente para um avatar
+    const MAX_LENGTH = 700 * 1024;
+    if (avatarDataUrl.length > MAX_LENGTH) {
+      return res.status(400).json({ error: 'Imagem muito grande. Escolha um arquivo menor (máx. ~500KB).' });
+    }
+
+    await run('UPDATE users SET avatar_url = $1 WHERE id = $2', [avatarDataUrl, req.auth.id]);
+    res.json({ ok: true, avatarUrl: avatarDataUrl });
+  } catch (err) {
+    console.error('[trading/avatar]', err);
+    res.status(500).json({ error: 'Erro interno ao salvar a foto' });
+  }
+});
+
 // Depósito real (conta principal) — em modo demo/sandbox, apenas credita; gera CPA de afiliado
 router.post('/deposit', authRequired, async (req, res) => {
   try {
