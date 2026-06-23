@@ -40,14 +40,17 @@ function formatDate(iso) {
   return new Date(iso).toLocaleString('pt-BR');
 }
 
-// Som de clique real (arquivo de áudio), pré-carregado uma vez.
-// Usa .cloneNode() a cada clique para permitir cliques rápidos/sobrepostos sem cortar o som anterior.
-const _clickSoundBase = new Audio('/sounds/click.mp3');
-_clickSoundBase.volume = 0.5;
-function playClickSound() {
+// Dois sons distintos: um exclusivo para os botões Comprar/Vender (#buyBtn, #sellBtn, #m_buyBtn, #m_sellBtn),
+// e outro genérico para o restante dos cliques na interface.
+const _tradeSoundBase = new Audio('/sounds/click.mp3');
+_tradeSoundBase.volume = 0.5;
+const _genericSoundBase = new Audio('/sounds/botaoclick.mp3');
+_genericSoundBase.volume = 0.5;
+
+function _playSound(base) {
   try {
-    const sound = _clickSoundBase.cloneNode();
-    sound.volume = _clickSoundBase.volume;
+    const sound = base.cloneNode();
+    sound.volume = base.volume;
     sound.play().catch(() => {
       // Navegadores que bloqueiam áudio sem interação prévia do usuário: ignora silenciosamente.
     });
@@ -56,11 +59,22 @@ function playClickSound() {
   }
 }
 
+function playClickSound() { _playSound(_genericSoundBase); }
+function playTradeSound() { _playSound(_tradeSoundBase); }
+
+const TRADE_BUTTON_IDS = ['buyBtn', 'sellBtn', 'm_buyBtn', 'm_sellBtn'];
+
 // Liga o som de clique em todos os botões e links clicáveis da página automaticamente.
+// Os botões de Comprar/Vender usam o som específico de trade; o restante usa o som genérico.
 function enableClickSounds() {
   document.addEventListener('click', (e) => {
     const target = e.target.closest('button, .menu-item, .asset-tab, .category-item, .account-option, .asset-option, .m-asset-drawer-item, a.btn, [role="button"]');
-    if (target) playClickSound();
+    if (!target) return;
+    if (TRADE_BUTTON_IDS.includes(target.id)) {
+      playTradeSound();
+    } else {
+      playClickSound();
+    }
   }, true);
 }
 document.addEventListener('DOMContentLoaded', enableClickSounds);
