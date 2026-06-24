@@ -61,44 +61,44 @@ html, body { height: 100%; overflow: hidden; }
 .chart-instance iframe, .chart-instance > div { width: 100%; height: 100%; }
 
 .trade-panel {
-  width: 260px; flex-shrink: 0; background: #0a0a0a;
-  border-left: 1px solid var(--border); padding: 14px 12px; display: flex; flex-direction: column; gap: 10px;
+  width: 220px; flex-shrink: 0; background: #0a0a0a;
+  border-left: 1px solid var(--border); padding: 10px 8px; display: flex; flex-direction: column; gap: 6px;
   overflow-y: auto;
 }
-.panel-block { background: #141414; border-radius: 10px; padding: 10px 12px; overflow: hidden; }
-.panel-label-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #888; margin-bottom: 6px; letter-spacing: 0.3px; }
-.panel-label-row i { font-size: 14px; color: var(--text-faint); }
+.panel-block { background: #141414; border-radius: 8px; padding: 6px 8px; overflow: hidden; }
+.panel-label-row { display: flex; align-items: center; gap: 6px; font-size: 10px; color: #888; margin-bottom: 4px; letter-spacing: 0.3px; }
+.panel-label-row i { font-size: 12px; color: var(--text-faint); }
 .stepper-value-row {
-  font-family: var(--font-mono); font-size: 22px; color: #fff; font-weight: 600;
-  display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 0 10px;
+  font-family: var(--font-mono); font-size: 16px; color: #fff; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 4px; padding: 2px 0 6px;
 }
-.stepper-btn-row { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.stepper-btn-row { display: flex; align-items: center; justify-content: center; gap: 6px; }
 .stepper-btn {
-  flex: 1; height: 32px; border-radius: 6px; border: none;
+  flex: 1; height: 26px; border-radius: 5px; border: none;
   background: #1e1e1e; color: #999; font-family: var(--font-mono);
-  font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
   transition: background 0.15s;
 }
 .stepper-btn:hover { background: #2a2a2a; color: #fff; }
-.countdown-bar { height: 3px; background: #1e1e1e; border-radius: 2px; margin-top: 8px; overflow: hidden; }
+.countdown-bar { height: 3px; background: #1e1e1e; border-radius: 2px; margin-top: 6px; overflow: hidden; }
 .countdown-fill { height: 100%; background: var(--up); width: 100%; transition: width 1s linear; border-radius: 2px; margin-left: auto; }
-.profit-block { margin: 0; padding: 14px 10px; border: 1px solid #1e1e1e; border-radius: 10px; text-align: center; background: #0a0a0a; }
-.profit-row { display: flex; align-items: baseline; justify-content: center; gap: 6px; }
-.profit-label { font-size: 12px; color: #888; letter-spacing: 0.3px; }
-.profit-pct { font-family: var(--font-mono); font-size: 20px; font-weight: 700; color: #08B774; }
-.profit-amount { font-family: var(--font-mono); color: #08B774; font-size: 18px; font-weight: 600; margin-top: 4px; }
-.trade-buttons { display: flex; flex-direction: column; gap: 8px; }
+.profit-block { margin: 0; padding: 8px 6px; border: 1px solid #1e1e1e; border-radius: 8px; text-align: center; background: #0a0a0a; }
+.profit-row { display: flex; align-items: baseline; justify-content: center; gap: 4px; }
+.profit-label { font-size: 10px; color: #888; letter-spacing: 0.3px; }
+.profit-pct { font-family: var(--font-mono); font-size: 15px; font-weight: 700; color: #08B774; }
+.profit-amount { font-family: var(--font-mono); color: #08B774; font-size: 13px; font-weight: 600; margin-top: 2px; }
+.trade-buttons { display: flex; flex-direction: column; gap: 6px; }
 .buy-btn, .sell-btn {
-  width: 100%; height: 80px; padding: 10px; border-radius: 12px; border: none;
-  font-weight: 700; font-size: 15px; cursor: pointer; letter-spacing: 0.5px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; height: 56px; padding: 6px; border-radius: 10px; border: none;
+  font-weight: 700; font-size: 12px; cursor: pointer; letter-spacing: 0.5px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
   touch-action: manipulation; transition: filter 0.15s;
 }
 .buy-btn { background: #08B774; color: #ffffff; }
 .buy-btn:hover { filter: brightness(1.15); }
 .sell-btn { background: #F92757; color: #ffffff; }
 .sell-btn:hover { filter: brightness(1.15); }
-.buy-btn i, .sell-btn i { font-size: 24px; }
+.buy-btn i, .sell-btn i { font-size: 20px; }
 .live-clock { display: none; } /* movido para footer desktop */
 
 /* Footer bar desktop */
@@ -165,16 +165,20 @@ html, body { height: 100%; overflow: hidden; }
 .side-menu-overlay.open { display: block; }
 .side-menu {
   width: 72px; height: 100%; background: var(--bg-panel); border-right: 1px solid var(--border);
-  display: flex; flex-direction: column; gap: 6px;
-  padding: 12px 4px; overflow-y: auto; pointer-events: auto;
+  display: flex; flex-direction: column;
+  padding: 0; pointer-events: auto;
 }
 .sidebar-logo {
   font-family: var(--font-display); font-weight: 700; font-size: 16px;
-  text-align: center; padding: 6px 0 2px; letter-spacing: -0.02em;
+  text-align: center; padding: 10px 0 8px; letter-spacing: -0.02em;
   display: flex; align-items: center; justify-content: center; gap: 4px;
+  flex-shrink: 0; border-bottom: 1px solid var(--border);
 }
 .sidebar-logo .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand); }
 .sidebar-logo .tag { color: var(--brand); }
+.sidebar-items {
+  flex: 1; overflow-y: auto; padding: 8px 4px; display: flex; flex-direction: column; gap: 4px;
+}
 .menu-item {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   width: 100%; background: none; border: none; border-radius: 0;
@@ -536,7 +540,7 @@ html, body { height: 100%; overflow: hidden; }
 <div class="side-menu-overlay" id="sideMenuOverlay">
   <div class="side-menu" id="sideMenu">
     <div class="sidebar-logo"><span class="dot"></span>Hud<span class="tag">B</span></div>
-    <div style="border-bottom: 1px solid var(--border); margin: 4px 8px 8px;"></div>
+    <div class="sidebar-items">
     <button class="menu-item" data-action="charts"><span class="material-icons-outlined">analytics</span><span>Gráficos</span></button>
     <button class="menu-item" data-action="history"><span class="material-icons-outlined">history</span><span>Histórico</span></button>
     <a class="menu-item" href="/client/account.html"><span class="material-icons-outlined">account_circle</span><span>Minha Conta</span></a>
@@ -548,6 +552,7 @@ html, body { height: 100%; overflow: hidden; }
     <button class="menu-item" data-action="promocode"><span class="material-icons-outlined">local_activity</span><span>Código</span></button>
     <button class="menu-item" data-action="support"><span class="material-icons-outlined">chat</span><span>Suporte</span></button>
     <button class="menu-item menu-item-logout" id="sideMenuLogout"><span class="material-icons-outlined">logout</span><span>Sair</span></button>
+    </div>
   </div>
 </div>
 
