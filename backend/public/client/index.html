@@ -166,57 +166,57 @@ html, body { height: 100%; overflow: hidden; }
 .assets-close-btn:hover { background: var(--bg-elevated); }
 
 /* Painel de Histórico — janela flutuante */
-.history-panel { display: none; position: fixed; left: 72px; top: 0; bottom: 0; width: 320px; background: var(--bg-panel); z-index: 96; flex-direction: column; border-right: 1px solid var(--border); box-shadow: 4px 0 20px rgba(0,0,0,0.4); }
+.history-panel { display: none; position: fixed; left: 72px; top: 0; bottom: 0; width: 240px; background: var(--bg-panel); z-index: 96; flex-direction: column; border-right: 1px solid var(--border); box-shadow: 4px 0 20px rgba(0,0,0,0.4); }
 .history-panel.open { display: flex; }
 .history-header {
-  display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+  display: flex; align-items: center; gap: 8px; padding: 10px 10px;
   border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--bg-panel);
 }
 .history-header .back-btn {
-  background: none; border: none; color: var(--text); cursor: pointer; font-size: 20px;
+  background: none; border: none; color: var(--text); cursor: pointer; font-size: 16px;
   display: flex; align-items: center; padding: 4px;
 }
 .history-header h2 {
-  flex: 1; font-family: var(--font-display); font-size: 16px; font-weight: 600;
+  flex: 1; font-family: var(--font-display); font-size: 13px; font-weight: 600;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .history-header .refresh-btn {
-  background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 18px;
+  background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 15px;
   display: flex; align-items: center; padding: 4px;
 }
 .history-body { flex: 1; overflow-y: auto; padding: 0; }
 .history-item {
-  display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+  display: flex; align-items: center; gap: 6px; padding: 8px 10px;
   border-bottom: 1px solid var(--border);
 }
 .history-item-time {
-  text-align: center; flex-shrink: 0; width: 55px;
+  text-align: center; flex-shrink: 0; width: 42px;
 }
-.history-item-time .time { font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: var(--text); }
-.history-item-time .date { font-family: var(--font-mono); font-size: 10px; color: var(--text-faint); }
+.history-item-time .time { font-family: var(--font-mono); font-size: 10px; font-weight: 600; color: var(--text); }
+.history-item-time .date { font-family: var(--font-mono); font-size: 9px; color: var(--text-faint); }
 .history-item-icon {
-  width: 36px; height: 36px; border-radius: 50%; background: var(--bg-elevated);
+  width: 28px; height: 28px; border-radius: 50%; 
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  border: 1px solid var(--border);
+  font-size: 11px; font-weight: 700; color: #fff;
 }
-.history-item-icon img { width: 20px; height: 20px; }
+.history-item-icon img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
 .history-item-info { flex: 1; min-width: 0; }
-.history-item-asset { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.history-item-price { font-size: 11px; color: var(--text-faint); font-family: var(--font-mono); }
+.history-item-asset { font-size: 11px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.history-item-price { font-size: 9px; color: var(--text-faint); font-family: var(--font-mono); }
 .history-item-badge {
-  font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px;
-  display: inline-block; margin-top: 2px;
+  font-size: 8px; font-weight: 700; padding: 1px 4px; border-radius: 3px;
+  display: inline-block; margin-top: 1px;
 }
 .history-item-badge.demo { background: #2a4a3a; color: #4ade80; }
 .history-item-badge.real { background: #4a3a1f; color: var(--brand); }
 .history-item-dir {
-  flex-shrink: 0; font-size: 16px; font-weight: 700;
+  flex-shrink: 0; font-size: 13px; font-weight: 700;
 }
 .history-item-dir.up { color: var(--up); }
 .history-item-dir.down { color: var(--down); }
 .history-item-result { text-align: right; flex-shrink: 0; }
-.history-item-result .stake { font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--text); }
-.history-item-result .pnl { font-family: var(--font-mono); font-size: 11px; }
+.history-item-result .stake { font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--text); }
+.history-item-result .pnl { font-family: var(--font-mono); font-size: 9px; }
 .history-item-result .pnl.won { color: var(--up); }
 .history-item-result .pnl.lost { color: var(--down); }
 .history-item-result .pnl.open { color: var(--brand); }
@@ -1044,12 +1044,12 @@ let historyPage = 0;
 let historyData = [];
 
 const cryptoIcons = {
-  BTCUSDT: 'https://cdn.jsdelivr.net/gh/nicehash/cryptocurrency-icons-fork/128/btc.png',
-  ETHUSDT: 'https://cdn.jsdelivr.net/gh/nicehash/cryptocurrency-icons-fork/128/eth.png',
-  SOLUSDT: 'https://cdn.jsdelivr.net/gh/nicehash/cryptocurrency-icons-fork/128/sol.png',
-  BNBUSDT: 'https://cdn.jsdelivr.net/gh/nicehash/cryptocurrency-icons-fork/128/bnb.png',
-  LTCUSDT: 'https://cdn.jsdelivr.net/gh/nicehash/cryptocurrency-icons-fork/128/ltc.png',
-  ADAUSDT: 'https://cdn.jsdelivr.net/gh/nicehash/cryptocurrency-icons-fork/128/ada.png',
+  BTCUSDT: { img: 'https://assets.coincap.io/assets/icons/btc@2x.png', bg: '#F7931A' },
+  ETHUSDT: { img: 'https://assets.coincap.io/assets/icons/eth@2x.png', bg: '#627EEA' },
+  SOLUSDT: { img: 'https://assets.coincap.io/assets/icons/sol@2x.png', bg: '#9945FF' },
+  BNBUSDT: { img: 'https://assets.coincap.io/assets/icons/bnb@2x.png', bg: '#F3BA2F' },
+  LTCUSDT: { img: 'https://assets.coincap.io/assets/icons/ltc@2x.png', bg: '#345D9D' },
+  ADAUSDT: { img: 'https://assets.coincap.io/assets/icons/ada@2x.png', bg: '#0033AD' },
 };
 
 function openHistoryPanel() {
@@ -1088,7 +1088,12 @@ function renderHistory() {
     const time = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const date = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
     const asset = (t.asset || '').toUpperCase();
-    const icon = cryptoIcons[asset] || '';
+    const iconData = cryptoIcons[asset];
+    const symbol = asset.replace('USDT', '');
+    const bgColor = iconData ? iconData.bg : '#555';
+    const iconHtml = iconData
+      ? `<img src="${iconData.img}" alt="${symbol}" onerror="this.style.display='none';this.parentNode.textContent='${symbol.slice(0,2)}';">`
+      : `<span>${symbol.slice(0,2)}</span>`;
     const dirClass = t.direction === 'up' ? 'up' : 'down';
     const dirArrow = t.direction === 'up' ? '▲' : '▼';
     const badgeClass = t.account_type === 'real' ? 'real' : 'demo';
@@ -1111,8 +1116,8 @@ function renderHistory() {
           <div class="time">${time}</div>
           <div class="date">${date}</div>
         </div>
-        <div class="history-item-icon">
-          ${icon ? `<img src="${icon}" alt="${asset}">` : '<span style="font-size:12px;color:var(--text-faint)">₿</span>'}
+        <div class="history-item-icon" style="background:${bgColor}">
+          ${iconHtml}
         </div>
         <div class="history-item-info">
           <div class="history-item-asset">${asset}</div>
