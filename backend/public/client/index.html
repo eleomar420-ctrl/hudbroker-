@@ -98,7 +98,35 @@ html, body { height: 100%; overflow: hidden; }
 .sell-btn { background: #F92757; color: #ffffff; }
 .sell-btn:hover { background: #ff3f6b; }
 .buy-btn i, .sell-btn i { font-size: 20px; }
-.live-clock { text-align: center; font-size: 12px; color: var(--text-faint); font-family: var(--font-mono); }
+.live-clock { display: none; } /* movido para footer desktop */
+
+/* Footer bar desktop */
+.desktop-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px; height: 32px; background: var(--bg-panel);
+  border-top: 1px solid var(--border); flex-shrink: 0;
+  font-size: 11px; color: var(--text-faint);
+}
+.footer-left { display: flex; align-items: center; gap: 12px; }
+.footer-support-btn {
+  background: #e53935; color: #fff; border: none; border-radius: 3px;
+  font-size: 10px; font-weight: 700; padding: 3px 10px; cursor: pointer;
+  letter-spacing: 0.5px;
+}
+.footer-support-btn:hover { background: #f44336; }
+.footer-email { font-size: 11px; color: var(--text-dim); }
+.footer-slogan { font-size: 10px; color: var(--text-faint); letter-spacing: 0.3px; }
+.footer-right { display: flex; align-items: center; gap: 10px; }
+.footer-icon-btn {
+  background: none; border: none; color: var(--text-dim); font-size: 15px;
+  cursor: pointer; padding: 2px 4px; display: flex; align-items: center;
+}
+.footer-icon-btn:hover { color: var(--text); }
+.footer-clock {
+  font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);
+  letter-spacing: 0.3px;
+}
+.footer-clock strong { color: var(--brand); font-weight: 600; }
 .mobile-panel { display: none; }
 .m-asset-drawer { display: none; }
 .open-trades-strip { padding: 8px 16px; border-top: 1px solid var(--border); background: var(--bg-panel); max-height: 100px; overflow-y: auto; flex-shrink: 0; }
@@ -270,6 +298,7 @@ html, body { height: 100%; overflow: hidden; }
   .mobile-panel { display: flex; }
 
   .open-trades-strip { display: none; }
+  .desktop-footer { display: none; }
   .mobile-panel { padding-bottom: 0; }
   .m-asset-row { border-radius: 0; margin-bottom: 0; }
 
@@ -484,6 +513,21 @@ html, body { height: 100%; overflow: hidden; }
 
   <div class="open-trades-strip" id="openTradesStrip">
     <span style="font-size:12px; color:var(--text-faint);">Nenhuma operação em andamento</span>
+  </div>
+
+  <!-- Footer bar desktop -->
+  <div class="desktop-footer" id="desktopFooter">
+    <div class="footer-left">
+      <button class="footer-support-btn" onclick="showToast('Suporte em breve')">SUPORTE</button>
+      <span class="footer-email">support@hudbroker.com</span>
+      <span class="footer-slogan">CONTE CONOSCO, SEMPRE QUE PRECISAR</span>
+    </div>
+    <div class="footer-right">
+      <button class="footer-icon-btn" id="footerSoundBtn" title="Som">🔊</button>
+      <button class="footer-icon-btn" id="footerSettingsBtn" title="Configurações" onclick="showToast('Configurações em breve')">⚙</button>
+      <button class="footer-icon-btn" id="footerFullscreenBtn" title="Tela cheia">⛶</button>
+      <span class="footer-clock" id="footerClock">HORA ATUAL <strong>--:--:--</strong></span>
+    </div>
   </div>
 </div>
 
@@ -879,8 +923,11 @@ function tickCountdown() {
   });
   const now = new Date();
   const clockText = 'Hora atual: ' + now.toLocaleTimeString('pt-BR');
+  const clockTime = now.toLocaleTimeString('pt-BR');
   setText('liveClock', clockText);
   setText('m_liveClock', clockText);
+  const fc = document.getElementById('footerClock');
+  if (fc) fc.innerHTML = 'HORA ATUAL <strong>' + clockTime + '</strong>';
 }
 // Primeira execução alinhada ao próximo segundo exato
 const msToNextSec = 1000 - (Date.now() % 1000);
@@ -957,8 +1004,8 @@ function _playBuf(buf) {
   src.connect(_actx.destination);
   src.start(0);
 }
-function playClick() { _playBuf(_bufClick); }
-function playTrade() { _playBuf(_bufTrade); }
+function playClick() { if (typeof soundEnabled !== 'undefined' && !soundEnabled) return; _playBuf(_bufClick); }
+function playTrade() { if (typeof soundEnabled !== 'undefined' && !soundEnabled) return; _playBuf(_bufTrade); }
 
 // Desbloquear AudioContext no primeiro toque (exigência mobile)
 document.addEventListener('touchstart', function _unlock() {
@@ -1257,6 +1304,23 @@ setActiveAccount(activeAccount);
 refreshBalance().then(renderBalance);
 setInterval(refreshOpenTrades, 5000);
 setInterval(refreshBalance, 8000);
+
+// Fullscreen toggle
+document.getElementById('footerFullscreenBtn').onclick = () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen().catch(() => {});
+  }
+};
+
+// Sound toggle
+let soundEnabled = true;
+document.getElementById('footerSoundBtn').onclick = () => {
+  soundEnabled = !soundEnabled;
+  document.getElementById('footerSoundBtn').textContent = soundEnabled ? '🔊' : '🔇';
+  showToast(soundEnabled ? 'Som ativado' : 'Som desativado');
+};
 </script>
 </body>
 </html>
