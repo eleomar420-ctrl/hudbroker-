@@ -80,7 +80,7 @@ html, body { height: 100%; overflow: hidden; }
 }
 .stepper-btn:hover { background: #00000055; }
 .countdown-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 10px; overflow: hidden; }
-.countdown-fill { height: 100%; background: var(--up); width: 100%; transition: width 1s linear; border-radius: 2px; margin-left: auto; }
+.countdown-fill { height: 100%; background: var(--up); width: 100%; transition: width 1s linear; border-radius: 2px; }
 .profit-block { width: 220.02px; min-height: 71.69px; margin: 10px auto; padding: 10px; border: 2px solid var(--border); border-radius: 8px; text-align: center; }
 .profit-row { display: flex; align-items: baseline; justify-content: center; gap: 8px; }
 .profit-label { font-size: 13px; color: var(--text-dim); }
@@ -214,7 +214,7 @@ html, body { height: 100%; overflow: hidden; }
   .m-timer-label { color: #8b8b96; font-size: 13px; }
   .m-timer-value { color: #00c896; font-weight: 700; font-size: 14px; letter-spacing: 0.5px; font-variant-numeric: tabular-nums; }
   .m-progress-track { height: 3px; background: #2a2a35; border-radius: 2px; overflow: hidden; }
-  .m-progress-fill { height: 100%; background: #00c896; width: 100%; transition: width 1s linear; border-radius: 2px; margin-left: auto; }
+  .m-progress-fill { height: 100%; background: #00c896; width: 100%; transition: width 1s linear; border-radius: 2px; }
 
   /* Linhas 3 e 4 juntas: tempo e valor lado a lado, cada um com -/+ colados à esquerda */
   .m-stepper-pair-row { display: flex; gap: 0; }
@@ -659,8 +659,8 @@ function updateLiveCountdown() {
   setWidth('countdownFill', widthPct);
   setWidth('m_countdownFill', widthPct);
 
-  // Vermelho nos últimos 5 segundos
-  const danger = remaining <= 5;
+  // Vermelho nos últimos 10 segundos
+  const danger = remaining <= 10;
   const barColor = danger ? '#F92757' : '#00c896';
   const textColor = danger ? '#F92757' : '#00c896';
 
