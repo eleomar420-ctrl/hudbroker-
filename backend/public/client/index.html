@@ -116,11 +116,12 @@ html, body { height: 100%; overflow: hidden; }
 
 .btn-deposit {
   font-family: 'Raleway', var(--font-body); font-size: 15px; font-weight: 700;
-  background: #08B774; color: #ffffff; border: 1px solid #08B774;
+  background: transparent; color: #08B774; border: 1px solid #08B774;
   border-radius: 10px; padding: 0 28px; height: 44px; cursor: pointer; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center; letter-spacing: 0.3px;
+  transition: background 0.15s, color 0.15s;
 }
-.btn-deposit:hover { background: #0acf82; color: #ffffff; border-color: #0acf82; }
+.btn-deposit:hover { background: #08B774; color: #ffffff; border-color: #08B774; }
 
 .avatar-btn { width: 42px; height: 42px; border-radius: 50%; background: var(--bg-elevated); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; border: 1px solid var(--border); flex-shrink: 0; }
 .avatar-btn i { font-size: 20px; color: var(--text-faint); }
