@@ -653,11 +653,25 @@ function updateLiveCountdown() {
   const durationSeconds = durationOptions[t.durationIndex].sec;
   const remaining = secondsUntilNextCandleClose(durationSeconds);
   const label = formatCountdown(remaining);
-  const widthPct = ((remaining / durationSeconds) * 100) + '%';
+  const widthPct = (((durationSeconds - remaining) / durationSeconds) * 100) + '%';
   setText('countdownLabel', label);
   setText('m_countdownLabel', label);
   setWidth('countdownFill', widthPct);
   setWidth('m_countdownFill', widthPct);
+
+  // Vermelho nos últimos 5 segundos
+  const danger = remaining <= 5;
+  const barColor = danger ? '#F92757' : '#00c896';
+  const textColor = danger ? '#F92757' : '#00c896';
+
+  const cf = document.getElementById('countdownFill');
+  const mf = document.getElementById('m_countdownFill');
+  const cl = document.getElementById('countdownLabel');
+  const ml = document.getElementById('m_countdownLabel');
+  if (cf) cf.style.background = barColor;
+  if (mf) mf.style.background = barColor;
+  if (cl) cl.style.color = textColor;
+  if (ml) ml.style.color = textColor;
 }
 
 function adjustDuration(delta) {
