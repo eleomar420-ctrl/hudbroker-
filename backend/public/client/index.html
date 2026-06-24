@@ -61,43 +61,44 @@ html, body { height: 100%; overflow: hidden; }
 .chart-instance iframe, .chart-instance > div { width: 100%; height: 100%; }
 
 .trade-panel {
-  width: 280px; flex-shrink: 0; background: var(--bg-panel);
-  border-left: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 16px;
+  width: 260px; flex-shrink: 0; background: #0a0a0a;
+  border-left: 1px solid var(--border); padding: 14px 12px; display: flex; flex-direction: column; gap: 10px;
   overflow-y: auto;
 }
-.panel-block { background: var(--bg-elevated); border-radius: 10px; padding: 12px; overflow: hidden; }
-.panel-label-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-dim); margin-bottom: 10px; }
-.panel-label-row i { font-size: 16px; color: var(--text-faint); }
+.panel-block { background: #141414; border-radius: 10px; padding: 10px 12px; overflow: hidden; }
+.panel-label-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #888; margin-bottom: 6px; letter-spacing: 0.3px; }
+.panel-label-row i { font-size: 14px; color: var(--text-faint); }
 .stepper-value-row {
-  font-family: 'Raleway', sans-serif; font-size: 20px; color: #FFFFFFCC;
-  display: flex; align-items: center; justify-content: center; gap: 4px; padding: 4px 0 10px;
+  font-family: var(--font-mono); font-size: 22px; color: #fff; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 0 10px;
 }
-.stepper-btn-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.stepper-btn-row { display: flex; align-items: center; justify-content: center; gap: 10px; }
 .stepper-btn {
-  flex: 1; max-width: 110px; height: 34.5px; border-radius: 8px; border: none;
-  background: #00000033; color: #FFFFFFB3; font-family: 'Raleway', sans-serif;
-  font-size: 26px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex: 1; height: 32px; border-radius: 6px; border: none;
+  background: #1e1e1e; color: #999; font-family: var(--font-mono);
+  font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
 }
-.stepper-btn:hover { background: #00000055; }
-.countdown-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+.stepper-btn:hover { background: #2a2a2a; color: #fff; }
+.countdown-bar { height: 3px; background: #1e1e1e; border-radius: 2px; margin-top: 8px; overflow: hidden; }
 .countdown-fill { height: 100%; background: var(--up); width: 100%; transition: width 1s linear; border-radius: 2px; margin-left: auto; }
-.profit-block { width: 220.02px; min-height: 71.69px; margin: 10px auto; padding: 10px; border: 2px solid var(--border); border-radius: 8px; text-align: center; }
-.profit-row { display: flex; align-items: baseline; justify-content: center; gap: 8px; }
-.profit-label { font-size: 13px; color: var(--text-dim); }
-.profit-pct { font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; color: #08B774; }
-.profit-amount { font-family: Arial, sans-serif; color: #08B774; font-size: 26px; font-weight: 700; margin-top: 4px; }
+.profit-block { margin: 0; padding: 14px 10px; border: 1px solid #1e1e1e; border-radius: 10px; text-align: center; background: #0a0a0a; }
+.profit-row { display: flex; align-items: baseline; justify-content: center; gap: 6px; }
+.profit-label { font-size: 12px; color: #888; letter-spacing: 0.3px; }
+.profit-pct { font-family: var(--font-mono); font-size: 20px; font-weight: 700; color: #08B774; }
+.profit-amount { font-family: var(--font-mono); color: #08B774; font-size: 18px; font-weight: 600; margin-top: 4px; }
 .trade-buttons { display: flex; flex-direction: column; gap: 8px; }
 .buy-btn, .sell-btn {
-  width: 100%; height: 71px; padding: 15px 10px; border-radius: 10px; border: none;
-  font-weight: 700; font-size: 16px; cursor: pointer;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-  touch-action: manipulation;
+  width: 100%; height: 80px; padding: 10px; border-radius: 12px; border: none;
+  font-weight: 700; font-size: 15px; cursor: pointer; letter-spacing: 0.5px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  touch-action: manipulation; transition: filter 0.15s;
 }
 .buy-btn { background: #08B774; color: #ffffff; }
-.buy-btn:hover { background: #0acf82; }
+.buy-btn:hover { filter: brightness(1.15); }
 .sell-btn { background: #F92757; color: #ffffff; }
-.sell-btn:hover { background: #ff3f6b; }
-.buy-btn i, .sell-btn i { font-size: 20px; }
+.sell-btn:hover { filter: brightness(1.15); }
+.buy-btn i, .sell-btn i { font-size: 24px; }
 .live-clock { display: none; } /* movido para footer desktop */
 
 /* Footer bar desktop */
@@ -440,14 +441,14 @@ html, body { height: 100%; overflow: hidden; }
       <div class="profit-block">
         <div class="profit-row">
           <span class="profit-label">Lucro</span>
-          <span class="profit-pct">85%</span>
         </div>
+        <div class="profit-pct" style="margin-top:4px;">+<span id="profitPct">85</span>%</div>
         <div class="profit-amount" id="profitAmount">+R$ 4,25</div>
       </div>
 
       <div class="trade-buttons">
-        <button class="buy-btn" id="buyBtn"><i class="ti ti-trending-up" aria-hidden="true"></i> COMPRAR</button>
-        <button class="sell-btn" id="sellBtn"><i class="ti ti-trending-down" aria-hidden="true"></i> VENDER</button>
+        <button class="buy-btn" id="buyBtn"><i class="ti ti-trending-up" aria-hidden="true" style="font-size:28px;"></i><span>COMPRAR</span></button>
+        <button class="sell-btn" id="sellBtn"><i class="ti ti-trending-down" aria-hidden="true" style="font-size:28px;"></i><span>VENDER</span></button>
       </div>
 
       <div class="live-clock" id="liveClock">Hora atual: --:--:--</div>
