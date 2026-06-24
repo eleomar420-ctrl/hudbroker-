@@ -46,16 +46,17 @@ router.post('/deposit', async (req, res) => {
 });
 
 // Abrir operação
-router.post('/trades/open', async (req, res) => {
+router.post('/trades', async (req, res) => {
   try {
-    const { accountType, asset, direction, stake, duration } = req.body;
+    const { accountType, asset, direction, stake, durationSeconds, payoutPct } = req.body;
     const result = await openTrade({
       userId: req.auth.id,
       accountType: accountType || 'demo',
       asset,
       direction,
       stake: Number(stake),
-      durationSeconds: Number(duration)
+      durationSeconds: Number(durationSeconds),
+      payoutPct: payoutPct != null ? Number(payoutPct) : 0.85
     });
     res.json(result);
   } catch (err) {
@@ -66,7 +67,7 @@ router.post('/trades/open', async (req, res) => {
 
 // Operações abertas
 router.get('/trades/open', async (req, res) => {
-  const accountType = req.query.account;
+  const accountType = req.query.accountType;
   const trades = await getOpenTrades(req.auth.id, accountType);
   res.json(trades);
 });

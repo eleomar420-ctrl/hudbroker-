@@ -817,10 +817,40 @@ function showSuccessPopup(message) {
   }, 2200);
 }
 
-document.getElementById('buyBtn').onclick = () => openTrade('up');
-document.getElementById('sellBtn').onclick = () => openTrade('down');
-document.getElementById('m_buyBtn').onclick = () => openTrade('up');
-document.getElementById('m_sellBtn').onclick = () => openTrade('down');
+// === SONS ===
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let _audioCtx;
+function getAudioCtx() { if (!_audioCtx) _audioCtx = new AudioCtx(); return _audioCtx; }
+
+function playSound(type) {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    if (type === 'buy') {
+      osc.frequency.value = 880;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.18, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.15);
+    } else {
+      osc.frequency.value = 440;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.18, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.18);
+    }
+  } catch (e) { }
+}
+
+document.getElementById('buyBtn').onclick = () => { playSound('buy'); openTrade('up'); };
+document.getElementById('sellBtn').onclick = () => { playSound('sell'); openTrade('down'); };
+document.getElementById('m_buyBtn').onclick = () => { playSound('buy'); openTrade('up'); };
+document.getElementById('m_sellBtn').onclick = () => { playSound('sell'); openTrade('down'); };
 
 document.getElementById('depositBtn').onclick = () => {
   if (activeAccount === 'demo') {
