@@ -182,8 +182,8 @@ html, body { height: 100%; overflow: hidden; }
 
   .avatar-btn { order: 1; width: 34px; height: 34px; flex-shrink: 0; }
   .account-pill { order: 2; flex: 5 1 0; min-width: 0; justify-content: space-between; align-items: center; gap: 4px; background: var(--bg-elevated); border-radius: 8px; padding: 0 8px 0 10px; height: 48px; }
-  .account-pill .label { display: block; font-size: 8px; }
-  .account-pill .value { font-size: 12px; }
+  .account-pill .label { display: block; font-size: 11px; }
+  .account-pill .value { font-size: 16px; }
   .btn-deposit {
     order: 3; flex: 5 1 0; min-width: 0; font-size: 15px; font-weight: 700; padding: 0 12px; height: 48px;
     background: #08B774; color: #ffffff; border-color: #08B774;
@@ -817,14 +817,38 @@ function showSuccessPopup(message) {
   }, 2200);
 }
 
-// === SONS ===
-const sndClick = new Audio('/sounds/click.mp3');
-const sndTrade = new Audio('/sounds/trade.mp3');
-sndClick.preload = 'auto'; sndClick.load();
-sndTrade.preload = 'auto'; sndTrade.load();
+// === SONS (Web Audio API — sem delay) ===
+const _actx = new (window.AudioContext || window.webkitAudioContext)();
+let _bufClick = null, _bufTrade = null;
 
-function playClick() { sndClick.currentTime = 0; sndClick.play().catch(() => {}); }
-function playTrade() { sndTrade.currentTime = 0; sndTrade.play().catch(() => {}); }
+async function _loadBuf(url) {
+  try {
+    const res = await fetch(url);
+    const arr = await res.arrayBuffer();
+    return await _actx.decodeAudioData(arr);
+  } catch(e) { return null; }
+}
+(async () => {
+  _bufClick = await _loadBuf('/sounds/click.mp3');
+  _bufTrade = await _loadBuf('/sounds/trade.mp3');
+})();
+
+function _playBuf(buf) {
+  if (!buf) return;
+  if (_actx.state === 'suspended') _actx.resume();
+  const src = _actx.createBufferSource();
+  src.buffer = buf;
+  src.connect(_actx.destination);
+  src.start(0);
+}
+function playClick() { _playBuf(_bufClick); }
+function playTrade() { _playBuf(_bufTrade); }
+
+// Desbloquear AudioContext no primeiro toque (exigência mobile)
+document.addEventListener('touchstart', function _unlock() {
+  if (_actx.state === 'suspended') _actx.resume();
+  document.removeEventListener('touchstart', _unlock);
+}, { once: true });
 
 document.getElementById('buyBtn').onclick = () => { playTrade(); openTrade('up'); };
 document.getElementById('sellBtn').onclick = () => { playTrade(); openTrade('down'); };
