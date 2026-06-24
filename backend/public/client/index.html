@@ -273,8 +273,11 @@ html, body { height: 100%; overflow: hidden; }
   .mobile-panel { padding-bottom: 0; }
   .m-asset-row { border-radius: 0; margin-bottom: 0; }
 
+  .side-menu-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); width: auto; pointer-events: auto; }
+  .side-menu-overlay.open { display: block; }
   .side-menu { width: 72px; max-width: 72px; }
-  .history-panel { left: 72px; width: calc(100vw - 72px); }
+  .trade-shell { margin-left: 0; }
+  .history-panel { left: 0; width: 100vw; }
   .assets-screen-body { flex-direction: column; }
   .assets-categories { width: 100%; display: flex; overflow-x: auto; padding: 8px 0; border-right: none; border-bottom: 1px solid var(--border); }
   .category-item { white-space: nowrap; }
@@ -993,7 +996,15 @@ document.getElementById('depositModal').onclick = (e) => {
 };
 
 document.getElementById('avatarBtn').onclick = () => {
-  window.location.href = '/client/account.html';
+  if (window.innerWidth <= 768) {
+    document.getElementById('sideMenuOverlay').classList.add('open');
+  } else {
+    window.location.href = '/client/account.html';
+  }
+};
+// Mobile: fechar sidebar ao clicar no fundo escuro
+document.getElementById('sideMenuOverlay').onclick = (e) => {
+  if (e.target.id === 'sideMenuOverlay') e.target.classList.remove('open');
 };
 
 // Sidebar sempre visível
@@ -1001,6 +1012,10 @@ document.getElementById('sideMenuLogout').onclick = () => logout();
 document.querySelectorAll('.menu-item[data-action]').forEach(item => {
   item.onclick = () => {
     const action = item.dataset.action;
+    // Fechar overlay no mobile
+    if (window.innerWidth <= 768) {
+      document.getElementById('sideMenuOverlay').classList.remove('open');
+    }
     if (action === 'deposit') {
       document.getElementById('depositBtn').click();
     } else if (action === 'assets') {
