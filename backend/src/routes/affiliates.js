@@ -1,77 +1,98 @@
-import { Router } from 'express';
-import { randomUUID } from 'crypto';
-import bcrypt from 'bcryptjs';
-import { queryOne, run, withTransaction } from '../db/index.js';
-import { authRequired, requireRole } from '../middleware/auth.js';
-import { registerClick, getAffiliateStats } from '../services/commissionEngine.js';
+-- HudBroker - Schema do banco de dados (PostgreSQL)
 
-const router = Router();
+CREATE TABLE IF NOT EXISTS affiliates (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  ref_code TEXT UNIQUE NOT NULL,
+  commission_model TEXT NOT NULL DEFAULT 'hybrid',
+  cpa_amount DOUBLE PRECISION NOT NULL DEFAULT 50,
+  revshare_pct DOUBLE PRECISION NOT NULL DEFAULT 0.20,
+  balance DOUBLE PRECISION NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'active',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
 
-router.post('/track', async (req, res) => {
-  try {
-    const { refCode } = req.body;
-    const result = await registerClick({ refCode, ip: req.ip, userAgent: req.headers['user-agent'] });
-    if (!result) return res.status(404).json({ error: 'Código de afiliado inválido' });
-    res.json(result);
-  } catch (err) {
-    console.error('[affiliates/track]', err);
-    res.status(500).json({ error: 'Erro interno' });
-  }
-});
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  last_name TEXT,
+  email TEXT UNIQUE NOT NULL,
+  phone TEXT,
+  country TEXT NOT NULL DEFAULT 'BR',
+  currency TEXT NOT NULL DEFAULT 'BRL',
+  password_hash TEXT NOT NULL,
+  balance DOUBLE PRECISION NOT NULL DEFAULT 0,
+  demo_balance DOUBLE PRECISION NOT NULL DEFAULT 10000,
+  avatar_url TEXT,
+  affiliate_id TEXT REFERENCES affiliates(id),
+  kyc_status TEXT NOT NULL DEFAULT 'pending',
+  role TEXT NOT NULL DEFAULT 'client',
+  status TEXT NOT NULL DEFAULT 'active',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
 
-router.post('/register', async (req, res) => {
-  try {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Nome, email e senha são obrigatórios' });
-    }
+CREATE TABLE IF NOT EXISTS clicks (
+  id TEXT PRIMARY KEY,
+  affiliate_id TEXT NOT NULL REFERENCES affiliates(id),
+  click_id TEXT UNIQUE NOT NULL,
+  ip TEXT,
+  user_agent TEXT,
+  converted_user_id TEXT REFERENCES users(id),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  expires_at TIMESTAMPTZ NOT NULL
+);
 
-    const existing = await queryOne('SELECT id FROM affiliates WHERE email = $1', [email]);
-    if (existing) return res.status(409).json({ error: 'Email já cadastrado' });
+CREATE TABLE IF NOT EXISTS trades (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id),
+  account_type TEXT NOT NULL DEFAULT 'demo',
+  asset TEXT NOT NULL,
+  direction TEXT NOT NULL,
+  stake DOUBLE PRECISION NOT NULL,
+  payout_pct DOUBLE PRECISION NOT NULL,
+  entry_price DOUBLE PRECISION NOT NULL,
+  exit_price DOUBLE PRECISION,
+  opened_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  expires_at TIMESTAMPTZ NOT NULL,
+  status TEXT NOT NULL DEFAULT 'open',
+  result_amount DOUBLE PRECISION,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
 
-    const id = randomUUID();
-    const refCode = id.slice(0, 8).toUpperCase();
-    const passwordHash = await bcrypt.hash(password, 10);
+CREATE TABLE IF NOT EXISTS transactions (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id),
+  type TEXT NOT NULL,
+  amount DOUBLE PRECISION NOT NULL,
+  status TEXT NOT NULL DEFAULT 'completed',
+  reference_id TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
 
-    await run(
-      `INSERT INTO affiliates (id, name, email, password_hash, ref_code) VALUES ($1, $2, $3, $4, $5)`,
-      [id, name, email, passwordHash, refCode]
-    );
+CREATE TABLE IF NOT EXISTS commission_events (
+  id TEXT PRIMARY KEY,
+  affiliate_id TEXT NOT NULL REFERENCES affiliates(id),
+  user_id TEXT NOT NULL REFERENCES users(id),
+  type TEXT NOT NULL,
+  amount DOUBLE PRECISION NOT NULL,
+  source_id TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
 
-    res.json({ id, refCode });
-  } catch (err) {
-    console.error('[affiliates/register]', err);
-    res.status(500).json({ error: 'Erro interno ao cadastrar' });
-  }
-});
+CREATE TABLE IF NOT EXISTS withdrawal_requests (
+  id TEXT PRIMARY KEY,
+  requester_type TEXT NOT NULL,
+  requester_id TEXT NOT NULL,
+  amount DOUBLE PRECISION NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  reviewed_by TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  reviewed_at TIMESTAMPTZ
+);
 
-router.use(authRequired, requireRole('affiliate'));
-
-router.get('/me/stats', async (req, res) => {
-  res.json(await getAffiliateStats(req.auth.id));
-});
-
-router.post('/me/withdraw', async (req, res) => {
-  try {
-    const { amount } = req.body;
-    const affiliate = await queryOne('SELECT * FROM affiliates WHERE id = $1', [req.auth.id]);
-
-    if (!amount || amount <= 0) return res.status(400).json({ error: 'Valor inválido' });
-    if (amount > affiliate.balance) return res.status(400).json({ error: 'Saldo insuficiente' });
-
-    await withTransaction(async (client) => {
-      await client.query('UPDATE affiliates SET balance = balance - $1 WHERE id = $2', [amount, req.auth.id]);
-      await client.query(
-        `INSERT INTO withdrawal_requests (id, requester_type, requester_id, amount) VALUES ($1, 'affiliate', $2, $3)`,
-        [randomUUID(), req.auth.id, amount]
-      );
-    });
-
-    res.json({ ok: true, message: 'Solicitação de saque enviada para aprovação' });
-  } catch (err) {
-    console.error('[affiliates/withdraw]', err);
-    res.status(500).json({ error: 'Erro interno' });
-  }
-});
-
-export default router;
+CREATE INDEX IF NOT EXISTS idx_trades_user ON trades(user_id);
+CREATE INDEX IF NOT EXISTS idx_trades_status ON trades(status);
+CREATE INDEX IF NOT EXISTS idx_clicks_code ON clicks(click_id);
+CREATE INDEX IF NOT EXISTS idx_commission_affiliate ON commission_events(affiliate_id);

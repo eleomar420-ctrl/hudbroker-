@@ -1,87 +1,59 @@
-const API = '/api';
+// HudBroker — utilidades compartilhadas do frontend
 
-function getToken() { return localStorage.getItem('hb_token'); }
-function setToken(t) { localStorage.setItem('hb_token', t); }
-function clearToken() { localStorage.removeItem('hb_token'); }
+const API_BASE = '/api';
 
-async function apiFetch(path, opts = {}) {
-  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
-  const token = getToken();
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-
-  const res = await fetch(API + path, { ...opts, headers });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || 'Erro na requisição');
-  return data;
+function getToken() {
+  return localStorage.getItem('hb_token');
 }
 
-function showToast(message, type = 'success') {
-  const el = document.createElement('div');
-  el.className = `toast ${type}`;
-  el.textContent = message;
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 3500);
+function setToken(token) {
+  localStorage.setItem('hb_token', token);
 }
 
-function requireAuth(redirectTo = '/client/login.html') {
-  if (!getToken()) window.location.href = redirectTo;
-}
-
-function logout(redirectTo = '/client/login.html') {
-  clearToken();
-  window.location.href = redirectTo;
-}
-
-function formatMoney(value) {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-}
-
-function formatDate(iso) {
-  return new Date(iso).toLocaleString('pt-BR');
-}
-
-// Dois sons distintos: um exclusivo para os botões Comprar/Vender (#buyBtn, #sellBtn, #m_buyBtn, #m_sellBtn),
-// e outro genérico para o restante dos cliques na interface.
-// preload + load() força o navegador a buscar/decodificar o áudio assim que a página carrega,
-// evitando o atraso perceptível que aconteceria só no primeiro clique de cada som.
-const _tradeSoundBase = new Audio('/sounds/click.mp3');
-_tradeSoundBase.volume = 0.5;
-_tradeSoundBase.preload = 'auto';
-_tradeSoundBase.load();
-
-const _genericSoundBase = new Audio('/sounds/botaoclick.mp3');
-_genericSoundBase.volume = 0.5;
-_genericSoundBase.preload = 'auto';
-_genericSoundBase.load();
-
-function _playSound(base) {
-  try {
-    const sound = base.cloneNode();
-    sound.volume = base.volume;
-    sound.play().catch(() => {
-      // Navegadores que bloqueiam áudio sem interação prévia do usuário: ignora silenciosamente.
-    });
-  } catch (err) {
-    // Sem suporte a áudio: ignora silenciosamente.
+function requireAuth(loginUrl) {
+  if (!getToken()) {
+    window.location.href = loginUrl || '/client/login.html';
   }
 }
 
-function playClickSound() { _playSound(_genericSoundBase); }
-function playTradeSound() { _playSound(_tradeSoundBase); }
-
-const TRADE_BUTTON_IDS = ['buyBtn', 'sellBtn', 'm_buyBtn', 'm_sellBtn'];
-
-// Liga o som de clique em todos os botões e links clicáveis da página automaticamente.
-// Os botões de Comprar/Vender usam o som específico de trade; o restante usa o som genérico.
-function enableClickSounds() {
-  document.addEventListener('click', (e) => {
-    const target = e.target.closest('button, .menu-item, .asset-tab, .category-item, .account-option, .asset-option, .m-asset-drawer-item, a.btn, [role="button"]');
-    if (!target) return;
-    if (TRADE_BUTTON_IDS.includes(target.id)) {
-      playTradeSound();
-    } else {
-      playClickSound();
-    }
-  }, true);
+function logout(redirectUrl) {
+  localStorage.removeItem('hb_token');
+  window.location.href = redirectUrl || '/client/login.html';
 }
-document.addEventListener('DOMContentLoaded', enableClickSounds);
+
+async function apiFetch(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  const token = getToken();
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(API_BASE + path, { ...opts, headers });
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error || `Erro ${res.status}`);
+  }
+  return data;
+}
+
+function formatMoney(value) {
+  if (value == null) return '--';
+  return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function formatDate(iso) {
+  if (!iso) return '--';
+  const d = new Date(iso);
+  return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function showToast(msg, type) {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' ' + type : '');
+  el.textContent = msg;
+  document.body.appendChild(el);
+
+  setTimeout(() => el.remove(), 4000);
+}
