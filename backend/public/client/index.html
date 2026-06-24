@@ -115,15 +115,15 @@ html, body { height: 100%; overflow: hidden; }
 .account-option.active { color: var(--brand); }
 
 .btn-deposit {
-  font-family: 'Raleway', var(--font-body); font-size: 16px; font-weight: 600;
-  background: transparent; color: #08B774; border: 1px solid #08B774;
-  border-radius: 8px; padding: 0 15px; height: 36px; cursor: pointer; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
+  font-family: 'Raleway', var(--font-body); font-size: 15px; font-weight: 700;
+  background: #08B774; color: #ffffff; border: 1px solid #08B774;
+  border-radius: 10px; padding: 0 28px; height: 44px; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; letter-spacing: 0.3px;
 }
-.btn-deposit:hover { background: #08B774; color: #ffffff; }
+.btn-deposit:hover { background: #0acf82; color: #ffffff; border-color: #0acf82; }
 
-.avatar-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--bg-elevated); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; border: 1px solid var(--border); flex-shrink: 0; }
-.avatar-btn i { font-size: 18px; color: var(--text-faint); }
+.avatar-btn { width: 42px; height: 42px; border-radius: 50%; background: var(--bg-elevated); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; border: 1px solid var(--border); flex-shrink: 0; }
+.avatar-btn i { font-size: 20px; color: var(--text-faint); }
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 100; }
 .modal-overlay.open { display: flex; }
@@ -881,11 +881,7 @@ document.getElementById('depositBtn').onclick = () => {
   if (activeAccount === 'demo') {
     document.getElementById('depositModal').classList.add('open');
   } else {
-    const amount = prompt('Valor do depósito na Conta Principal (R$):', '500');
-    if (!amount) return;
-    apiFetch('/trading/deposit', { method: 'POST', body: JSON.stringify({ amount: Number(amount) }) })
-      .then(() => { showToast('Depósito realizado'); refreshBalance(); })
-      .catch(err => showToast(err.message, 'error'));
+    window.location.href = '/client/deposit.html';
   }
 };
 
