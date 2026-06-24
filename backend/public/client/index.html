@@ -139,6 +139,13 @@ html, body { height: 100%; overflow: hidden; }
   display: flex; flex-direction: column; gap: 6px;
   padding: 12px 4px; overflow-y: auto; pointer-events: auto;
 }
+.sidebar-logo {
+  font-family: var(--font-display); font-weight: 700; font-size: 16px;
+  text-align: center; padding: 6px 0 2px; letter-spacing: -0.02em;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+}
+.sidebar-logo .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand); }
+.sidebar-logo .tag { color: var(--brand); }
 .menu-item {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   width: 100%; background: none; border: none; border-radius: 0;
@@ -158,8 +165,8 @@ html, body { height: 100%; overflow: hidden; }
 .assets-close-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border); background: none; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .assets-close-btn:hover { background: var(--bg-elevated); }
 
-/* Painel de Histórico */
-.history-panel { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 96; flex-direction: column; }
+/* Painel de Histórico — janela flutuante */
+.history-panel { display: none; position: fixed; left: 72px; top: 0; bottom: 0; width: 320px; background: var(--bg-panel); z-index: 96; flex-direction: column; border-right: 1px solid var(--border); box-shadow: 4px 0 20px rgba(0,0,0,0.4); }
 .history-panel.open { display: flex; }
 .history-header {
   display: flex; align-items: center; gap: 12px; padding: 14px 16px;
@@ -267,6 +274,7 @@ html, body { height: 100%; overflow: hidden; }
   .m-asset-row { border-radius: 0; margin-bottom: 0; }
 
   .side-menu { width: 72px; max-width: 72px; }
+  .history-panel { left: 72px; width: calc(100vw - 72px); }
   .assets-screen-body { flex-direction: column; }
   .assets-categories { width: 100%; display: flex; overflow-x: auto; padding: 8px 0; border-right: none; border-bottom: 1px solid var(--border); }
   .category-item { white-space: nowrap; }
@@ -478,8 +486,8 @@ html, body { height: 100%; overflow: hidden; }
 
 <div class="side-menu-overlay" id="sideMenuOverlay">
   <div class="side-menu" id="sideMenu">
-    <button class="menu-item menu-item-deposit" data-action="deposit"><span class="material-icons-outlined">attach_money</span><span>Depositar</span></button>
-    <button class="menu-item" data-action="assets"><span class="material-icons-outlined">add</span><span>Ativos</span></button>
+    <div class="sidebar-logo"><span class="dot"></span>Hud<span class="tag">B</span></div>
+    <div style="border-bottom: 1px solid var(--border); margin: 4px 8px 8px;"></div>
     <button class="menu-item" data-action="charts"><span class="material-icons-outlined">analytics</span><span>Gráficos</span></button>
     <button class="menu-item" data-action="history"><span class="material-icons-outlined">history</span><span>Histórico</span></button>
     <a class="menu-item" href="/client/account.html"><span class="material-icons-outlined">account_circle</span><span>Minha Conta</span></a>
