@@ -129,7 +129,7 @@ html, body { height: 100%; overflow: hidden; }
 .footer-clock strong { color: var(--brand); font-weight: 600; }
 .mobile-panel { display: none; }
 .m-asset-drawer { display: none; }
-.open-trades-strip { padding: 8px 16px; border-top: 1px solid var(--border); background: var(--bg-panel); max-height: 100px; overflow-y: auto; flex-shrink: 0; }
+.open-trades-strip { display: none; }
 .trade-chip { display: inline-flex; align-items: center; gap: 8px; background: var(--bg-elevated); border-radius: 8px; padding: 6px 10px; margin: 4px 4px 0 0; font-size: 12px; font-family: var(--font-mono); }
 
 .account-pill { display: flex; align-items: center; gap: 6px; cursor: pointer; position: relative; height: 36px; flex-shrink: 0; }
@@ -415,7 +415,7 @@ html, body { height: 100%; overflow: hidden; }
 
     <div class="trade-panel">
       <div>
-        <div class="panel-label-row"><i class="ti ti-clock" aria-hidden="true"></i> Tempo restante: <span style="margin-left:auto; color:var(--up); font-weight:600;" id="countdownLabel">01:00</span></div>
+        <div class="panel-label-row"><span>Expiração</span><span style="margin-left:auto; font-weight:600;" id="countdownLabel">01:00</span></div>
         <div class="countdown-bar"><div class="countdown-fill" id="countdownFill"></div></div>
         <div class="panel-block" style="margin-top:10px;">
           <div class="stepper-value-row" id="durValue">1 min.</div>
@@ -427,8 +427,9 @@ html, body { height: 100%; overflow: hidden; }
       </div>
 
       <div>
+        <div class="panel-label-row" style="margin-top:8px;"><span>Valor</span></div>
         <div class="panel-block">
-          <div class="stepper-value-row"><i class="fa fa-dollar" aria-hidden="true" style="font-size:16px;"></i><span id="stakeValue">5,00</span></div>
+          <div class="stepper-value-row"><span style="color:var(--up); font-weight:600; margin-right:6px;">$</span><span id="stakeValue">5,00</span></div>
           <div class="stepper-btn-row">
             <button class="stepper-btn" id="stakeMinus">−</button>
             <button class="stepper-btn" id="stakePlus">+</button>
