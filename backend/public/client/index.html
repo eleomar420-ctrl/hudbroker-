@@ -674,14 +674,14 @@ function adjustStake(delta) {
   renderPanelForActiveTab();
 }
 
-document.getElementById('durMinus').onclick = () => adjustDuration(-1);
-document.getElementById('durPlus').onclick = () => adjustDuration(1);
-document.getElementById('stakeMinus').onclick = () => adjustStake(-1);
-document.getElementById('stakePlus').onclick = () => adjustStake(1);
-document.getElementById('m_durMinus').onclick = () => adjustDuration(-1);
-document.getElementById('m_durPlus').onclick = () => adjustDuration(1);
-document.getElementById('m_stakeMinus').onclick = () => adjustStake(-1);
-document.getElementById('m_stakePlus').onclick = () => adjustStake(1);
+document.getElementById('durMinus').onclick = () => { playClick(); adjustDuration(-1); };
+document.getElementById('durPlus').onclick = () => { playClick(); adjustDuration(1); };
+document.getElementById('stakeMinus').onclick = () => { playClick(); adjustStake(-1); };
+document.getElementById('stakePlus').onclick = () => { playClick(); adjustStake(1); };
+document.getElementById('m_durMinus').onclick = () => { playClick(); adjustDuration(-1); };
+document.getElementById('m_durPlus').onclick = () => { playClick(); adjustDuration(1); };
+document.getElementById('m_stakeMinus').onclick = () => { playClick(); adjustStake(-1); };
+document.getElementById('m_stakePlus').onclick = () => { playClick(); adjustStake(1); };
 
 function connectPriceFeed() {
   const proto = location.protocol === 'https:' ? 'wss' : 'ws';
@@ -818,39 +818,18 @@ function showSuccessPopup(message) {
 }
 
 // === SONS ===
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let _audioCtx;
-function getAudioCtx() { if (!_audioCtx) _audioCtx = new AudioCtx(); return _audioCtx; }
+const sndClick = new Audio('/sounds/click.mp3');
+const sndTrade = new Audio('/sounds/trade.mp3');
+sndClick.preload = 'auto'; sndClick.load();
+sndTrade.preload = 'auto'; sndTrade.load();
 
-function playSound(type) {
-  try {
-    const ctx = getAudioCtx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    if (type === 'buy') {
-      osc.frequency.value = 880;
-      osc.type = 'sine';
-      gain.gain.setValueAtTime(0.18, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.15);
-    } else {
-      osc.frequency.value = 440;
-      osc.type = 'sine';
-      gain.gain.setValueAtTime(0.18, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.18);
-    }
-  } catch (e) { }
-}
+function playClick() { sndClick.currentTime = 0; sndClick.play().catch(() => {}); }
+function playTrade() { sndTrade.currentTime = 0; sndTrade.play().catch(() => {}); }
 
-document.getElementById('buyBtn').onclick = () => { playSound('buy'); openTrade('up'); };
-document.getElementById('sellBtn').onclick = () => { playSound('sell'); openTrade('down'); };
-document.getElementById('m_buyBtn').onclick = () => { playSound('buy'); openTrade('up'); };
-document.getElementById('m_sellBtn').onclick = () => { playSound('sell'); openTrade('down'); };
+document.getElementById('buyBtn').onclick = () => { playTrade(); openTrade('up'); };
+document.getElementById('sellBtn').onclick = () => { playTrade(); openTrade('down'); };
+document.getElementById('m_buyBtn').onclick = () => { playTrade(); openTrade('up'); };
+document.getElementById('m_sellBtn').onclick = () => { playTrade(); openTrade('down'); };
 
 document.getElementById('depositBtn').onclick = () => {
   if (activeAccount === 'demo') {
