@@ -1136,8 +1136,12 @@ async function openTrade(direction) {
     showSuccessPopup('Transação efetuada com sucesso!');
     refreshBalance();
     refreshOpenTrades();
-    if (document.getElementById('historyPanel').classList.contains('open')) loadHistory();
-    if (data && data.tradeId) trackTradeResult(data.tradeId, syncedDuration);
+    // Refresh histórico imediato
+    loadHistory();
+    // Rastrear resultado
+    if (data && data.tradeId) {
+      trackTradeResult(data.tradeId, syncedDuration);
+    }
   } catch (err) {
     showToast(err.message, 'error');
   }
@@ -1461,7 +1465,15 @@ function renderHistory() {
     let pnlText = '';
     let pnlClass = 'open';
     if (t.status === 'open') {
-      pnlText = 'Aberta';
+      const expiresAt = new Date(t.expires_at);
+      const remaining = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
+      if (remaining > 0) {
+        const m = Math.floor(remaining / 60);
+        const s = remaining % 60;
+        pnlText = (m > 0 ? m + ':' : '') + String(s).padStart(2, '0') + 's';
+      } else {
+        pnlText = '...';
+      }
     } else if (t.result_amount != null) {
       const won = t.result_amount > 0;
       pnlClass = won ? 'won' : 'lost';
@@ -1616,28 +1628,25 @@ refreshBalance().then(renderBalance);
 setInterval(refreshOpenTrades, 5000);
 setInterval(refreshBalance, 8000);
 
-// Auto-refresh do histórico a cada 5s se estiver aberto
-setInterval(() => {
-  if (document.getElementById('historyPanel').classList.contains('open')) loadHistory();
-}, 5000);
+// Auto-refresh do histórico a cada 2s (sempre, não só quando aberto)
+setInterval(() => { loadHistory(); }, 2000);
 
 // Rastrear resultado de operação e mostrar popup
 function trackTradeResult(tradeId, durationSec) {
-  const checkDelay = (durationSec || 60) * 1000 + 2000;
-  setTimeout(async () => {
+  const pollInterval = setInterval(async () => {
     try {
       const trades = await apiFetch('/trading/trades/history');
       const trade = trades.find(t => t.id === tradeId);
       if (trade && trade.status !== 'open') {
+        clearInterval(pollInterval);
         showTradeResultPopup(trade);
         refreshBalance();
-        if (document.getElementById('historyPanel').classList.contains('open')) loadHistory();
-      } else {
-        // Tentar novamente em 3s
-        setTimeout(() => trackTradeResult(tradeId, 3), 0);
+        loadHistory();
       }
     } catch(e) {}
-  }, checkDelay);
+  }, 2000);
+  // Parar de checar depois de 20 minutos
+  setTimeout(() => clearInterval(pollInterval), 20 * 60 * 1000);
 }
 
 function showTradeResultPopup(trade) {
