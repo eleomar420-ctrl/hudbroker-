@@ -96,3 +96,16 @@ CREATE INDEX IF NOT EXISTS idx_trades_user ON trades(user_id);
 CREATE INDEX IF NOT EXISTS idx_trades_status ON trades(status);
 CREATE INDEX IF NOT EXISTS idx_clicks_code ON clicks(click_id);
 CREATE INDEX IF NOT EXISTS idx_commission_affiliate ON commission_events(affiliate_id);
+
+CREATE TABLE IF NOT EXISTS pix_charges (
+  id TEXT PRIMARY KEY,
+  txid TEXT UNIQUE NOT NULL,
+  user_id TEXT NOT NULL REFERENCES users(id),
+  amount DOUBLE PRECISION NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  loc_id INTEGER,
+  paid_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_pix_txid ON pix_charges(txid);
+CREATE INDEX IF NOT EXISTS idx_pix_user ON pix_charges(user_id);

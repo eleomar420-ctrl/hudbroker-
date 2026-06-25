@@ -1,3 +1,6 @@
 node_modules/
 .env
 *.log
+
+# Certificado EfiPay (nunca subir pro GitHub)
+backend/certs/*.p12

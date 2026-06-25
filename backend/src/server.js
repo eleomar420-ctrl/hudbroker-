@@ -13,6 +13,7 @@ import tradingRoutes from './routes/trading.js';
 import adminRoutes from './routes/admin.js';
 import backofficeRoutes from './routes/backoffice.js';
 import affiliateRoutes from './routes/affiliates.js';
+import pixRoutes from './routes/pix.js';
 import { seedDemoData } from './seed.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -32,6 +33,7 @@ async function bootstrap() {
   app.use('/api/admin', adminRoutes);
   app.use('/api/backoffice', backofficeRoutes);
   app.use('/api/affiliates', affiliateRoutes);
+  app.use('/api/pix', pixRoutes);
 
   app.get('/api/health', (req, res) => res.json({ ok: true, name: 'HudBroker API' }));
 
