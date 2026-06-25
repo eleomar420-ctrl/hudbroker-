@@ -29,7 +29,7 @@ router.post('/charge', authRequired, requireRole('client'), async (req, res) => 
 
     const externalId = 'hud-' + randomUUID().replace(/-/g, '').slice(0, 20);
     const amountCents = Math.round(amount * 100);
-    const webhookUrl = process.env.IHUB_WEBHOOK_URL || `${req.protocol}://${req.get('host')}/api/pix/webhook`;
+    const webhookUrl = process.env.IHUB_WEBHOOK_URL || `https://${req.get('host')}/api/pix/webhook`;
 
     const authHeader = getAuthHeader();
     console.log('[pix/charge] Auth header prefix:', authHeader.substring(0, 20) + '...');
@@ -69,19 +69,24 @@ router.post('/charge', authRequired, requireRole('client'), async (req, res) => 
     }
 
     // Salvar no banco
-    const txid = data.transactionId || data.transaction_id || data.id || externalId;
+    const txid = externalId;
     await run(
       `INSERT INTO pix_charges (id, txid, user_id, amount, status, loc_id, created_at)
        VALUES ($1, $2, $3, $4, 'pending', 0, now())`,
       [randomUUID(), externalId, req.auth.id, amount]
     );
 
+    // iHub retorna pixCode (copia e cola) — gerar QR via API
+    const pixCode = data.pixCode || '';
+    const qrcodeUrl = pixCode 
+      ? `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(pixCode)}`
+      : null;
+
     res.json({
       txid: externalId,
-      qrcode: data.qrCode || data.qr_code || data.qrCodeImage || null,
-      copiaecola: data.pixCode || data.pix_code || data.emvqrcps || data.qrCodeText || null,
-      raw: data,
-      expiracao: 3600
+      qrcode: qrcodeUrl,
+      copiaecola: pixCode,
+      expiracao: Math.max(60, Math.floor((new Date(data.expiresAt) - Date.now()) / 1000))
     });
   } catch (err) {
     console.error('[pix/charge]', err);
