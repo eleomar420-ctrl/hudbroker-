@@ -1376,7 +1376,7 @@ function closeTimePopup() {
 
 function selectTime(idx) {
   const t = getActiveTab();
-  if (t) { t.durationIndex = idx; renderTradePanel(); }
+  if (t) { t.durationIndex = idx; renderPanelForActiveTab(); }
   closeTimePopup();
 }
 
@@ -1387,8 +1387,8 @@ function openValuePopup(el) {
   popup.style.left = (rect.left - 230) + 'px';
   popup.style.top = rect.top + 'px';
   const t = getActiveTab();
-  const currentStake = t ? t.stake : 5;
-  const bal = activeAccount === 'real' ? cachedBalance : cachedDemoBalance;
+  const currentStake = t ? t.stakeValue : 5;
+  const bal = cachedUser ? (activeAccount === 'real' ? cachedUser.balance : cachedUser.demo_balance) : 0;
   document.getElementById('popupBalance').textContent = formatMoney(bal);
   document.getElementById('popupTotalBalance').textContent = formatMoney(bal);
   document.getElementById('valueShortcuts').innerHTML = valueShortcuts.map(v =>
@@ -1408,7 +1408,7 @@ function closeValuePopup() {
 
 function selectValue(val) {
   const t = getActiveTab();
-  if (t) { t.stake = val; renderTradePanel(); }
+  if (t) { t.stakeValue = val; renderPanelForActiveTab(); }
   closeValuePopup();
 }
 
