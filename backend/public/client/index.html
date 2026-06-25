@@ -804,7 +804,8 @@ function renderPanelForActiveTab() {
   const stakeLabel = t.stakeValue.toFixed(2).replace('.', ',');
   setText('durValue', durLabel);
   setText('m_durValue', durLabel);
-  setText('stakeValue', stakeLabel);
+  const stakeEl = document.getElementById('stakeValue');
+  if (stakeEl) stakeEl.value = t.stakeValue.toFixed(2);
   setText('m_stakeValue', stakeLabel);
   setText('m_assetName', t.catalog.name);
   const iconEl = document.getElementById('m_assetIcon');
