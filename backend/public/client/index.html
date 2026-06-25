@@ -81,12 +81,33 @@ html, body { height: 100%; overflow: hidden; }
 }
 .stepper-btn-row { display: flex; align-items: center; justify-content: center; gap: 0; }
 .stepper-btn {
-  flex: 1; height: 25px; border-radius: 3px; border: none;
+  flex: 1; height: 25px; border-radius: 0; border: none;
   background: rgba(255,255,255,0.06); color: #999; font-family: var(--font-mono);
   font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
   transition: background 0.15s;
 }
+.stepper-btn:first-child { border-radius: 3px 0 0 3px; }
+.stepper-btn:last-child { border-radius: 0 3px 3px 0; }
 .stepper-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+/* Popups flutuantes */
+.panel-popup { display:none; position:fixed; z-index:200; background:#1a1a1a; border:1px solid #2a2a2a; border-radius:6px; padding:12px; min-width:220px; box-shadow:0 8px 30px rgba(0,0,0,0.6); }
+.panel-popup.open { display:block; }
+.panel-popup-title { font-size:13px; font-weight:700; color:#fff; margin-bottom:10px; font-style:italic; }
+.panel-popup-subtitle { font-size:10px; color:#888; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px; }
+.panel-popup-option { padding:10px 12px; cursor:pointer; font-size:14px; color:#ccc; border-radius:4px; }
+.panel-popup-option:hover { background:#252525; color:#fff; }
+.panel-popup-option.active { background:#2a2a2a; color:#fff; font-weight:600; }
+.panel-popup-balance { font-size:11px; color:#888; margin-bottom:4px; }
+.panel-popup-balance strong { color:#fff; font-size:16px; }
+.panel-popup-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px; }
+.panel-popup-grid button { background:#252525; border:1px solid #333; border-radius:4px; color:#ccc; font-size:12px; font-family:var(--font-mono); padding:8px; cursor:pointer; }
+.panel-popup-grid button:hover { background:#333; color:#fff; border-color:#444; }
+.panel-popup-grid button.active { background:#2a4a3a; color:#08B774; border-color:#08B774; }
+.panel-popup-input { width:100%; background:#111; border:1px solid #333; color:#fff; border-radius:4px; padding:8px 10px; font-size:16px; font-family:var(--font-mono); margin-top:8px; text-align:center; }
+.panel-popup-footer { font-size:10px; color:#666; margin-top:8px; display:flex; align-items:center; gap:4px; }
+.panel-popup-close { position:absolute; top:8px; right:10px; background:none; border:none; color:#666; font-size:16px; cursor:pointer; }
+.panel-popup-close:hover { color:#fff; }
 .countdown-bar { display: none; }
 .countdown-fill { height: 100%; background: var(--up); width: 100%; transition: width 1s linear; border-radius: 2px; margin-left: auto; }
 .profit-block { margin: 0; padding: 4px 0; border: none; border-radius: 0; text-align: center; background: transparent; }
@@ -429,7 +450,7 @@ html, body { height: 100%; overflow: hidden; }
       <div class="panel-block panel-square">
         <div class="panel-label-row"><span>Expiração</span><span class="panel-timer" id="countdownLabel">01:00</span></div>
         <div class="countdown-bar"><div class="countdown-fill" id="countdownFill"></div></div>
-        <div class="stepper-value-row" style="position:relative;justify-content:center;"><span style="position:absolute;left:0;font-size:13px;">🏁</span><span id="durValue">1 min.</span></div>
+        <div class="stepper-value-row" style="position:relative;justify-content:center;cursor:pointer;" onclick="openTimePopup(this)"><span style="position:absolute;left:0;font-size:13px;">🏁</span><span id="durValue">1 min</span></div>
         <div class="stepper-btn-row">
           <button class="stepper-btn" id="durMinus">−</button>
           <button class="stepper-btn" id="durPlus">+</button>
@@ -438,7 +459,7 @@ html, body { height: 100%; overflow: hidden; }
 
       <div class="panel-block panel-square">
         <div class="panel-label-row"><span>Valor</span></div>
-        <div class="stepper-value-row" style="position:relative;justify-content:center;"><span style="position:absolute;left:0;color:#fff;font-weight:600;">$</span><span id="stakeValue">5,00</span></div>
+        <div class="stepper-value-row" style="position:relative;justify-content:center;cursor:pointer;" onclick="openValuePopup(this)"><span style="position:absolute;left:0;color:#fff;font-weight:600;">$</span><span id="stakeValue">5,00</span></div>
         <div class="stepper-btn-row">
           <button class="stepper-btn" id="stakeMinus">−</button>
           <button class="stepper-btn" id="stakePlus">+</button>
@@ -476,7 +497,7 @@ html, body { height: 100%; overflow: hidden; }
             <button class="m-stepper-btn" id="m_durMinus">−</button>
             <button class="m-stepper-btn" id="m_durPlus">+</button>
           </div>
-          <div class="m-stepper-display" id="m_durValue">1 min.</div>
+          <div class="m-stepper-display" id="m_durValue">1 min</div>
         </div>
 
         <div class="m-stepper-row">
@@ -749,10 +770,10 @@ function formatCountdown(totalSeconds) {
 }
 
 const durationOptions = [
-  { sec: 30, label: '30 seg.' },
-  { sec: 60, label: '1 min.' },
-  { sec: 300, label: '5 min.' },
-  { sec: 900, label: '15 min.' }
+  { sec: 30, label: '30 seg' },
+  { sec: 60, label: '1 min' },
+  { sec: 300, label: '5 min' },
+  { sec: 900, label: '15 min' }
 ];
 
 function secondsUntilNextCandleClose(durationSec) {
@@ -1331,6 +1352,93 @@ document.getElementById('footerSoundBtn').onclick = () => {
   document.getElementById('footerSoundBtn').textContent = soundEnabled ? '🔊' : '🔇';
   showToast(soundEnabled ? 'Som ativado' : 'Som desativado');
 };
+
+// === POPUPS FLUTUANTES ===
+const valueShortcuts = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
+
+function openTimePopup(el) {
+  closeValuePopup();
+  const popup = document.getElementById('timePopup');
+  const rect = el.getBoundingClientRect();
+  popup.style.left = (rect.left - 230) + 'px';
+  popup.style.top = rect.top + 'px';
+  const t = getActiveTab();
+  const currentIdx = t ? t.durationIndex : 0;
+  document.getElementById('timeOptions').innerHTML = durationOptions.map((opt, i) => 
+    `<div class="panel-popup-option ${i === currentIdx ? 'active' : ''}" onclick="selectTime(${i})">${opt.label}</div>`
+  ).join('');
+  popup.classList.add('open');
+}
+
+function closeTimePopup() {
+  document.getElementById('timePopup').classList.remove('open');
+}
+
+function selectTime(idx) {
+  const t = getActiveTab();
+  if (t) { t.durationIndex = idx; renderTradePanel(); }
+  closeTimePopup();
+}
+
+function openValuePopup(el) {
+  closeTimePopup();
+  const popup = document.getElementById('valuePopup');
+  const rect = el.getBoundingClientRect();
+  popup.style.left = (rect.left - 230) + 'px';
+  popup.style.top = rect.top + 'px';
+  const t = getActiveTab();
+  const currentStake = t ? t.stake : 5;
+  const bal = activeAccount === 'real' ? cachedBalance : cachedDemoBalance;
+  document.getElementById('popupBalance').textContent = formatMoney(bal);
+  document.getElementById('popupTotalBalance').textContent = formatMoney(bal);
+  document.getElementById('valueShortcuts').innerHTML = valueShortcuts.map(v =>
+    `<button class="${v === currentStake ? 'active' : ''}" onclick="selectValue(${v})">R$ ${v.toLocaleString('pt-BR')}</button>`
+  ).join('');
+  document.getElementById('customValueInput').value = currentStake;
+  popup.classList.add('open');
+  document.getElementById('customValueInput').onchange = (e) => {
+    const val = Number(e.target.value);
+    if (val > 0) selectValue(val);
+  };
+}
+
+function closeValuePopup() {
+  document.getElementById('valuePopup').classList.remove('open');
+}
+
+function selectValue(val) {
+  const t = getActiveTab();
+  if (t) { t.stake = val; renderTradePanel(); }
+  closeValuePopup();
+}
+
+// Fechar popups ao clicar fora
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.panel-popup') && !e.target.closest('.stepper-value-row')) {
+    closeTimePopup();
+    closeValuePopup();
+  }
+});
 </script>
+
+<!-- Popup Tempo -->
+<div class="panel-popup" id="timePopup">
+  <button class="panel-popup-close" onclick="closeTimePopup()">&times;</button>
+  <div class="panel-popup-title">Expiração</div>
+  <div class="panel-popup-subtitle">TEMPO</div>
+  <div id="timeOptions"></div>
+</div>
+
+<!-- Popup Valor -->
+<div class="panel-popup" id="valuePopup">
+  <button class="panel-popup-close" onclick="closeValuePopup()">&times;</button>
+  <div class="panel-popup-title">Valor</div>
+  <div class="panel-popup-subtitle">SALDO DISPONÍVEL</div>
+  <div class="panel-popup-balance"><strong id="popupBalance">R$ 0,00</strong></div>
+  <div class="panel-popup-subtitle" style="margin-top:10px;">ATALHOS</div>
+  <div class="panel-popup-grid" id="valueShortcuts"></div>
+  <input type="number" class="panel-popup-input" id="customValueInput" placeholder="Digite o valor" min="1">
+  <div class="panel-popup-footer">💰 Saldo total — <span id="popupTotalBalance">R$ 0,00</span></div>
+</div>
 </body>
 </html>
