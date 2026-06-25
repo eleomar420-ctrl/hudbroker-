@@ -89,6 +89,8 @@ html, body { height: 100%; overflow: hidden; }
 .stepper-btn:first-child { border-radius: 3px 0 0 3px; }
 .stepper-btn:last-child { border-radius: 0 3px 3px 0; }
 .stepper-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
+.stake-inline-input { background:transparent; border:none; color:#fff; font-family:var(--font-mono); font-size:15px; font-weight:600; text-align:center; width:70px; outline:none; -moz-appearance:textfield; }
+.stake-inline-input::-webkit-outer-spin-button, .stake-inline-input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
 
 /* Popups flutuantes */
 .panel-popup { display:none; position:fixed; z-index:200; background:#1a1a1a; border:1px solid #2a2a2a; border-radius:6px; padding:12px; min-width:220px; box-shadow:0 8px 30px rgba(0,0,0,0.6); }
@@ -459,7 +461,7 @@ html, body { height: 100%; overflow: hidden; }
 
       <div class="panel-block panel-square">
         <div class="panel-label-row"><span>Valor</span></div>
-        <div class="stepper-value-row" style="position:relative;justify-content:center;cursor:pointer;" onclick="openValuePopup(this)"><span style="position:absolute;left:0;color:#fff;font-weight:600;">$</span><span id="stakeValue">5,00</span></div>
+        <div class="stepper-value-row" style="position:relative;justify-content:center;"><span style="position:absolute;left:0;color:#fff;font-weight:600;">$</span><input type="number" id="stakeValue" class="stake-inline-input" value="5" min="1" step="1"></div>
         <div class="stepper-btn-row">
           <button class="stepper-btn" id="stakeMinus">−</button>
           <button class="stepper-btn" id="stakePlus">+</button>
@@ -786,7 +788,9 @@ function secondsUntilNextCandleClose(durationSec) {
 
 function setText(id, text) {
   const el = document.getElementById(id);
-  if (el) el.textContent = text;
+  if (!el) return;
+  if (el.tagName === 'INPUT') el.value = text;
+  else el.textContent = text;
 }
 function setWidth(id, width) {
   const el = document.getElementById(id);
@@ -1394,12 +1398,7 @@ function openValuePopup(el) {
   document.getElementById('valueShortcuts').innerHTML = valueShortcuts.map(v =>
     `<button class="${v === currentStake ? 'active' : ''}" onclick="selectValue(${v})">R$ ${v.toLocaleString('pt-BR')}</button>`
   ).join('');
-  document.getElementById('customValueInput').value = currentStake;
   popup.classList.add('open');
-  document.getElementById('customValueInput').onchange = (e) => {
-    const val = Number(e.target.value);
-    if (val > 0) selectValue(val);
-  };
 }
 
 function closeValuePopup() {
@@ -1411,6 +1410,26 @@ function selectValue(val) {
   if (t) { t.stakeValue = val; renderPanelForActiveTab(); }
   closeValuePopup();
 }
+
+function selectFullBalance() {
+  const bal = cachedUser ? (activeAccount === 'real' ? cachedUser.balance : cachedUser.demo_balance) : 0;
+  if (bal > 0) selectValue(bal);
+}
+
+// Input inline do valor: editar direto
+document.getElementById('stakeValue').addEventListener('change', (e) => {
+  const val = Number(e.target.value);
+  const t = getActiveTab();
+  if (t && val > 0) { t.stakeValue = val; renderPanelForActiveTab(); }
+});
+document.getElementById('stakeValue').addEventListener('click', (e) => {
+  e.target.select();
+});
+
+// Cifrão $ abre popup
+document.querySelector('.stepper-value-row span[style*="absolute"]')?.addEventListener('click', function() {
+  openValuePopup(this.parentElement);
+});
 
 // Fechar popups ao clicar fora
 document.addEventListener('click', (e) => {
@@ -1437,7 +1456,7 @@ document.addEventListener('click', (e) => {
   <div class="panel-popup-balance"><strong id="popupBalance">R$ 0,00</strong></div>
   <div class="panel-popup-subtitle" style="margin-top:10px;">ATALHOS</div>
   <div class="panel-popup-grid" id="valueShortcuts"></div>
-  <input type="number" class="panel-popup-input" id="customValueInput" placeholder="Digite o valor" min="1">
+  <div style="margin-top:8px;"><button style="width:100%;background:#2a4a3a;border:1px solid #08B774;border-radius:4px;color:#08B774;font-size:12px;font-family:var(--font-mono);padding:10px;cursor:pointer;font-weight:700;" onclick="selectFullBalance()">💰 BANCA TODA</button></div>
   <div class="panel-popup-footer">💰 Saldo total — <span id="popupTotalBalance">R$ 0,00</span></div>
 </div>
 </body>
