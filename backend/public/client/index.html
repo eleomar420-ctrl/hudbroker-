@@ -71,9 +71,10 @@ html, body { height: 100%; overflow: hidden; }
   border-left: 1px solid var(--border); padding: 10px 8px; display: flex; flex-direction: column; gap: 8px;
   overflow-y: auto;
 }
-.panel-block { background: rgba(255,255,255,0.06); border-radius: 14px; padding: 6px; overflow: hidden; margin-top: 10px; }
-.panel-label-row { display: flex; align-items: center; gap: 6px; font-size: 10px; color: #888; margin-bottom: 4px; letter-spacing: 0.3px; }
-.panel-label-row i { font-size: 12px; color: var(--text-faint); }
+.panel-block { background: rgba(255,255,255,0.06); border-radius: 14px; padding: 8px 10px; overflow: hidden; }
+.panel-square { aspect-ratio: auto; margin-bottom: 0; }
+.panel-label-row { display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #888; margin-bottom: 2px; letter-spacing: 0.3px; }
+.panel-timer { font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: var(--up); }
 .stepper-value-row {
   font-family: var(--font-mono); font-size: 18px; color: #fff; font-weight: 600;
   display: flex; align-items: center; justify-content: center; gap: 6px; padding: 4px 0 8px;
@@ -425,26 +426,22 @@ html, body { height: 100%; overflow: hidden; }
     <div class="chart-area" id="chartArea"></div>
 
     <div class="trade-panel">
-      <div>
-        <div class="panel-label-row"><span>Expiração</span><span style="margin-left:auto; font-weight:600;" id="countdownLabel">01:00</span></div>
+      <div class="panel-block panel-square">
+        <div class="panel-label-row"><span>Expiração</span><span class="panel-timer" id="countdownLabel">01:00</span></div>
         <div class="countdown-bar"><div class="countdown-fill" id="countdownFill"></div></div>
-        <div class="panel-block" style="margin-top:10px;">
-          <div class="stepper-value-row" id="durValue">1 min.</div>
-          <div class="stepper-btn-row">
-            <button class="stepper-btn" id="durMinus">−</button>
-            <button class="stepper-btn" id="durPlus">+</button>
-          </div>
+        <div class="stepper-value-row" id="durValue">1 min.</div>
+        <div class="stepper-btn-row">
+          <button class="stepper-btn" id="durMinus">−</button>
+          <button class="stepper-btn" id="durPlus">+</button>
         </div>
       </div>
 
-      <div>
-        <div class="panel-label-row" style="margin-top:8px;"><span>Valor</span></div>
-        <div class="panel-block">
-          <div class="stepper-value-row"><span style="color:var(--up); font-weight:600; margin-right:6px;">$</span><span id="stakeValue">5,00</span></div>
-          <div class="stepper-btn-row">
-            <button class="stepper-btn" id="stakeMinus">−</button>
-            <button class="stepper-btn" id="stakePlus">+</button>
-          </div>
+      <div class="panel-block panel-square">
+        <div class="panel-label-row"><span>Valor</span></div>
+        <div class="stepper-value-row"><span style="color:var(--up); font-weight:600; margin-right:4px;">$</span><span id="stakeValue">5,00</span></div>
+        <div class="stepper-btn-row">
+          <button class="stepper-btn" id="stakeMinus">−</button>
+          <button class="stepper-btn" id="stakePlus">+</button>
         </div>
       </div>
 
