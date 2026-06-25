@@ -675,21 +675,27 @@ html, body { height: 100%; overflow: hidden; }
     <!-- Step 2: QR Code -->
     <div id="depStep2" style="display:none;">
       <div class="modal-title" style="display:flex;justify-content:space-between;align-items:center;background:#0a0a0a;color:#fff;">
-        <span>Pague o seu depósito</span>
-        <button onclick="closeDepositModal()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;">✕</button>
+        <span>Pague o seu deposito</span>
+        <button onclick="closeDepositModal()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;">X</button>
       </div>
       <div class="modal-body" style="text-align:center;">
         <div style="background:#fff;border-radius:10px;padding:12px;display:inline-block;">
           <img id="depQrImg" src="" alt="QR Code PIX" style="width:200px;height:200px;">
         </div>
-        <div style="font-size:12px;color:#888;margin-top:12px;">Copie o código PIX abaixo</div>
+        <div style="font-size:12px;color:#888;margin-top:12px;">Copie o codigo PIX abaixo</div>
         <div style="margin-top:6px;">
           <input type="text" id="depPixCode" readonly style="width:100%;background:#111;border:1px solid #2a2a2a;color:#fff;border-radius:6px;padding:8px;font-size:10px;font-family:var(--font-mono);">
         </div>
-        <button onclick="copyDepPix()" style="width:100%;margin-top:10px;padding:12px;background:#51a85d;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;">COPIAR CÓDIGO</button>
-        <button onclick="closeDepositModal()" style="width:100%;margin-top:8px;padding:12px;background:#1a1a1a;color:#ccc;border:1px solid #2a2a2a;border-radius:6px;font-size:13px;cursor:pointer;">Já efetuei o pagamento</button>
+        <button onclick="copyDepPix()" style="width:100%;margin-top:10px;padding:12px;background:#51a85d;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;">COPIAR CODIGO</button>
+        <button onclick="closeDepositModal()" style="width:100%;margin-top:8px;padding:12px;background:#1a1a1a;color:#ccc;border:1px solid #2a2a2a;border-radius:6px;font-size:13px;cursor:pointer;">Ja efetuei o pagamento</button>
       </div>
     </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="https://s3.tradingview.com/tv.js"></script>
+<script>
 requireAuth();
 
 const ASSET_CATALOG = [
