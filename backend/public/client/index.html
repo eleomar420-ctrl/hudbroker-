@@ -429,7 +429,7 @@ html, body { height: 100%; overflow: hidden; }
       <div class="panel-block panel-square">
         <div class="panel-label-row"><span>Expiração</span><span class="panel-timer" id="countdownLabel">01:00</span></div>
         <div class="countdown-bar"><div class="countdown-fill" id="countdownFill"></div></div>
-        <div class="stepper-value-row" id="durValue">🏁 1 min.</div>
+        <div class="stepper-value-row" style="position:relative;justify-content:center;"><span style="position:absolute;left:0;font-size:13px;">🏁</span><span id="durValue">1 min.</span></div>
         <div class="stepper-btn-row">
           <button class="stepper-btn" id="durMinus">−</button>
           <button class="stepper-btn" id="durPlus">+</button>
@@ -438,7 +438,7 @@ html, body { height: 100%; overflow: hidden; }
 
       <div class="panel-block panel-square">
         <div class="panel-label-row"><span>Valor</span></div>
-        <div class="stepper-value-row" style="justify-content:flex-start;"><span style="color:#fff; font-weight:600; margin-right:6px;">$</span><span id="stakeValue">5,00</span></div>
+        <div class="stepper-value-row" style="position:relative;justify-content:center;"><span style="position:absolute;left:0;color:#fff;font-weight:600;">$</span><span id="stakeValue">5,00</span></div>
         <div class="stepper-btn-row">
           <button class="stepper-btn" id="stakeMinus">−</button>
           <button class="stepper-btn" id="stakePlus">+</button>
@@ -777,7 +777,7 @@ function renderPanelForActiveTab() {
   if (!t) return;
   const durLabel = durationOptions[t.durationIndex].label;
   const stakeLabel = t.stakeValue.toFixed(2).replace('.', ',');
-  setText('durValue', '🏁 ' + durLabel);
+  setText('durValue', durLabel);
   setText('m_durValue', durLabel);
   setText('stakeValue', stakeLabel);
   setText('m_stakeValue', stakeLabel);
