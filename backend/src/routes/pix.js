@@ -31,12 +31,16 @@ router.post('/charge', authRequired, requireRole('client'), async (req, res) => 
     const amountCents = Math.round(amount * 100);
     const webhookUrl = process.env.IHUB_WEBHOOK_URL || `${req.protocol}://${req.get('host')}/api/pix/webhook`;
 
+    const authHeader = getAuthHeader();
+    console.log('[pix/charge] Auth header prefix:', authHeader.substring(0, 20) + '...');
+    console.log('[pix/charge] Enviando para iHub:', JSON.stringify({ amount: amountCents, paymentMethod: 'PIX', externalId }));
+
     const response = await fetch(`${IHUB_API}/transactions/v2/purchase`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'Authorization': getAuthHeader()
+        'Authorization': authHeader
       },
       body: JSON.stringify({
         name: user.name || 'Cliente',
@@ -57,7 +61,9 @@ router.post('/charge', authRequired, requireRole('client'), async (req, res) => 
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('[pix/charge] iHub error:', data);
+      console.error('[pix/charge] iHub status:', response.status);
+      console.error('[pix/charge] iHub response:', JSON.stringify(data));
+      console.error('[pix/charge] iHub headers:', JSON.stringify(Object.fromEntries(response.headers)));
       return res.status(400).json({ error: data.message || 'Erro ao gerar cobrança PIX' });
     }
 
