@@ -114,12 +114,9 @@ router.get('/charge/:txid', authRequired, requireRole('client'), async (req, res
 
 router.post('/webhook', async (req, res) => {
   try {
-    const event = req.body.event;
-    const payload = req.body.payload;
+    console.log('[pix/webhook] Body recebido:', JSON.stringify(req.body));
 
-    console.log(`[pix/webhook] Evento recebido: ${event}`, JSON.stringify(payload));
-
-    // Verificar assinatura (se configurada)
+    // Verificar assinatura (apenas log, não rejeitar)
     const signature = req.headers['x-signature'] || req.headers['x-webhook-signature'];
     const webhookKey = process.env.IHUB_WEBHOOK_KEY;
     if (webhookKey && signature) {
@@ -128,21 +125,37 @@ router.post('/webhook', async (req, res) => {
         .update(JSON.stringify(req.body))
         .digest('hex');
       if (signature !== expectedSig) {
-        console.warn('[pix/webhook] Assinatura inválida');
-        return res.status(200).json({ ok: true });
+        console.warn('[pix/webhook] Assinatura não bate (processando mesmo assim)');
       }
     }
 
-    // Processar evento cashin.paid (depósito confirmado)
-    if (event === 'cashin.paid' && payload) {
-      const externalId = payload.external_id;
-      const amountCents = payload.amount;
+    // Suportar V2 (event + payload) e V1 (campos diretos)
+    let event, externalId, amountCents, transactionId;
 
-      if (!externalId) {
-        console.warn('[pix/webhook] external_id ausente');
-        return res.status(200).json({ ok: true });
+    if (req.body.event && req.body.payload) {
+      // V2
+      event = req.body.event;
+      externalId = req.body.payload.external_id;
+      amountCents = req.body.payload.amount;
+      transactionId = req.body.payload.transaction_id;
+    } else {
+      // V1 - campos diretos
+      const status = req.body.status;
+      externalId = req.body.externalId || req.body.external_id;
+      amountCents = req.body.amount;
+      transactionId = req.body.transactionId || req.body.transaction_id || req.body.id;
+      // Mapear status V1 para evento
+      if (status === 'APPROVED' || status === 1 || status === 'paid') {
+        event = 'cashin.paid';
+      } else if (status === 'REFUNDED' || status === 'refunded') {
+        event = 'cashin.refunded';
       }
+    }
 
+    console.log(`[pix/webhook] Evento: ${event}, externalId: ${externalId}, amount: ${amountCents}`);
+
+    // Processar pagamento confirmado
+    if (event === 'cashin.paid' && externalId) {
       const charge = await queryOne(
         "SELECT * FROM pix_charges WHERE txid = $1 AND status = 'pending'",
         [externalId]
@@ -153,9 +166,8 @@ router.post('/webhook', async (req, res) => {
         return res.status(200).json({ ok: true });
       }
 
-      const amountReal = amountCents / 100;
+      const amountReal = amountCents ? amountCents / 100 : charge.amount;
 
-      // Creditar saldo do usuário
       await withTransaction(async (client) => {
         await client.query(
           "UPDATE pix_charges SET status = 'paid', paid_at = now() WHERE id = $1",
@@ -172,24 +184,18 @@ router.post('/webhook', async (req, res) => {
         );
       });
 
-      // Comissão CPA no primeiro depósito
       await processFirstDeposit({ userId: charge.user_id });
-
       console.log(`[pix/webhook] ✅ Depósito confirmado: R$ ${amountReal} para user ${charge.user_id}`);
     }
 
-    // cashin.refunded
-    if (event === 'cashin.refunded' && payload) {
-      const externalId = payload.external_id;
+    if (event === 'cashin.refunded' && externalId) {
       console.log(`[pix/webhook] Reembolso: ${externalId}`);
-      if (externalId) {
-        await run("UPDATE pix_charges SET status = 'refunded' WHERE txid = $1", [externalId]);
-      }
+      await run("UPDATE pix_charges SET status = 'refunded' WHERE txid = $1", [externalId]);
     }
 
     res.status(200).json({ ok: true });
   } catch (err) {
-    console.error('[pix/webhook]', err);
+    console.error('[pix/webhook] Erro:', err);
     res.status(200).json({ ok: true });
   }
 });
