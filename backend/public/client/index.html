@@ -461,7 +461,7 @@ html, body { height: 100%; overflow: hidden; }
 
       <div class="panel-block panel-square">
         <div class="panel-label-row"><span>Valor</span></div>
-        <div class="stepper-value-row" style="position:relative;justify-content:center;"><span style="position:absolute;left:0;color:#fff;font-weight:600;">$</span><input type="number" id="stakeValue" class="stake-inline-input" value="5" min="1" step="1"></div>
+        <div class="stepper-value-row" style="position:relative;justify-content:center;"><span style="position:absolute;left:0;color:#fff;font-weight:600;">$</span><input type="number" id="stakeValue" class="stake-inline-input" value="5.00" min="1" step="0.01"></div>
         <div class="stepper-btn-row">
           <button class="stepper-btn" id="stakeMinus">−</button>
           <button class="stepper-btn" id="stakePlus">+</button>
@@ -1395,6 +1395,7 @@ function openValuePopup(el) {
   const bal = cachedUser ? (activeAccount === 'real' ? cachedUser.balance : cachedUser.demo_balance) : 0;
   document.getElementById('popupBalance').textContent = formatMoney(bal);
   document.getElementById('popupTotalBalance').textContent = formatMoney(bal);
+  document.getElementById('fullBalanceBtn').textContent = '💰 ' + formatMoney(bal);
   document.getElementById('valueShortcuts').innerHTML = valueShortcuts.map(v =>
     `<button class="${v === currentStake ? 'active' : ''}" onclick="selectValue(${v})">R$ ${v.toLocaleString('pt-BR')}</button>`
   ).join('');
@@ -1452,7 +1453,7 @@ document.addEventListener('click', (e) => {
   <div class="panel-popup-balance"><strong id="popupBalance">R$ 0,00</strong></div>
   <div class="panel-popup-subtitle" style="margin-top:10px;">ATALHOS</div>
   <div class="panel-popup-grid" id="valueShortcuts"></div>
-  <div style="margin-top:8px;"><button style="width:100%;background:#2a4a3a;border:1px solid #08B774;border-radius:4px;color:#08B774;font-size:12px;font-family:var(--font-mono);padding:10px;cursor:pointer;font-weight:700;" onclick="selectFullBalance()">💰 BANCA TODA</button></div>
+  <div style="margin-top:8px;"><button id="fullBalanceBtn" style="width:100%;background:#2a4a3a;border:1px solid #08B774;border-radius:4px;color:#08B774;font-size:13px;font-family:var(--font-mono);padding:10px;cursor:pointer;font-weight:700;" onclick="selectFullBalance()">💰 R$ 0,00</button></div>
   <div class="panel-popup-footer">💰 Saldo total — <span id="popupTotalBalance">R$ 0,00</span></div>
 </div>
 </body>
