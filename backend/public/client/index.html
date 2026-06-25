@@ -461,7 +461,7 @@ html, body { height: 100%; overflow: hidden; }
 
       <div class="panel-block panel-square">
         <div class="panel-label-row"><span>Valor</span></div>
-        <div class="stepper-value-row" style="position:relative;justify-content:center;"><span style="position:absolute;left:0;color:#fff;font-weight:600;">$</span><input type="number" id="stakeValue" class="stake-inline-input" value="5.00" min="1" step="0.01"></div>
+        <div class="stepper-value-row" style="position:relative;justify-content:center;"><span style="position:absolute;left:0;color:#fff;font-weight:600;">$</span><input type="text" id="stakeValue" class="stake-inline-input" value="5,00" inputmode="decimal"></div>
         <div class="stepper-btn-row">
           <button class="stepper-btn" id="stakeMinus">−</button>
           <button class="stepper-btn" id="stakePlus">+</button>
@@ -805,7 +805,7 @@ function renderPanelForActiveTab() {
   setText('durValue', durLabel);
   setText('m_durValue', durLabel);
   const stakeEl = document.getElementById('stakeValue');
-  if (stakeEl) stakeEl.value = t.stakeValue.toFixed(2);
+  if (stakeEl) stakeEl.value = stakeLabel;
   setText('m_stakeValue', stakeLabel);
   setText('m_assetName', t.catalog.name);
   const iconEl = document.getElementById('m_assetIcon');
@@ -1420,7 +1420,7 @@ function selectFullBalance() {
 
 // Input inline do valor: editar direto
 document.getElementById('stakeValue').addEventListener('change', (e) => {
-  const val = Number(e.target.value);
+  const val = Number(e.target.value.replace(',', '.'));
   const t = getActiveTab();
   if (t && val > 0) { t.stakeValue = val; renderPanelForActiveTab(); }
 });
