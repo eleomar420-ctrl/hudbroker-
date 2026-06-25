@@ -1422,18 +1422,14 @@ document.getElementById('stakeValue').addEventListener('change', (e) => {
   const t = getActiveTab();
   if (t && val > 0) { t.stakeValue = val; renderPanelForActiveTab(); }
 });
-document.getElementById('stakeValue').addEventListener('click', (e) => {
+document.getElementById('stakeValue').addEventListener('focus', (e) => {
   e.target.select();
-});
-
-// Cifrão $ abre popup
-document.querySelector('.stepper-value-row span[style*="absolute"]')?.addEventListener('click', function() {
-  openValuePopup(this.parentElement);
+  openValuePopup(e.target.closest('.stepper-value-row'));
 });
 
 // Fechar popups ao clicar fora
 document.addEventListener('click', (e) => {
-  if (!e.target.closest('.panel-popup') && !e.target.closest('.stepper-value-row')) {
+  if (!e.target.closest('.panel-popup') && !e.target.closest('.stepper-value-row') && !e.target.closest('.stake-inline-input')) {
     closeTimePopup();
     closeValuePopup();
   }
