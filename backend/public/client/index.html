@@ -67,45 +67,45 @@ html, body { height: 100%; overflow: hidden; }
 .chart-instance iframe, .chart-instance > div { width: 100%; height: 100%; }
 
 .trade-panel {
-  width: 220px; flex-shrink: 0; background: #0a0a0a;
-  border-left: 1px solid var(--border); padding: 10px 8px; display: flex; flex-direction: column; gap: 8px;
+  width: 160px; flex-shrink: 0; background: #0a0a0a;
+  border-left: 1px solid var(--border); padding: 8px 6px; display: flex; flex-direction: column; gap: 6px;
   overflow-y: auto;
 }
-.panel-block { background: rgba(255,255,255,0.06); border-radius: 14px; padding: 8px 10px; overflow: hidden; }
+.panel-block { background: rgba(255,255,255,0.06); border-radius: 4px; padding: 6px 8px; overflow: hidden; }
 .panel-square { aspect-ratio: auto; margin-bottom: 0; }
-.panel-label-row { display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #888; margin-bottom: 2px; letter-spacing: 0.3px; }
-.panel-timer { font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: var(--up); }
+.panel-label-row { display: flex; align-items: center; justify-content: space-between; font-size: 9px; color: #888; margin-bottom: 2px; letter-spacing: 0.3px; }
+.panel-timer { font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--up); }
 .stepper-value-row {
-  font-family: var(--font-mono); font-size: 18px; color: #fff; font-weight: 600;
-  display: flex; align-items: center; justify-content: center; gap: 6px; padding: 4px 0 8px;
+  font-family: var(--font-mono); font-size: 14px; color: #fff; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 4px; padding: 2px 0 4px;
 }
-.stepper-btn-row { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.stepper-btn-row { display: flex; align-items: center; justify-content: center; gap: 4px; }
 .stepper-btn {
-  flex: 1; height: 30px; border-radius: 8px; border: none;
+  flex: 1; height: 24px; border-radius: 4px; border: none;
   background: rgba(255,255,255,0.06); color: #999; font-family: var(--font-mono);
-  font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
   transition: background 0.15s;
 }
 .stepper-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
-.countdown-bar { height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+.countdown-bar { display: none; }
 .countdown-fill { height: 100%; background: var(--up); width: 100%; transition: width 1s linear; border-radius: 2px; margin-left: auto; }
-.profit-block { margin: 10px 0 0; padding: 10px 8px; border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; text-align: center; background: transparent; }
+.profit-block { margin: 0; padding: 8px 6px; border: 1px solid rgba(255,255,255,0.06); border-radius: 4px; text-align: center; background: transparent; }
 .profit-row { display: flex; align-items: baseline; justify-content: center; gap: 4px; }
-.profit-label { font-size: 11px; color: #888; letter-spacing: 0.3px; }
-.profit-pct { font-family: var(--font-mono); font-size: 28px; font-weight: 700; color: #08B774; }
-.profit-amount { font-family: var(--font-mono); color: #08B774; font-size: 14px; font-weight: 600; margin-top: 2px; }
-.trade-buttons { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.profit-label { font-size: 9px; color: #888; letter-spacing: 0.3px; }
+.profit-pct { font-family: var(--font-mono); font-size: 22px; font-weight: 700; color: #08B774; }
+.profit-amount { font-family: var(--font-mono); color: #08B774; font-size: 12px; font-weight: 600; margin-top: 2px; }
+.trade-buttons { display: flex; flex-direction: column; gap: 6px; margin-top: 2px; }
 .buy-btn, .sell-btn {
-  width: 100%; height: 68px; padding: 8px; border-radius: 16px; border: none;
-  font-weight: 700; font-size: 13px; cursor: pointer; letter-spacing: 0.5px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  width: 100%; height: 58px; padding: 6px; border-radius: 4px; border: none;
+  font-weight: 700; font-size: 11px; cursor: pointer; letter-spacing: 0.5px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
   touch-action: manipulation; transition: filter 0.15s;
 }
 .buy-btn { background: #08B774; color: #ffffff; }
 .buy-btn:hover { filter: brightness(1.15); }
 .sell-btn { background: #F92757; color: #ffffff; }
 .sell-btn:hover { filter: brightness(1.15); }
-.buy-btn i, .sell-btn i { font-size: 22px; }
+.buy-btn i, .sell-btn i { font-size: 20px; }
 .live-clock { display: none; } /* movido para footer desktop */
 
 /* Footer bar desktop */
