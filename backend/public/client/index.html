@@ -625,7 +625,7 @@ html, body { height: 100%; overflow: hidden; }
   <div class="modal-box" style="width:400px;">
     <!-- Step 1: Formulário -->
     <div id="depStep1">
-      <div class="modal-title" style="display:flex;justify-content:space-between;align-items:center;">
+      <div class="modal-title" style="display:flex;justify-content:space-between;align-items:center;background:#0a0a0a;color:#fff;">
         <span>Depositar</span>
         <button onclick="closeDepositModal()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;">✕</button>
       </div>
@@ -662,8 +662,8 @@ html, body { height: 100%; overflow: hidden; }
           <button class="dep-shortcut" onclick="setDepAmount(2000)">R$ 2.000</button>
         </div>
 
-        <div style="background:rgba(255,180,0,0.08);border:1px solid rgba(255,180,0,0.2);border-radius:6px;padding:10px 12px;font-size:11px;color:#bba040;line-height:1.4;">
-          ⚠️ Lembre-se que os pagamentos são permitidos apenas se feitos por contas bancárias de mesma titularidade.
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:10px 12px;font-size:11px;color:#999;line-height:1.4;">
+          Lembre-se que os pagamentos são permitidos apenas se feitos por contas bancárias de mesma titularidade.
         </div>
 
         <button id="depGenerateBtn" onclick="generateDepositPix()" style="width:100%;padding:14px;background:#51a85d;color:#fff;border:none;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;">
@@ -674,39 +674,22 @@ html, body { height: 100%; overflow: hidden; }
 
     <!-- Step 2: QR Code -->
     <div id="depStep2" style="display:none;">
-      <div class="modal-title" style="display:flex;justify-content:space-between;align-items:center;">
-        <span>Escaneie o QR Code</span>
+      <div class="modal-title" style="display:flex;justify-content:space-between;align-items:center;background:#0a0a0a;color:#fff;">
+        <span>Pague o seu depósito</span>
         <button onclick="closeDepositModal()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;">✕</button>
       </div>
       <div class="modal-body" style="text-align:center;">
         <div style="background:#fff;border-radius:10px;padding:12px;display:inline-block;">
           <img id="depQrImg" src="" alt="QR Code PIX" style="width:200px;height:200px;">
         </div>
-
-        <div style="font-size:12px;color:#888;margin-top:10px;">Ou copie o código PIX</div>
-        <div style="display:flex;gap:6px;margin-top:6px;">
-          <input type="text" id="depPixCode" readonly style="flex:1;background:#111;border:1px solid #2a2a2a;color:#fff;border-radius:6px;padding:8px;font-size:10px;font-family:var(--font-mono);">
-          <button onclick="copyDepPix()" style="background:#51a85d;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">Copiar</button>
+        <div style="font-size:12px;color:#888;margin-top:12px;">Copie o código PIX abaixo</div>
+        <div style="margin-top:6px;">
+          <input type="text" id="depPixCode" readonly style="width:100%;background:#111;border:1px solid #2a2a2a;color:#fff;border-radius:6px;padding:8px;font-size:10px;font-family:var(--font-mono);">
         </div>
-
-        <div id="depStatusBadge" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;margin-top:12px;background:rgba(255,180,0,0.1);color:#e8a23d;">
-          <div style="width:12px;height:12px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
-          <span id="depStatusText">Aguardando pagamento...</span>
-        </div>
-
-        <div id="depTimer" style="color:#888;font-size:11px;margin-top:6px;font-family:var(--font-mono);">Expira em 59:59</div>
-
-        <button onclick="resetDepositModal()" style="width:100%;margin-top:12px;padding:10px;background:#1a1a1a;color:#ccc;border:1px solid #2a2a2a;border-radius:6px;font-size:12px;cursor:pointer;">
-          Fazer outro depósito
-        </button>
+        <button onclick="copyDepPix()" style="width:100%;margin-top:10px;padding:12px;background:#51a85d;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;">COPIAR CÓDIGO</button>
+        <button onclick="closeDepositModal()" style="width:100%;margin-top:8px;padding:12px;background:#1a1a1a;color:#ccc;border:1px solid #2a2a2a;border-radius:6px;font-size:13px;cursor:pointer;">Já efetuei o pagamento</button>
       </div>
     </div>
-  </div>
-</div>
-
-<script src="/js/api.js"></script>
-<script src="https://s3.tradingview.com/tv.js"></script>
-<script>
 requireAuth();
 
 const ASSET_CATALOG = [
@@ -1133,7 +1116,6 @@ document.getElementById('depositBtn').onclick = () => {
 
 // === MODAL DE DEPÓSITO PIX ===
 let depPollInterval = null;
-let depExpireInterval = null;
 let userCpfSaved = null;
 
 function openDepositModal() {
@@ -1151,7 +1133,6 @@ function openDepositModal() {
 function closeDepositModal() {
   document.getElementById('depositModal').classList.remove('open');
   if (depPollInterval) clearInterval(depPollInterval);
-  if (depExpireInterval) clearInterval(depExpireInterval);
 }
 
 function resetDepositModal() {
@@ -1162,6 +1143,14 @@ function resetDepositModal() {
 
 function setDepAmount(val) {
   document.getElementById('depAmount').value = val.toFixed(2).replace('.', ',');
+  document.querySelectorAll('.dep-shortcut').forEach(b => {
+    b.style.background = '#1a1a1a';
+    b.style.color = '#ccc';
+    b.style.borderColor = '#2a2a2a';
+  });
+  event.target.style.background = 'rgba(81,168,93,0.15)';
+  event.target.style.color = '#51a85d';
+  event.target.style.borderColor = '#51a85d';
 }
 
 function validateCpf(cpf) {
@@ -1204,15 +1193,8 @@ async function generateDepositPix() {
     document.getElementById('depPixCode').value = data.copiaecola;
     document.getElementById('depStep1').style.display = 'none';
     document.getElementById('depStep2').style.display = 'block';
-    document.getElementById('depStatusBadge').style.background = 'rgba(255,180,0,0.1)';
-    document.getElementById('depStatusBadge').style.color = '#e8a23d';
-    document.getElementById('depStatusText').textContent = 'Aguardando pagamento...';
     const expiresAt = Date.now() + (data.expiracao * 1000);
-    if (depExpireInterval) clearInterval(depExpireInterval);
-    depExpireInterval = setInterval(() => {
       const rem = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
-      document.getElementById('depTimer').textContent = `Expira em ${String(Math.floor(rem/60)).padStart(2,'0')}:${String(rem%60).padStart(2,'0')}`;
-      if (rem <= 0) { clearInterval(depExpireInterval); clearInterval(depPollInterval); document.getElementById('depTimer').textContent = 'PIX expirado'; }
     }, 1000);
     const txid = data.txid;
     if (depPollInterval) clearInterval(depPollInterval);
@@ -1220,13 +1202,10 @@ async function generateDepositPix() {
       try {
         const charge = await apiFetch(`/pix/charge/${txid}`);
         if (charge.status === 'paid') {
-          clearInterval(depPollInterval); clearInterval(depExpireInterval);
-          document.getElementById('depStatusBadge').style.background = 'rgba(81,168,93,0.15)';
-          document.getElementById('depStatusBadge').style.color = '#51a85d';
-          document.getElementById('depStatusBadge').innerHTML = '<span>✓</span><span>Pagamento confirmado!</span>';
-          document.getElementById('depTimer').textContent = 'Saldo creditado';
+          clearInterval(depPollInterval);
           showToast('Depósito confirmado!');
           refreshBalance();
+          setTimeout(() => closeDepositModal(), 1500);
         }
       } catch(e){}
     }, 3000);
