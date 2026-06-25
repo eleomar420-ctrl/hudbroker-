@@ -1193,9 +1193,6 @@ async function generateDepositPix() {
     document.getElementById('depPixCode').value = data.copiaecola;
     document.getElementById('depStep1').style.display = 'none';
     document.getElementById('depStep2').style.display = 'block';
-    const expiresAt = Date.now() + (data.expiracao * 1000);
-      const rem = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
-    }, 1000);
     const txid = data.txid;
     if (depPollInterval) clearInterval(depPollInterval);
     depPollInterval = setInterval(async () => {
