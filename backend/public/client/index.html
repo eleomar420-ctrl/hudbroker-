@@ -16,6 +16,7 @@
   --bg-panel: #0a0a0a;
   --bg-elevated: #111111;
   --border: #1a1a1a;
+  --up: #51a85d;
 }
 html, body { height: 100%; overflow: hidden; }
 .trade-shell { display: flex; flex-direction: column; height: 100vh; margin-left: 72px; }
@@ -29,7 +30,7 @@ html, body { height: 100%; overflow: hidden; }
 
 .success-popup {
   position: fixed; top: 56px; left: 50%; transform: translateX(-50%) translateY(-12px);
-  background: #08B774; color: #ffffff; border-radius: 0 0 10px 10px;
+  background: #51a85d; color: #ffffff; border-radius: 0 0 10px 10px;
   padding: 12px 22px; display: flex; align-items: center; gap: 10px;
   font-size: 14px; font-weight: 600; box-shadow: 0 4px 14px rgba(0,0,0,0.35);
   opacity: 0; z-index: 200; transition: opacity 0.25s ease, transform 0.25s ease; pointer-events: none;
@@ -105,7 +106,7 @@ html, body { height: 100%; overflow: hidden; }
 .panel-popup-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px; }
 .panel-popup-grid button { background:#252525; border:1px solid #333; border-radius:4px; color:#ccc; font-size:12px; font-family:var(--font-mono); padding:8px; cursor:pointer; }
 .panel-popup-grid button:hover { background:#333; color:#fff; border-color:#444; }
-.panel-popup-grid button.active { background:#2a4a3a; color:#08B774; border-color:#08B774; }
+.panel-popup-grid button.active { background:#2a4a3a; color:#51a85d; border-color:#51a85d; }
 .panel-popup-input { width:100%; background:#111; border:1px solid #333; color:#fff; border-radius:4px; padding:8px 10px; font-size:16px; font-family:var(--font-mono); margin-top:8px; text-align:center; }
 .panel-popup-footer { font-size:10px; color:#666; margin-top:8px; display:flex; align-items:center; gap:4px; }
 .panel-popup-close { position:absolute; top:8px; right:10px; background:none; border:none; color:#666; font-size:16px; cursor:pointer; }
@@ -115,8 +116,8 @@ html, body { height: 100%; overflow: hidden; }
 .profit-block { margin: 0; padding: 4px 0; border: none; border-radius: 0; text-align: center; background: transparent; }
 .profit-row { display: flex; align-items: baseline; justify-content: center; }
 .profit-label { font-size: 10px; color: #888; }
-.profit-pct { font-family: var(--font-mono); font-size: 20px; font-weight: 700; color: #08B774; }
-.profit-amount { font-family: var(--font-mono); color: #08B774; font-size: 11px; font-weight: 600; margin-top: 2px; }
+.profit-pct { font-family: var(--font-mono); font-size: 20px; font-weight: 700; color: #51a85d; }
+.profit-amount { font-family: var(--font-mono); color: #51a85d; font-size: 11px; font-weight: 600; margin-top: 2px; }
 .trade-buttons { display: flex; flex-direction: column; gap: 4px; margin-top: 2px; }
 .buy-btn, .sell-btn {
   width: 100%; height: 82px; padding: 6px; border-radius: 4px; border: none;
@@ -165,7 +166,7 @@ html, body { height: 100%; overflow: hidden; }
 
 .account-pill { display: flex; align-items: center; gap: 6px; cursor: pointer; position: relative; height: 36px; flex-shrink: 0; }
 .account-pill .label { font-size: 11px; color: var(--text-faint); display: block; line-height: 1.2; }
-.account-pill .value { font-size: 18px; font-weight: 700; color: #08B774; font-family: var(--font-display); display: block; line-height: 1.2; }
+.account-pill .value { font-size: 18px; font-weight: 700; color: #51a85d; font-family: var(--font-display); display: block; line-height: 1.2; }
 .account-pill .value.demo { color: var(--brand); }
 .account-dropdown { display: none; position: absolute; top: 44px; right: 0; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 6px; z-index: 60; min-width: 200px; }
 .account-dropdown.open { display: block; }
@@ -175,12 +176,12 @@ html, body { height: 100%; overflow: hidden; }
 
 .btn-deposit {
   font-family: 'Raleway', var(--font-body); font-size: 15px; font-weight: 700;
-  background: transparent; color: #08B774; border: 1px solid #08B774;
+  background: transparent; color: #51a85d; border: 1px solid #51a85d;
   border-radius: 4px; padding: 0 28px; height: 44px; cursor: pointer; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center; letter-spacing: 0.3px;
   transition: background 0.15s, color 0.15s;
 }
-.btn-deposit:hover { background: #08B774; color: #ffffff; border-color: #08B774; }
+.btn-deposit:hover { background: #51a85d; color: #ffffff; border-color: #51a85d; }
 
 .avatar-btn { width: 42px; height: 42px; border-radius: 50%; background: var(--bg-elevated); display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; border: 1px solid var(--border); flex-shrink: 0; }
 .avatar-btn i { font-size: 20px; color: var(--text-faint); }
@@ -218,7 +219,7 @@ html, body { height: 100%; overflow: hidden; }
 .menu-item .material-icons-outlined { font-size: 14px; margin-bottom: 4px; }
 .menu-item span:last-child { font-size: 12px; }
 .menu-item:hover { background: none; color: var(--text); }
-.menu-item-deposit { color: #08B774; }
+.menu-item-deposit { color: #51a85d; }
 .menu-item-logout { color: var(--down); }
 
 .assets-screen { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 95; flex-direction: column; }
@@ -324,7 +325,7 @@ html, body { height: 100%; overflow: hidden; }
   .account-pill .value { font-size: 16px; }
   .btn-deposit {
     order: 3; flex: 5 1 0; min-width: 0; font-size: 15px; font-weight: 700; padding: 0 12px; height: 48px;
-    background: #08B774; color: #ffffff; border-color: #08B774; border-radius: 4px;
+    background: #51a85d; color: #ffffff; border-color: #51a85d; border-radius: 4px;
   }
 
   .trade-body { flex-direction: column; overflow-y: auto; }
@@ -355,9 +356,9 @@ html, body { height: 100%; overflow: hidden; }
 
   .m-timer-row { display: flex; justify-content: space-between; align-items: center; }
   .m-timer-label { color: #8b8b96; font-size: 13px; }
-  .m-timer-value { color: #00c896; font-weight: 700; font-size: 14px; letter-spacing: 0.5px; font-variant-numeric: tabular-nums; }
+  .m-timer-value { color: #51a85d; font-weight: 700; font-size: 14px; letter-spacing: 0.5px; font-variant-numeric: tabular-nums; }
   .m-progress-track { height: 3px; background: #2a2a35; border-radius: 2px; overflow: hidden; }
-  .m-progress-fill { height: 100%; background: #00c896; width: 100%; transition: width 1s linear; border-radius: 2px; margin-left: auto; }
+  .m-progress-fill { height: 100%; background: #51a85d; width: 100%; transition: width 1s linear; border-radius: 2px; margin-left: auto; }
 
   /* Linhas 3 e 4 juntas: tempo e valor lado a lado, cada um com -/+ colados à esquerda */
   .m-stepper-pair-row { display: flex; gap: 0; }
@@ -375,7 +376,7 @@ html, body { height: 100%; overflow: hidden; }
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 16px; font-size: 14px; font-weight: 700; color: #fff;
   }
-  .m-btn-buy { background: #00c896; }
+  .m-btn-buy { background: #51a85d; }
   .m-btn-sell { background: #f0274a; }
   .m-btn-buy .m-pct { color: rgba(0,0,0,0.35); font-weight: 600; font-size: 12px; }
   .m-btn-sell .m-pct { color: rgba(0,0,0,0.25); font-weight: 600; font-size: 12px; }
@@ -836,8 +837,8 @@ function updateLiveCountdown() {
 
   // Vermelho nos últimos 10 segundos
   const danger = remaining <= 10;
-  const barColor = danger ? '#F92757' : '#00c896';
-  const textColor = danger ? '#F92757' : '#00c896';
+  const barColor = danger ? '#F92757' : '#51a85d';
+  const textColor = danger ? '#F92757' : '#51a85d';
 
   const cf = document.getElementById('countdownFill');
   const mf = document.getElementById('m_countdownFill');
@@ -1322,7 +1323,7 @@ function renderAssetsTable(category, search) {
           </div>
         </td>
         <td>${price}</td>
-        <td style="color:#08B774; font-weight:600;">85%</td>
+        <td style="color:#51a85d; font-weight:600;">85%</td>
       </tr>
     `;
   }).join('');
@@ -1454,7 +1455,7 @@ document.addEventListener('click', (e) => {
   <div class="panel-popup-balance"><strong id="popupBalance">R$ 0,00</strong></div>
   <div class="panel-popup-subtitle" style="margin-top:10px;">ATALHOS</div>
   <div class="panel-popup-grid" id="valueShortcuts"></div>
-  <div style="margin-top:8px;"><button id="fullBalanceBtn" style="width:100%;background:#2a4a3a;border:1px solid #08B774;border-radius:4px;color:#08B774;font-size:13px;font-family:var(--font-mono);padding:10px;cursor:pointer;font-weight:700;" onclick="selectFullBalance()">💰 R$ 0,00</button></div>
+  <div style="margin-top:8px;"><button id="fullBalanceBtn" style="width:100%;background:#2a4a3a;border:1px solid #51a85d;border-radius:4px;color:#51a85d;font-size:13px;font-family:var(--font-mono);padding:10px;cursor:pointer;font-weight:700;" onclick="selectFullBalance()">💰 R$ 0,00</button></div>
   <div class="panel-popup-footer">💰 Saldo total — <span id="popupTotalBalance">R$ 0,00</span></div>
 </div>
 </body>
