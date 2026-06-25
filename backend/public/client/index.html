@@ -343,6 +343,19 @@ html, body { height: 100%; overflow: hidden; }
 .profile-popup-item:hover { background:rgba(255,255,255,0.05); color:#fff; }
 .profile-popup-item .material-icons-outlined { font-size:18px; color:#888; }
 
+
+/* Trade Result Popup */
+.trade-result-popup {
+  position: fixed; bottom: 80px; left: 90px; z-index: 150;
+  padding: 14px 20px; border-radius: 8px; font-size: 14px; font-weight: 600;
+  font-family: var(--font-mono); display: flex; align-items: center; gap: 10px;
+  animation: slideInResult 0.3s ease-out; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+.trade-result-popup.win { background: rgba(81,168,93,0.95); color: #fff; }
+.trade-result-popup.loss { background: rgba(229,57,53,0.95); color: #fff; }
+.trade-result-popup.draw { background: rgba(232,162,61,0.95); color: #fff; }
+@keyframes slideInResult { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
 @media (max-width: 768px) {
   .trade-topbar { padding: 0 10px; gap: 8px; height: 60px; justify-content: space-between; }
   .asset-tabs-row { display: none; }
@@ -1123,6 +1136,8 @@ async function openTrade(direction) {
     showSuccessPopup('Transação efetuada com sucesso!');
     refreshBalance();
     refreshOpenTrades();
+    if (document.getElementById('historyPanel').classList.contains('open')) loadHistory();
+    if (data && data.tradeId) trackTradeResult(data.tradeId, syncedDuration);
   } catch (err) {
     showToast(err.message, 'error');
   }
@@ -1600,6 +1615,54 @@ setActiveAccount(activeAccount);
 refreshBalance().then(renderBalance);
 setInterval(refreshOpenTrades, 5000);
 setInterval(refreshBalance, 8000);
+
+// Auto-refresh do histórico a cada 5s se estiver aberto
+setInterval(() => {
+  if (document.getElementById('historyPanel').classList.contains('open')) loadHistory();
+}, 5000);
+
+// Rastrear resultado de operação e mostrar popup
+function trackTradeResult(tradeId, durationSec) {
+  const checkDelay = (durationSec || 60) * 1000 + 2000;
+  setTimeout(async () => {
+    try {
+      const trades = await apiFetch('/trading/trades/history');
+      const trade = trades.find(t => t.id === tradeId);
+      if (trade && trade.status !== 'open') {
+        showTradeResultPopup(trade);
+        refreshBalance();
+        if (document.getElementById('historyPanel').classList.contains('open')) loadHistory();
+      } else {
+        // Tentar novamente em 3s
+        setTimeout(() => trackTradeResult(tradeId, 3), 0);
+      }
+    } catch(e) {}
+  }, checkDelay);
+}
+
+function showTradeResultPopup(trade) {
+  const existing = document.querySelectorAll('.trade-result-popup');
+  existing.forEach(e => e.remove());
+
+  const el = document.createElement('div');
+  const won = trade.status === 'won';
+  const draw = trade.status === 'draw';
+  const resultClass = won ? 'win' : draw ? 'draw' : 'loss';
+  const icon = won ? '✓' : draw ? '↔' : '✕';
+  const label = won ? 'WIN' : draw ? 'EMPATE' : 'LOSS';
+  const amount = trade.result_amount != null ? (trade.result_amount > 0 ? '+' : '') + formatMoney(trade.result_amount) : '';
+  const asset = (trade.asset || '').toUpperCase();
+
+  el.className = 'trade-result-popup ' + resultClass;
+  el.innerHTML = '<span style="font-size:20px;">' + icon + '</span><div><div>' + label + ' - ' + asset + '</div><div style="font-size:12px;opacity:0.8;">' + amount + '</div></div>';
+  document.body.appendChild(el);
+
+  setTimeout(() => {
+    el.style.transition = 'opacity 0.5s';
+    el.style.opacity = '0';
+    setTimeout(() => el.remove(), 500);
+  }, 5000);
+}
 
 // Fullscreen toggle
 document.getElementById('footerFullscreenBtn').onclick = () => {
