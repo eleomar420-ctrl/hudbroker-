@@ -317,7 +317,7 @@ html, body { height: 100%; overflow: hidden; }
 /* ===== Responsivo: mobile (telas até 768px) ===== */
 
 /* Profile Popup */
-.profile-popup { display:none; position:absolute; top:56px; right:120px; width:420px; background:#1a1a1a; border:1px solid #2a2a2a; border-radius:10px; z-index:200; box-shadow:0 8px 30px rgba(0,0,0,0.6); overflow:hidden; }
+.profile-popup { display:none; position:absolute; top:56px; right:120px; width:520px; background:#1a1a1a; border:1px solid #2a2a2a; border-radius:10px; z-index:200; box-shadow:0 8px 30px rgba(0,0,0,0.6); overflow:hidden; }
 .profile-popup.open { display:block; }
 .profile-popup-header { display:flex; gap:14px; padding:20px; align-items:center; }
 .profile-popup-avatar { width:64px; height:64px; border-radius:50%; background:#252525; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; position:relative; }
@@ -335,6 +335,9 @@ html, body { height: 100%; overflow: hidden; }
 .profile-popup-country { display:flex; align-items:center; gap:6px; font-size:13px; color:#ccc; }
 .profile-popup-detail { font-size:11px; color:#888; }
 .profile-popup-detail strong { color:#ccc; font-size:12px; display:block; margin-top:2px; }
+.profile-popup-cols { display:flex; }
+.profile-popup-left { flex:1; padding-bottom:16px; border-right:1px solid #2a2a2a; }
+.profile-popup-right { width:180px; padding:8px 0; display:flex; flex-direction:column; }
 .profile-popup-menu { border-top:1px solid #2a2a2a; }
 .profile-popup-item { display:flex; align-items:center; gap:10px; padding:12px 20px; color:#ccc; font-size:13px; cursor:pointer; transition:background 0.15s; border:none; background:none; width:100%; text-align:left; font-family:var(--font-body); }
 .profile-popup-item:hover { background:rgba(255,255,255,0.05); color:#fff; }
@@ -472,36 +475,42 @@ html, body { height: 100%; overflow: hidden; }
     <div class="avatar-btn" id="avatarBtn"><i class="ti ti-user" aria-hidden="true"></i></div>
     <!-- Profile Popup -->
     <div class="profile-popup" id="profilePopup">
-      <div class="profile-popup-header">
-        <div class="profile-popup-avatar" id="profileAvatar">
-          <i class="ti ti-user" style="font-size:28px;color:#888;"></i>
-          <div class="verify-badge">!</div>
+      <div class="profile-popup-cols">
+        <div class="profile-popup-left">
+          <div class="profile-popup-header">
+            <div class="profile-popup-avatar" id="profileAvatar">
+              <i class="ti ti-user" style="font-size:28px;color:#888;"></i>
+              <div class="verify-badge">!</div>
+            </div>
+            <div class="profile-popup-info">
+              <div class="profile-popup-name" id="profileName">---</div>
+              <div class="profile-popup-email" id="profileEmail">---</div>
+            </div>
+          </div>
+          <div class="profile-popup-verify" onclick="window.location.href='/client/account.html'">
+            <div class="profile-popup-verify-icon">!</div>
+            <div>
+              <div class="profile-popup-verify-text">Verifique sua conta</div>
+              <div class="profile-popup-verify-sub">Prossiga para a verificacao de conta.</div>
+            </div>
+          </div>
+          <div class="profile-popup-meta">
+            <div class="profile-popup-country" id="profileCountry">Brasil</div>
+          </div>
+          <div class="profile-popup-meta">
+            <div class="profile-popup-detail">Registro<strong id="profileDate">--/--/----</strong></div>
+            <div class="profile-popup-detail">ID de usuario<strong id="profileId">------</strong></div>
+          </div>
         </div>
-        <div class="profile-popup-info">
-          <div class="profile-popup-name" id="profileName">---</div>
-          <div class="profile-popup-email" id="profileEmail">---</div>
+        <div class="profile-popup-right">
+          <button class="profile-popup-item" onclick="window.location.href='/client/account.html'"><span class="material-icons-outlined">account_circle</span>Minha Conta</button>
+          <button class="profile-popup-item" onclick="window.location.href='/client/account.html#foto'"><span class="material-icons-outlined">account_box</span>Alterar Foto</button>
+          <button class="profile-popup-item" onclick="closeProfilePopup();openDepositModal();"><span class="material-icons-outlined">arrow_upward</span>Depositar</button>
+          <button class="profile-popup-item" onclick="showToast('Saques em breve')"><span class="material-icons-outlined">arrow_downward</span>Sacar</button>
+          <button class="profile-popup-item" onclick="closeProfilePopup();openHistoryPanel();"><span class="material-icons-outlined">history</span>Historico</button>
+          <button class="profile-popup-item" onclick="showToast('Suporte em breve')"><span class="material-icons-outlined">chat</span>Suporte</button>
+          <button class="profile-popup-item" onclick="logout()"><span class="material-icons-outlined">logout</span>Sair</button>
         </div>
-      </div>
-      <div class="profile-popup-verify" onclick="window.location.href='/client/account.html'">
-        <div class="profile-popup-verify-icon">!</div>
-        <div>
-          <div class="profile-popup-verify-text">Verifique sua conta</div>
-          <div class="profile-popup-verify-sub">Prossiga para a verificacao de conta.</div>
-        </div>
-      </div>
-      <div class="profile-popup-meta">
-        <div class="profile-popup-country" id="profileCountry">Brasil</div>
-        <div class="profile-popup-detail">Registro<strong id="profileDate">--/--/----</strong></div>
-        <div class="profile-popup-detail">ID de usuario<strong id="profileId">------</strong></div>
-      </div>
-      <div class="profile-popup-menu">
-        <button class="profile-popup-item" onclick="window.location.href='/client/account.html'"><span class="material-icons-outlined">account_circle</span>Minha Conta</button>
-        <button class="profile-popup-item" onclick="window.location.href='/client/account.html#foto'"><span class="material-icons-outlined">account_box</span>Alterar Foto</button>
-        <button class="profile-popup-item" onclick="closeProfilePopup();openDepositModal();"><span class="material-icons-outlined">arrow_upward</span>Depositar</button>
-        <button class="profile-popup-item" onclick="showToast('Saques em breve')"><span class="material-icons-outlined">arrow_downward</span>Sacar</button>
-        <button class="profile-popup-item" onclick="closeProfilePopup();openHistoryPanel();"><span class="material-icons-outlined">history</span>Historico</button>
-        <button class="profile-popup-item" onclick="showToast('Suporte em breve')"><span class="material-icons-outlined">chat</span>Suporte</button>
-        <button class="profile-popup-item" onclick="logout()"><span class="material-icons-outlined">logout</span>Sair</button>
       </div>
     </div>
 
