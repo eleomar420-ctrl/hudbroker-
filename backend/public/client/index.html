@@ -1122,7 +1122,7 @@ async function openTrade(direction) {
   try {
     const durationSeconds = durationOptions[t.durationIndex].sec;
     const syncedDuration = secondsUntilNextCandleClose(durationSeconds);
-    await apiFetch('/trading/trades', {
+    const data = await apiFetch('/trading/trades', {
       method: 'POST',
       body: JSON.stringify({
         asset: t.asset,
