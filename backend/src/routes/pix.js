@@ -59,6 +59,7 @@ router.post('/charge', authRequired, requireRole('client'), async (req, res) => 
     });
 
     const data = await response.json();
+    console.log('[pix/charge] iHub response FULL:', JSON.stringify(data));
 
     if (!response.ok) {
       console.error('[pix/charge] iHub status:', response.status);
