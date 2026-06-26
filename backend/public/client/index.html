@@ -415,6 +415,13 @@ html, body { height: 100%; overflow: hidden; }
 @media(max-width:768px) { .account-panel,.acc-sub { width:100%; } }
 
 
+
+/* Hide mobile-only elements on desktop */
+.m-bottom-nav { display:none; }
+.m-buysell-row { display:none; }
+.m-controls-row { display:none; }
+.m-return-row { display:none; }
+
 @media (max-width: 768px) {
   .trade-topbar { padding: 0 10px; gap: 8px; height: 60px; justify-content: space-between; }
   .asset-tabs-row { display: none; }
@@ -694,7 +701,7 @@ html, body { height: 100%; overflow: hidden; }
           </div>
         </div>
         <div class="m-ctrl-col">
-          <div class="m-ctrl-label">Expiracao</div>
+          <div class="m-ctrl-label">Expiração</div>
           <div class="m-stepper-row2">
             <button class="m-step-btn" id="m_durMinus">−</button>
             <span class="m-step-val" id="m_durValue">1 min</span>
