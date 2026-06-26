@@ -415,13 +415,6 @@ html, body { height: 100%; overflow: hidden; }
 @media(max-width:768px) { .account-panel,.acc-sub { width:100%; } }
 
 
-
-/* Hide mobile-only elements on desktop */
-.m-bottom-nav { display:none; }
-.m-buysell-row { display:none; }
-.m-controls-row { display:none; }
-.m-return-row { display:none; }
-
 @media (max-width: 768px) {
   .trade-topbar { padding: 0 10px; gap: 8px; height: 60px; justify-content: space-between; }
   .asset-tabs-row { display: none; }
@@ -474,34 +467,13 @@ html, body { height: 100%; overflow: hidden; }
   .m-progress-fill { height: 100%; background: #51a85d; width: 100%; transition: width 1s linear; border-radius: 2px; margin-left: auto; }
 
   /* Linhas 3 e 4 juntas: tempo e valor lado a lado, cada um com -/+ colados à esquerda */
-  /* Buy/Sell buttons */
-  .m-buysell-row { display:flex; gap:8px; padding:6px 10px; }
-  .m-btn-buy2, .m-btn-sell2 { flex:1; display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border:none; border-radius:6px; font-size:16px; font-weight:500; cursor:pointer; color:#fff; touch-action:manipulation; }
-  .m-btn-buy2 { background:#51a85d; }
-  .m-btn-sell2 { background:#e15b44; }
-
-  /* Controls row */
-  .m-controls-row { display:flex; gap:0; padding:4px 10px; }
-  .m-ctrl-col { flex:1; text-align:center; }
-  .m-ctrl-label { font-size:11px; color:#888; margin-bottom:4px; }
-  .m-stepper-row2 { display:flex; align-items:center; background:#1c1c1c; border-radius:4px; overflow:hidden; }
-  .m-step-btn { background:#1a1a1a; border:none; color:#888; font-size:18px; width:36px; height:36px; cursor:pointer; touch-action:manipulation; }
-  .m-step-btn:first-child { border-right:1px solid #000; }
-  .m-step-btn:last-child { border-left:1px solid #000; }
-  .m-step-val { flex:1; text-align:center; color:#fff; font-size:14px; font-weight:500; }
-
-  /* Return row */
-  .m-return-row { display:flex; justify-content:space-between; padding:6px 14px; }
-  .m-return-label { font-size:12px; color:#888; }
-  .m-return-val { color:#51a85d; font-weight:600; }
-  .m-timer-val { font-size:12px; color:#e15b44; font-family:'IBM Plex Mono',monospace; font-weight:600; }
-
-  /* Bottom nav */
-  .m-bottom-nav { display:flex; position:fixed; bottom:0; left:0; right:0; background:#111; border-top:1px solid #1a1a1a; z-index:50; padding:6px 0 env(safe-area-inset-bottom,6px); }
-  .m-nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; background:none; border:none; color:#666; font-size:9px; cursor:pointer; padding:6px 0; font-family:'Inter',sans-serif; }
-  .m-nav-item .material-icons-outlined { font-size:20px; }
-  .m-nav-item.active { color:#51a85d; }
-  .mobile-panel { padding-bottom:60px; }
+  .m-stepper-pair-row { display: flex; gap: 0; }
+  .m-stepper-row { flex: 1; display: flex; align-items: center; background: #1c1c1c; border-radius: 0; overflow: hidden; }
+  .m-stepper-btns { display: flex; flex-shrink: 0; }
+  .m-stepper-btn { background: #1a1a1a; border: none; color: #8b8b96; font-size: 18px; width: 34px; height: 38px; cursor: pointer; flex-shrink: 0; touch-action: manipulation; }
+  .m-stepper-btn:hover { color: #fff; background: #242424; }
+  .m-stepper-btns .m-stepper-btn:first-child { border-right: 1px solid #000000; }
+  .m-stepper-display { flex: 1; text-align: center; color: #fff; font-size: 14px; font-weight: 500; padding-right: 8px; }
 
   /* Linha 5: Comprar e Vender colados, arredondado só nas pontas externas */
   .m-action-row { display: flex; gap: 0; border-radius: 10px; overflow: hidden; }
@@ -678,51 +650,52 @@ html, body { height: 100%; overflow: hidden; }
     </div>
 
     <div class="mobile-panel" id="mobilePanel">
-      <!-- Botoes Comprar/Vender -->
-      <div class="m-buysell-row">
-        <button class="m-btn-buy2" id="m_buyBtn">
-          <span>Comprar</span>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-        </button>
-        <button class="m-btn-sell2" id="m_sellBtn">
-          <span>Vender</span>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>
-        </button>
+      <div class="m-timer-row">
+        <span class="m-timer-label">Tempo restante:</span>
+        <span class="m-timer-value" id="m_countdownLabel">01:00</span>
+      </div>
+      <div class="m-progress-track">
+        <div class="m-progress-fill" id="m_countdownFill"></div>
       </div>
 
-      <!-- Valor e Expiracao lado a lado -->
-      <div class="m-controls-row">
-        <div class="m-ctrl-col">
-          <div class="m-ctrl-label">Valor</div>
-          <div class="m-stepper-row2">
-            <button class="m-step-btn" id="m_stakeMinus">−</button>
-            <span class="m-step-val" id="m_stakeValue">5,00</span>
-            <button class="m-step-btn" id="m_stakePlus">+</button>
+      <div class="m-stepper-pair-row">
+        <div class="m-stepper-row">
+          <div class="m-stepper-btns">
+            <button class="m-stepper-btn" id="m_durMinus">−</button>
+            <button class="m-stepper-btn" id="m_durPlus">+</button>
           </div>
+          <div class="m-stepper-display" id="m_durValue">1 min</div>
         </div>
-        <div class="m-ctrl-col">
-          <div class="m-ctrl-label">Expiração</div>
-          <div class="m-stepper-row2">
-            <button class="m-step-btn" id="m_durMinus">−</button>
-            <span class="m-step-val" id="m_durValue">1 min</span>
-            <button class="m-step-btn" id="m_durPlus">+</button>
+
+        <div class="m-stepper-row">
+          <div class="m-stepper-btns">
+            <button class="m-stepper-btn" id="m_stakeMinus">−</button>
+            <button class="m-stepper-btn" id="m_stakePlus">+</button>
           </div>
+          <div class="m-stepper-display"><i class="fa fa-dollar" aria-hidden="true" style="font-size:13px;"></i> <span id="m_stakeValue">5,00</span></div>
         </div>
       </div>
 
-      <!-- Retorno e Timer -->
-      <div class="m-return-row">
-        <span class="m-return-label">Retorno: <span class="m-return-val" id="m_profitAmount">+R$ 4,25</span></span>
-        <span class="m-timer-val" id="m_countdownLabel">01:00</span>
+      <div class="m-action-row">
+        <button class="m-btn-buy" id="m_buyBtn">
+          <span>COMPRAR</span>
+          <span class="m-pct">85%</span>
+        </button>
+        <button class="m-btn-sell" id="m_sellBtn">
+          <span class="m-pct">85%</span>
+          <span>VENDER</span>
+        </button>
       </div>
-    </div>
 
-    <!-- Bottom Navigation -->
-    <div class="m-bottom-nav" id="mBottomNav">
-      <button class="m-nav-item active" data-tab="trade"><span class="material-icons-outlined">candlestick_chart</span><span>TRADE</span></button>
-      <button class="m-nav-item" data-tab="history"><span class="material-icons-outlined">schedule</span><span>HISTORICO</span></button>
-      <button class="m-nav-item" data-tab="copytrade"><span class="material-icons-outlined">content_copy</span><span>COPY TRADE</span></button>
-      <button class="m-nav-item" data-tab="menu"><span class="material-icons-outlined">menu</span><span>MENU</span></button>
+      <div class="m-asset-row" id="m_assetRow">
+        <div class="m-asset-info">
+          <div class="m-asset-icon" id="m_assetIcon">B</div>
+          <span class="m-asset-name" id="m_assetName">Bitcoin</span>
+        </div>
+        <span class="m-chevron">▲▼</span>
+      </div>
+
+      <div class="m-live-clock" id="m_liveClock">Hora atual: --:--:--</div>
     </div>
 
     <div class="m-asset-drawer" id="mAssetDrawer">
@@ -1948,26 +1921,6 @@ document.getElementById('accAvInput').onchange = function(e) {
 
 
 
-// === BOTTOM NAV MOBILE ===
-document.querySelectorAll('.m-nav-item').forEach(function(btn) {
-  btn.onclick = function() {
-    var tab = btn.dataset.tab;
-    document.querySelectorAll('.m-nav-item').forEach(function(b) { b.classList.remove('active'); });
-    btn.classList.add('active');
-    if (tab === 'history') { openHistoryPanel(); }
-    else if (tab === 'menu') { document.getElementById('sideMenuOverlay').classList.add('open'); }
-    else if (tab === 'copytrade') { showToast('Copy Trade em breve'); }
-  };
-});
-
-// Update mobile profit amount
-function updateMobileProfit() {
-  var t = getActiveTab();
-  if (!t) return;
-  var el = document.getElementById('m_profitAmount');
-  if (el) el.textContent = '+' + formatMoney(t.stakeValue * 0.85);
-}
-setInterval(updateMobileProfit, 1000);
 
 </script>
 
