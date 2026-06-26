@@ -528,7 +528,7 @@ html, body { height: 100%; overflow: hidden; }
       <div class="account-option" data-account="demo">Conta Demo</div>
     </div>
 
-    <div class="avatar-btn" id="avatarBtn" style="position:relative;"><i class="ti ti-user" aria-hidden="true"></i><div class="avatar-verify-badge" id="avatarVerifyBadge" style="display:flex;position:absolute;bottom:-2px;right:-2px;width:16px;height:16px;background:#e53935;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;border:2px solid #000;font-weight:700;">!</div></div>
+    <div class="avatar-btn" id="avatarBtn"><i class="ti ti-user" aria-hidden="true"></i></div>
     <!-- Profile Popup -->
     <div class="profile-popup" id="profilePopup">
       <div class="profile-popup-cols">
@@ -1091,14 +1091,10 @@ function renderBalance() {
 
   const avatarBtn = document.getElementById('avatarBtn');
   if (avatarBtn && cachedUser.avatar_url && !avatarBtn.dataset.avatarSet) {
-    avatarBtn.innerHTML = `<img src="${cachedUser.avatar_url}" alt="" style="width:100%; height:100%; object-fit:cover;"><div class="avatar-verify-badge" id="avatarVerifyBadge" style="position:absolute;bottom:-2px;right:-2px;width:16px;height:16px;background:#e53935;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;border:2px solid #000;font-weight:700;">!</div>`;
+    avatarBtn.innerHTML = `<img src="${cachedUser.avatar_url}" alt="" style="width:100%; height:100%; object-fit:cover;">`;
     avatarBtn.dataset.avatarSet = 'true';
   }
-  // Mostrar badge de verificação se conta não verificada
-  const badge = document.getElementById('avatarVerifyBadge');
-  if (badge) {
-    badge.style.display = (cachedUser.kyc_status === 'approved') ? 'none' : 'flex';
-  }
+
 }
 
 document.getElementById('accountPill').onclick = () => {
