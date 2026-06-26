@@ -1320,43 +1320,34 @@ function showSuccessPopup(message) {
   }, 2200);
 }
 
-// === SONS (Web Audio API — zero delay) ===
-var _actx = null;
-var _bufClick = null, _bufTrade = null;
-try { _actx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
-
-async function _loadBuf(url) {
-  if (!_actx) return null;
-  try {
-    var res = await fetch(url);
-    if (!res.ok) return null;
-    var arr = await res.arrayBuffer();
-    return await _actx.decodeAudioData(arr);
-  } catch(e) { return null; }
+// === SONS (pool de Audio — funciona em todos os navegadores) ===
+function _createPool(url, size) {
+  var pool = [];
+  for (var i = 0; i < size; i++) {
+    var a = new Audio(url);
+    a.preload = 'auto';
+    pool.push(a);
+  }
+  return { pool: pool, idx: 0 };
 }
 
-(async function() {
-  _bufClick = await _loadBuf('/sounds/click.mp3');
-  _bufTrade = await _loadBuf('/sounds/trade.mp3');
-})();
+var _poolClick = _createPool('/sounds/click.mp3', 5);
+var _poolTrade = _createPool('/sounds/trade.mp3', 5);
 
-function _playBuf(buf) {
-  if (!buf || !_actx) return;
-  _actx.resume().then(function() {
-    var src = _actx.createBufferSource();
-    src.buffer = buf;
-    src.connect(_actx.destination);
-    src.start(0);
-  });
+function _playPool(p) {
+  var a = p.pool[p.idx];
+  p.idx = (p.idx + 1) % p.pool.length;
+  a.currentTime = 0;
+  a.play().catch(function(){});
 }
 
 function playClick() {
   if (typeof soundEnabled !== 'undefined' && !soundEnabled) return;
-  _playBuf(_bufClick);
+  _playPool(_poolClick);
 }
 function playTrade() {
   if (typeof soundEnabled !== 'undefined' && !soundEnabled) return;
-  _playBuf(_bufTrade);
+  _playPool(_poolTrade);
 }
 
 document.getElementById('buyBtn').onclick = () => { playTrade(); openTrade('up'); };
