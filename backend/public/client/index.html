@@ -206,7 +206,7 @@ html, body { height: 100%; overflow: hidden; }
 .modal-box { width: 380px; background: #000000; border-radius: 10px; overflow: hidden; }
 .modal-title { background: var(--text-faint); color: var(--bg); font-weight: 600; padding: 12px 18px; font-size: 14px; }
 .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
-.dep-shortcut { background:#1a1a1a;border:1px solid #2a2a2a;color:#ccc;border-radius:6px;padding:8px;font-size:11px;font-family:var(--font-mono);cursor:pointer;transition:all 0.15s; }
+.dep-shortcut { background:#1a1a1a;border:1px solid #2a2a2a;color:#ccc;border-radius:6px;padding:8px;font-size:11px;font-family:"Inter",sans-serif;cursor:pointer;transition:all 0.15s; }
 .dep-shortcut:hover { background:#252525;color:#fff;border-color:#51a85d; }
 
 .side-menu-overlay { display: block; position: fixed; left: 0; top: 0; bottom: 0; width: 72px; background: none; z-index: 90; pointer-events: none; }
@@ -414,6 +414,31 @@ html, body { height: 100%; overflow: hidden; }
 .acc-empty { text-align:center; padding:40px 16px; color:#555; font-size:13px; }
 @media(max-width:768px) { .account-panel,.acc-sub { width:100%; } }
 
+
+/* Trade Entry Overlay */
+.trade-entry-line { position:absolute; left:0; right:140px; height:1px; z-index:10; pointer-events:none; }
+.trade-entry-line.up { background:rgba(81,168,93,0.5); box-shadow:0 0 6px rgba(81,168,93,0.3); }
+.trade-entry-line.down { background:rgba(225,91,68,0.5); box-shadow:0 0 6px rgba(225,91,68,0.3); }
+.trade-entry-label { position:absolute; right:0; top:-10px; font-size:10px; font-family:'IBM Plex Mono',monospace; padding:2px 6px; border-radius:3px; color:#fff; white-space:nowrap; }
+.trade-entry-label.up { background:rgba(81,168,93,0.8); }
+.trade-entry-label.down { background:rgba(225,91,68,0.8); }
+.trade-entry-dash { position:absolute; left:0; right:0; top:0; border-top:1px dashed; }
+.trade-entry-dash.up { border-color:rgba(81,168,93,0.4); }
+.trade-entry-dash.down { border-color:rgba(225,91,68,0.4); }
+
+/* Trade Badge */
+.trade-badges { position:absolute; top:8px; left:8px; z-index:11; display:flex; flex-direction:column; gap:6px; }
+.trade-badge { display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:6px; font-size:12px; backdrop-filter:blur(8px); animation:fadeInBadge 0.3s ease; }
+.trade-badge.up { background:rgba(81,168,93,0.85); color:#fff; }
+.trade-badge.down { background:rgba(225,91,68,0.85); color:#fff; }
+.trade-badge-icon { font-size:16px; }
+.trade-badge-info { display:flex; flex-direction:column; gap:1px; }
+.trade-badge-asset { font-weight:600; font-size:11px; }
+.trade-badge-price { font-family:'IBM Plex Mono',monospace; font-size:11px; opacity:0.9; }
+.trade-badge-timer { font-family:'IBM Plex Mono',monospace; font-size:10px; opacity:0.8; }
+@keyframes fadeInBadge { from { transform:translateY(-10px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+@media(max-width:768px) { .trade-entry-line { right:0; } }
+
 @media (max-width: 768px) {
   .trade-topbar { padding: 0 10px; gap: 8px; height: 60px; justify-content: space-between; }
   .asset-tabs-row { display: none; }
@@ -610,7 +635,7 @@ html, body { height: 100%; overflow: hidden; }
   </div>
 
   <div class="trade-body">
-    <div class="chart-area" id="chartArea"></div>
+    <div class="chart-area" id="chartArea" style="position:relative;"><div class="trade-badges" id="tradeBadges"></div></div>
 
     <div class="trade-panel">
       <div class="panel-block panel-square">
@@ -792,7 +817,7 @@ html, body { height: 100%; overflow: hidden; }
       </div>
       <div class="modal-body">
         <div style="display:flex;align-items:center;justify-content:center;padding:10px;background:rgba(255,255,255,0.04);border-radius:8px;">
-          <img src="/img/pix-logo.png" alt="PIX - Powered by Banco Central" style="height:40px;">
+          <img src="/img/pix-logo.png" alt="PIX - Powered by Banco Central" style="height:20px;">
         </div>
 
         <div id="cpfField" style="display:none;">
@@ -804,7 +829,7 @@ html, body { height: 100%; overflow: hidden; }
           <label style="font-size:11px;color:#888;margin-bottom:4px;display:block;">Valor do depósito</label>
           <div style="position:relative;">
             <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#51a85d;font-weight:600;font-size:16px;">R$</span>
-            <input type="text" id="depAmount" placeholder="0,00" inputmode="decimal" style="width:100%;background:#111;border:1px solid #2a2a2a;color:#fff;border-radius:6px;padding:10px 12px 10px 40px;font-size:18px;font-family:var(--font-mono);font-weight:600;">
+            <input type="text" id="depAmount" placeholder="0,00" inputmode="decimal" style="width:100%;background:#111;border:1px solid #2a2a2a;color:#fff;border-radius:6px;padding:10px 12px 10px 40px;font-size:18px;font-family:"Inter",sans-serif;font-weight:600;">
           </div>
         </div>
 
@@ -1222,6 +1247,7 @@ async function openTrade(direction) {
     // Rastrear resultado
     if (data && data.tradeId) {
       trackTradeResult(data.tradeId, syncedDuration);
+      showTradeEntryOverlay(data.tradeId, t.asset, direction, data.entryPrice, data.expiresAt);
     }
   } catch (err) {
     showToast(err.message, 'error');
@@ -1723,6 +1749,7 @@ function trackTradeResult(tradeId, durationSec) {
       if (trade && trade.status !== 'open') {
         clearInterval(pollInterval);
         showTradeResultPopup(trade);
+        removeTradeEntryOverlay(tradeId);
         refreshBalance();
         loadHistory();
       }
@@ -1933,6 +1960,63 @@ document.getElementById('accAvInput').onchange = function(e) {
   };
   reader.readAsDataURL(file);
 };
+
+
+
+// === TRADE ENTRY OVERLAY ===
+let activeTradeOverlays = {};
+
+function showTradeEntryOverlay(tradeId, asset, direction, entryPrice, expiresAt) {
+  const chartArea = document.getElementById('chartArea');
+  if (!chartArea) return;
+
+  // Line overlay - position at random 30-70% height so multiple trades don't overlap
+  const existingCount = Object.keys(activeTradeOverlays).length;
+  const yPercent = 40 + (existingCount * 12) % 30;
+
+  const line = document.createElement('div');
+  line.className = 'trade-entry-line ' + direction;
+  line.id = 'tradeLine-' + tradeId;
+  line.style.top = yPercent + '%';
+  line.innerHTML = '<div class="trade-entry-dash ' + direction + '"></div><div class="trade-entry-label ' + direction + '">' + direction.toUpperCase() + ' @ ' + Number(entryPrice).toFixed(2) + '</div>';
+  chartArea.appendChild(line);
+
+  // Badge
+  const badges = document.getElementById('tradeBadges');
+  const badge = document.createElement('div');
+  badge.className = 'trade-badge ' + direction;
+  badge.id = 'tradeBadge-' + tradeId;
+  const arrow = direction === 'up' ? '↑' : '↓';
+  const assetShort = asset.replace('USDT','');
+  badge.innerHTML = '<span class="trade-badge-icon">' + arrow + '</span><div class="trade-badge-info"><span class="trade-badge-asset">' + assetShort + ' ' + (direction === 'up' ? 'COMPRA' : 'VENDA') + '</span><span class="trade-badge-price">Entrada: ' + Number(entryPrice).toFixed(2) + '</span><span class="trade-badge-timer" id="badgeTimer-' + tradeId + '">--:--</span></div>';
+  badges.appendChild(badge);
+
+  // Timer update
+  const timerInterval = setInterval(function() {
+    const remaining = Math.max(0, Math.floor((new Date(expiresAt) - Date.now()) / 1000));
+    const timerEl = document.getElementById('badgeTimer-' + tradeId);
+    if (timerEl) {
+      const m = Math.floor(remaining / 60);
+      const s = remaining % 60;
+      timerEl.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    }
+    if (remaining <= 0) {
+      clearInterval(timerInterval);
+      removeTradeEntryOverlay(tradeId);
+    }
+  }, 1000);
+
+  activeTradeOverlays[tradeId] = { lineEl: line, badgeEl: badge, timerInterval: timerInterval };
+}
+
+function removeTradeEntryOverlay(tradeId) {
+  const overlay = activeTradeOverlays[tradeId];
+  if (!overlay) return;
+  clearInterval(overlay.timerInterval);
+  if (overlay.lineEl && overlay.lineEl.parentNode) overlay.lineEl.remove();
+  if (overlay.badgeEl && overlay.badgeEl.parentNode) overlay.badgeEl.remove();
+  delete activeTradeOverlays[tradeId];
+}
 
 </script>
 
