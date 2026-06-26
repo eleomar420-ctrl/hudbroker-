@@ -27,7 +27,9 @@ async function apiFetch(path, opts = {}) {
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const res = await fetch(API_BASE + path, { ...opts, headers });
-  const data = await res.json();
+  const text = await res.text();
+  let data = {};
+  try { data = text ? JSON.parse(text) : {}; } catch(e) { data = {}; }
 
   if (!res.ok) {
     throw new Error(data.error || `Erro ${res.status}`);
