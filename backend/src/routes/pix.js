@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { randomUUID } from 'crypto';
 import crypto from 'crypto';
-import { queryOne, run, withTransaction } from '../db/index.js';
+import { queryOne, query, run, withTransaction } from '../db/index.js';
 import { authRequired, requireRole } from '../middleware/auth.js';
 import { processFirstDeposit } from '../services/commissionEngine.js';
 
@@ -14,6 +14,21 @@ function getAuthHeader() {
   const encoded = Buffer.from('secret:' + secretKey).toString('base64');
   return 'Basic ' + encoded;
 }
+
+// ============ LISTAR COBRANÇAS DO USUÁRIO ============
+
+router.get('/charges', authRequired, requireRole('client'), async (req, res) => {
+  try {
+    const charges = await query(
+      'SELECT * FROM pix_charges WHERE user_id = $1 ORDER BY created_at DESC LIMIT 50',
+      [req.auth.id]
+    );
+    res.json(charges);
+  } catch (err) {
+    console.error('[pix/charges]', err);
+    res.status(500).json({ error: 'Erro ao listar cobranças' });
+  }
+});
 
 // ============ CRIAR COBRANÇA PIX ============
 
