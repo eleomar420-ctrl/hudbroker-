@@ -1813,6 +1813,89 @@ document.addEventListener('click', (e) => {
     closeValuePopup();
   }
 });
+
+// === PAINEL MINHA CONTA (flutuante) ===
+function openAccountPanel() {
+  document.getElementById('accountPanel').classList.add('open');
+}
+function closeAccountPanel() {
+  document.getElementById('accountPanel').classList.remove('open');
+  document.querySelectorAll('.acc-sub').forEach(function(s) { s.classList.remove('open'); });
+}
+function openAccSub(name) {
+  document.getElementById('accSub-' + name).classList.add('open');
+  if (name === 'dados') loadAccDados();
+  if (name === 'depositos') loadAccDeposits();
+  if (name === 'foto') loadAccAvatar();
+}
+function closeAccSub(name) {
+  document.getElementById('accSub-' + name).classList.remove('open');
+}
+
+function loadAccDados() {
+  if (!cachedUser) return;
+  var u = cachedUser;
+  document.getElementById('accNome').value = (u.name || '') + ' ' + (u.last_name || '');
+  document.getElementById('accDoc').value = localStorage.getItem('hb_cpf') || '';
+  document.getElementById('accNasc').value = localStorage.getItem('hb_nasc') || '';
+  document.getElementById('accLogin').value = u.email || '';
+  document.getElementById('accEmail').value = u.email || '';
+  document.getElementById('accPhone').value = u.phone || '';
+  var d = new Date();
+  document.getElementById('accUltimoLogin').value = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  if (localStorage.getItem('hb_dados_saved')) {
+    document.getElementById('accDoc').disabled = true;
+    document.getElementById('accNasc').disabled = true;
+    document.getElementById('accPhone').disabled = true;
+    document.getElementById('accBtnSave').disabled = true;
+    document.getElementById('accBtnSave').textContent = 'Dados ja salvos';
+  }
+}
+
+function saveAccDados() {
+  var doc = document.getElementById('accDoc').value.replace(/\D/g,'');
+  if (doc.length !== 11 && doc.length !== 14) { showToast('Documento invalido','error'); return; }
+  localStorage.setItem('hb_dados_saved','1');
+  localStorage.setItem('hb_cpf', document.getElementById('accDoc').value);
+  localStorage.setItem('hb_nasc', document.getElementById('accNasc').value);
+  localStorage.setItem('hb_phone', document.getElementById('accPhone').value);
+  showToast('Dados salvos com sucesso');
+  loadAccDados();
+}
+
+async function loadAccDeposits() {
+  var el = document.getElementById('accDepList');
+  try {
+    var res = await fetch('/api/pix/charges', {headers:{'Authorization':'Bearer '+getToken()}});
+    var charges = res.ok ? await res.json() : [];
+    if (!charges.length) { el.innerHTML = '<div class="acc-empty">Nenhum deposito registrado</div>'; return; }
+    el.innerHTML = charges.map(function(c, i) {
+      var isPaid = c.status === 'paid';
+      var dt = new Date(c.created_at);
+      return '<div class="acc-tx-card"><div class="acc-tx-top"><span class="acc-tx-label">Deposito #' + (charges.length - i) + '</span><span class="acc-tx-amount">R$ ' + Number(c.amount).toFixed(2).replace('.',',') + '</span></div><div class="acc-tx-line"></div><div class="acc-tx-bottom"><span class="acc-tx-date">' + dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}) + '</span><span class="acc-tx-status ' + (isPaid?'paid':'pending') + '">Status: ' + (isPaid?'PAGO':'PENDENTE') + '</span></div></div>';
+    }).join('');
+  } catch(e) { el.innerHTML = '<div class="acc-empty">Erro ao carregar</div>'; }
+}
+
+function loadAccAvatar() {
+  if (cachedUser && cachedUser.avatar_url) {
+    document.getElementById('accAvPrev').innerHTML = '<img src="' + cachedUser.avatar_url + '" alt="">';
+  }
+}
+
+document.getElementById('accAvInput').onchange = function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 500*1024) { showToast('Max 500KB','error'); return; }
+  var reader = new FileReader();
+  reader.onload = async function(ev) {
+    var dataUrl = ev.target.result;
+    document.getElementById('accAvPrev').innerHTML = '<img src="' + dataUrl + '" alt="">';
+    try { await apiFetch('/trading/avatar',{method:'POST',body:JSON.stringify({avatarDataUrl:dataUrl})}); showToast('Foto atualizada'); } catch(err) { showToast('Erro','error'); }
+  };
+  reader.readAsDataURL(file);
+};
+
 </script>
 
 <!-- Popup Tempo -->
