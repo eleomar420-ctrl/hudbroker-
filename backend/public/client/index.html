@@ -1248,20 +1248,38 @@ function showSuccessPopup(message) {
   }, 2200);
 }
 
-// === SONS (HTML5 Audio) ===
-const _sndClick = new Audio('/sounds/click.mp3');
-const _sndTrade = new Audio('/sounds/trade.mp3');
-_sndClick.preload = 'auto';
-_sndTrade.preload = 'auto';
+// === SONS (Web Audio API — sem delay) ===
+const _actx = new (window.AudioContext || window.webkitAudioContext)();
+let _bufClick = null, _bufTrade = null;
 
-function playClick() {
-  if (typeof soundEnabled !== 'undefined' && !soundEnabled) return;
-  try { _sndClick.currentTime = 0; _sndClick.play().catch(function(){}); } catch(e) {}
+async function _loadBuf(url) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const arr = await res.arrayBuffer();
+    return await _actx.decodeAudioData(arr);
+  } catch(e) { return null; }
 }
-function playTrade() {
-  if (typeof soundEnabled !== 'undefined' && !soundEnabled) return;
-  try { _sndTrade.currentTime = 0; _sndTrade.play().catch(function(){}); } catch(e) {}
+(async () => {
+  _bufClick = await _loadBuf('/sounds/click.mp3');
+  _bufTrade = await _loadBuf('/sounds/trade.mp3');
+})();
+
+function _playBuf(buf) {
+  if (!buf) return;
+  if (_actx.state === 'suspended') _actx.resume();
+  const src = _actx.createBufferSource();
+  src.buffer = buf;
+  src.connect(_actx.destination);
+  src.start(0);
 }
+function playClick() { if (typeof soundEnabled !== 'undefined' && !soundEnabled) return; _playBuf(_bufClick); }
+function playTrade() { if (typeof soundEnabled !== 'undefined' && !soundEnabled) return; _playBuf(_bufTrade); }
+
+document.addEventListener('touchstart', function _unlock() {
+  if (_actx.state === 'suspended') _actx.resume();
+  document.removeEventListener('touchstart', _unlock);
+}, { once: true });
 
 document.getElementById('buyBtn').onclick = () => { playTrade(); openTrade('up'); };
 document.getElementById('sellBtn').onclick = () => { playTrade(); openTrade('down'); };
