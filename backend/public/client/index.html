@@ -166,7 +166,7 @@ html, body { height: 100%; overflow: hidden; }
 
 .account-pill { display: flex; align-items: center; gap: 6px; cursor: pointer; position: relative; height: 36px; flex-shrink: 0; }
 .account-pill .label { font-size: 11px; color: #ffffff82; display: block; line-height: 1.2; }
-.account-pill .value { font-size: 18px; font-weight: 700; color: #51a85d; font-family: var(--font-display); display: block; line-height: 1.2; }
+.account-pill .value { font-size: 18px; font-weight: 700; color: #ffffff; font-family: var(--font-display); display: block; line-height: 1.2; }
 .account-pill .value.demo { color: var(--brand); }
 .account-dropdown { display:none; position:absolute; top:50px; right:0; background:#1a1a1e; border:1px solid #2a2a2a; border-radius:8px; z-index:60; min-width:440px; box-shadow:0 8px 24px rgba(0,0,0,0.6); overflow:hidden; }
 .account-dropdown.open { display:block; }
@@ -415,6 +415,13 @@ html, body { height: 100%; overflow: hidden; }
 @media(max-width:768px) { .account-panel,.acc-sub { width:100%; } }
 
 
+
+
+/* Desktop: esconder avatar, pill sem fundo */
+@media (min-width: 769px) {
+  .avatar-btn { display: none; }
+  .account-pill { background: none !important; border: none; padding: 0; }
+}
 
 /* Mobile v2 - hidden on desktop */
 .m2-panel { display:none; }
