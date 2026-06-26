@@ -168,19 +168,23 @@ html, body { height: 100%; overflow: hidden; }
 .account-pill .label { font-size: 11px; color: #ffffff82; display: block; line-height: 1.2; }
 .account-pill .value { font-size: 18px; font-weight: 700; color: #51a85d; font-family: var(--font-display); display: block; line-height: 1.2; }
 .account-pill .value.demo { color: var(--brand); }
-.account-dropdown { display:none; position:absolute; top:50px; right:0; background:#111; border:1px solid #2a2a2a; border-radius:8px; padding:8px; z-index:60; min-width:260px; box-shadow:0 8px 24px rgba(0,0,0,0.6); }
+.account-dropdown { display:none; position:absolute; top:50px; right:0; background:#1a1a1e; border:1px solid #2a2a2a; border-radius:8px; z-index:60; min-width:440px; box-shadow:0 8px 24px rgba(0,0,0,0.6); overflow:hidden; }
 .account-dropdown.open { display:block; }
-.acc-opt-card { padding:12px; border-radius:6px; cursor:pointer; margin-bottom:6px; border:1px solid transparent; transition:background 0.15s; }
-.acc-opt-card:hover { background:rgba(255,255,255,0.04); }
-.acc-opt-card.active { border-color:#51a85d; background:rgba(81,168,93,0.06); }
-.acc-opt-card:last-child { margin-bottom:0; }
-.acc-opt-top { display:flex; align-items:center; gap:8px; margin-bottom:4px; }
-.acc-opt-icon { font-size:18px; font-weight:700; color:#51a85d; }
-.acc-opt-name { font-size:13px; font-weight:600; color:#fff; }
-.acc-opt-type { font-size:11px; color:#888; }
-.acc-opt-balance { font-family:'IBM Plex Mono',monospace; font-size:15px; font-weight:600; color:#fff; margin:6px 0; }
-.acc-opt-deposit { display:flex; align-items:center; gap:4px; font-size:11px; color:#51a85d; background:none; border:none; cursor:pointer; padding:4px 0; font-family:'Inter',sans-serif; }
-.acc-opt-deposit:hover { text-decoration:underline; }
+.acc-drop-title { padding:14px 16px; font-size:14px; font-weight:600; color:#fff; border-bottom:1px solid #2a2a2a; }
+.acc-opt-row { display:flex; align-items:center; gap:12px; padding:12px 16px; cursor:pointer; border-bottom:1px solid #2a2a2a; transition:background 0.15s; }
+.acc-opt-row:last-child { border-bottom:none; }
+.acc-opt-row:hover { background:rgba(255,255,255,0.03); }
+.acc-opt-row.active { background:rgba(81,168,93,0.08); }
+.acc-opt-circle { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:#fff; flex-shrink:0; }
+.acc-opt-circle.real { background:#51a85d; }
+.acc-opt-circle.demo { background:#e8a23d; }
+.acc-opt-info { flex:1; min-width:0; }
+.acc-opt-name { font-size:13px; font-weight:700; color:#fff; text-transform:uppercase; }
+.acc-opt-type { font-size:11px; color:#51a85d; }
+.acc-opt-type.demo { color:#e8a23d; }
+.acc-opt-balance { font-family:'IBM Plex Mono',monospace; font-size:14px; font-weight:500; color:#fff; white-space:nowrap; margin-right:10px; }
+.acc-opt-dep-btn { display:flex; align-items:center; gap:4px; font-size:12px; color:#ccc; background:#2a2a2e; border:none; border-radius:4px; padding:6px 12px; cursor:pointer; font-family:'Inter',sans-serif; flex-shrink:0; }
+.acc-opt-dep-btn:hover { background:#3a3a3e; color:#fff; }
 .account-option { padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; display: flex; justify-content: space-between; }
 .account-option:hover { background: var(--bg-elevated); }
 .account-option.active { color: var(--brand); }
@@ -535,27 +539,24 @@ html, body { height: 100%; overflow: hidden; }
       </svg>
     </div>
     <div class="account-dropdown" id="accountDropdown">
-      <div class="acc-opt-card active" data-account="real" onclick="selectAccount('real')">
-        <div class="acc-opt-top">
-          <span class="acc-opt-icon">R$</span>
-          <div>
-            <div class="acc-opt-name">Conta Principal</div>
-            <div class="acc-opt-type">Conta Real</div>
-          </div>
+      <div class="acc-drop-title">Contas de Operacao</div>
+      <div class="acc-opt-row active" data-account="real" onclick="selectAccount('real')">
+        <div class="acc-opt-circle real">R$</div>
+        <div class="acc-opt-info">
+          <div class="acc-opt-name">Conta Principal</div>
+          <div class="acc-opt-type">Conta Real</div>
         </div>
         <div class="acc-opt-balance" id="accOptRealBal">R$ 0,00</div>
-        <button class="acc-opt-deposit" onclick="event.stopPropagation();document.getElementById('accountDropdown').classList.remove('open');openDepositModal();"><span class="material-icons-outlined" style="font-size:14px;">attach_money</span>Depositar</button>
+        <button class="acc-opt-dep-btn" onclick="event.stopPropagation();document.getElementById('accountDropdown').classList.remove('open');openDepositModal();">$ Depositar</button>
       </div>
-      <div class="acc-opt-card" data-account="demo" onclick="selectAccount('demo')">
-        <div class="acc-opt-top">
-          <span class="acc-opt-icon">R$</span>
-          <div>
-            <div class="acc-opt-name">Conta Demo</div>
-            <div class="acc-opt-type">Demonstracao</div>
-          </div>
+      <div class="acc-opt-row" data-account="demo" onclick="selectAccount('demo')">
+        <div class="acc-opt-circle demo">R$</div>
+        <div class="acc-opt-info">
+          <div class="acc-opt-name">Conta Demo</div>
+          <div class="acc-opt-type demo">Demonstracao</div>
         </div>
         <div class="acc-opt-balance" id="accOptDemoBal">R$ 10.000,00</div>
-        <button class="acc-opt-deposit" onclick="event.stopPropagation();selectAccount('demo');document.getElementById('accountDropdown').classList.remove('open');"><span class="material-icons-outlined" style="font-size:14px;">attach_money</span>Depositar</button>
+        <button class="acc-opt-dep-btn" onclick="event.stopPropagation();selectAccount('demo');document.getElementById('accountDropdown').classList.remove('open');">$ Depositar</button>
       </div>
     </div>
 
@@ -1108,7 +1109,7 @@ function setActiveAccount(type) {
   activeAccount = type;
   localStorage.setItem('hb_active_account', type);
   document.getElementById('accountLabel').textContent = type === 'real' ? 'Conta Principal' : 'Conta Demo';
-  document.querySelectorAll('.acc-opt-card').forEach(o => o.classList.toggle('active', o.dataset.account === type));
+  document.querySelectorAll('.acc-opt-row').forEach(o => o.classList.toggle('active', o.dataset.account === type));
   renderBalance();
   refreshOpenTrades();
 }
