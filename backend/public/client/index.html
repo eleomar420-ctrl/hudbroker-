@@ -439,7 +439,7 @@ html, body { height: 100%; overflow: hidden; }
   }
 
   .trade-body { flex-direction: column; overflow-y: auto; }
-  .chart-area { min-height: 280px; flex: 1 1 auto; }
+  .chart-area { min-height: 280px; flex: 1 1 auto; position:relative; z-index:1; }
   .trade-panel { display: none; }
   .mobile-panel { display: flex; }
 
@@ -527,20 +527,20 @@ html, body { height: 100%; overflow: hidden; }
   /* === MOBILE V2 LAYOUT === */
   .mobile-panel { display:none !important; }
   .desktop-footer { display:none !important; }
-  .m2-panel { display:block; background:#000; }
-  .m2-buysell { display:flex; gap:8px; padding:8px 10px; }
+  .m2-panel { display:block; background:#000; position:relative; z-index:20; }
+  .m2-buysell { display:flex; gap:8px; padding:8px 10px; position:relative; z-index:21; }
   .m2-buy, .m2-sell { flex:1; display:flex; align-items:center; justify-content:space-between; padding:16px; border:none; border-radius:8px; font-size:17px; font-weight:500; cursor:pointer; color:#fff; touch-action:manipulation; font-family:'Inter',sans-serif; }
   .m2-buy { background:#51a85d; }
   .m2-sell { background:#e15b44; }
   .m2-buy svg, .m2-sell svg { width:24px; height:24px; }
-  .m2-steppers { display:flex; gap:0; padding:0 10px 4px; }
+  .m2-steppers { display:flex; gap:0; padding:0 10px 4px; position:relative; z-index:21; }
   .m2-col { flex:1; text-align:center; }
   .m2-label { font-size:11px; color:#888; margin-bottom:4px; }
   .m2-stepper { display:flex; align-items:center; background:#1c1c1c; border-radius:6px; overflow:hidden; height:38px; }
-  .m2-stepper button { background:#1a1a1a; border:none; color:#888; font-size:18px; width:38px; height:100%; cursor:pointer; touch-action:manipulation; flex-shrink:0; }
+  .m2-stepper button { background:#1a1a1a; border:none; color:#888; font-size:18px; width:38px; height:100%; cursor:pointer; touch-action:manipulation; flex-shrink:0; -webkit-tap-highlight-color:transparent; }
   .m2-stepper button:active { background:#333; color:#fff; }
   .m2-stepper span { flex:1; text-align:center; color:#fff; font-size:14px; font-weight:500; }
-  .m2-return { display:flex; justify-content:space-between; align-items:center; padding:6px 14px 10px; }
+  .m2-return { display:flex; justify-content:space-between; align-items:center; padding:6px 14px 10px; position:relative; z-index:21; }
   .m2-return-left { font-size:12px; color:#888; }
   .m2-profit { color:#51a85d; font-weight:600; }
   .m2-timer { font-size:13px; color:#e15b44; font-family:'IBM Plex Mono',monospace; font-weight:600; }
@@ -548,7 +548,7 @@ html, body { height: 100%; overflow: hidden; }
   .m2-nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border:none; color:#555; font-size:9px; font-weight:500; cursor:pointer; padding:4px 0; font-family:'Inter',sans-serif; letter-spacing:0.5px; }
   .m2-nav-btn .material-icons-outlined { font-size:20px; }
   .m2-nav-btn.active { color:#51a85d; }
-  .trade-body { padding-bottom:140px; }
+  .trade-body { padding-bottom:60px; }
 
 }
 
@@ -732,22 +732,22 @@ html, body { height: 100%; overflow: hidden; }
     <!-- Mobile V2 Panel -->
     <div class="m2-panel" id="m2Panel">
       <div class="m2-buysell">
-        <button class="m2-buy" id="m2BuyBtn"><span>Comprar</span><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></button>
-        <button class="m2-sell" id="m2SellBtn"><span>Vender</span><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg></button>
+        <button class="m2-buy" id="m2BuyBtn" onclick="playTrade();openTrade('up');"><span>Comprar</span><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></button>
+        <button class="m2-sell" id="m2SellBtn" onclick="playTrade();openTrade('down');"><span>Vender</span><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg></button>
       </div>
       <div class="m2-steppers">
-        <div class="m2-col"><div class="m2-label">Valor</div><div class="m2-stepper"><button id="m2StakeMinus">−</button><span id="m2StakeVal">5,00</span><button id="m2StakePlus">+</button></div></div>
-        <div class="m2-col"><div class="m2-label">Expiração</div><div class="m2-stepper"><button id="m2DurMinus">−</button><span id="m2DurVal">1 min</span><button id="m2DurPlus">+</button></div></div>
+        <div class="m2-col"><div class="m2-label">Valor</div><div class="m2-stepper"><button id="m2StakeMinus" onclick="playClick();adjustStake(-1);">−</button><span id="m2StakeVal">5,00</span><button id="m2StakePlus" onclick="playClick();adjustStake(1);">+</button></div></div>
+        <div class="m2-col"><div class="m2-label">Expiração</div><div class="m2-stepper"><button id="m2DurMinus" onclick="playClick();adjustDuration(-1);">−</button><span id="m2DurVal">1 min</span><button id="m2DurPlus" onclick="playClick();adjustDuration(1);">+</button></div></div>
       </div>
       <div class="m2-return"><span class="m2-return-left">Retorno: <span class="m2-profit" id="m2Profit">+R$ 4,25</span></span><span class="m2-timer" id="m2Timer">01:00</span></div>
     </div>
 
     <!-- Bottom Nav V2 -->
     <div class="m2-nav" id="m2Nav">
-      <button class="m2-nav-btn active" data-m2tab="trade"><span class="material-icons-outlined">candlestick_chart</span>TRADE</button>
-      <button class="m2-nav-btn" data-m2tab="history"><span class="material-icons-outlined">schedule</span>HISTÓRICO</button>
-      <button class="m2-nav-btn" data-m2tab="copytrade"><span class="material-icons-outlined">content_copy</span>COPY TRADE</button>
-      <button class="m2-nav-btn" data-m2tab="menu"><span class="material-icons-outlined">menu</span>MENU</button>
+      <button class="m2-nav-btn active" data-m2tab="trade" onclick="return;"><span class="material-icons-outlined">candlestick_chart</span>TRADE</button>
+      <button class="m2-nav-btn" data-m2tab="history" onclick="openHistoryPanel();"><span class="material-icons-outlined">schedule</span>HISTÓRICO</button>
+      <button class="m2-nav-btn" data-m2tab="copytrade" onclick="showToast('Copy Trade em breve');"><span class="material-icons-outlined">content_copy</span>COPY TRADE</button>
+      <button class="m2-nav-btn" data-m2tab="menu" onclick="document.getElementById('sideMenuOverlay').classList.add('open');"><span class="material-icons-outlined">menu</span>MENU</button>
     </div>
 
     <div class="m-asset-drawer" id="mAssetDrawer">
