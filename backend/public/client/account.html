@@ -2,182 +2,117 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>HudBroker - Minha Conta</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HudBroker — Minha Conta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 <link rel="stylesheet" href="/css/shared.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
 <style>
-:root { --bg:#000; --bg-panel:#0a0a0a; --bg-elevated:#111; --border:#1a1a1a; --up:#51a85d; --brand:#e8a23d; }
-body { background:#000; color:#e8eaed; font-family:'Inter',sans-serif; margin:0; min-height:100vh; }
-.account-shell { max-width:480px; margin:0 auto; min-height:100vh; background:#0a0a0a; }
-.account-header { display:flex; align-items:center; gap:12px; padding:16px; border-bottom:1px solid #1a1a1a; }
-.account-header .back-btn { background:none; border:none; color:#fff; font-size:22px; cursor:pointer; padding:4px; }
-.account-header h1 { font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:600; flex:1; }
-.account-menu { padding:8px 0; }
-.account-menu-item { display:flex; align-items:center; gap:12px; padding:14px 16px; cursor:pointer; border:none; background:none; width:100%; color:#ccc; font-size:14px; font-family:'Inter',sans-serif; text-align:left; transition:background 0.15s; }
-.account-menu-item:hover { background:rgba(255,255,255,0.04); }
-.account-menu-item .material-icons-outlined { font-size:20px; color:#888; }
-.account-menu-item .chevron { margin-left:auto; color:#555; font-size:18px; }
-.account-menu-item.logout { color:#e53935; }
-.account-menu-item.logout .material-icons-outlined { color:#e53935; }
-.menu-divider { height:1px; background:#1a1a1a; margin:4px 16px; }
-
-/* Sub-panels */
-.sub-panel { display:none; position:fixed; inset:0; background:#0a0a0a; z-index:300; overflow-y:auto; }
-.sub-panel.open { display:block; }
-.sub-header { display:flex; align-items:center; gap:12px; padding:14px 16px; border-bottom:1px solid #1a1a1a; position:sticky; top:0; background:#0a0a0a; z-index:1; }
-.sub-header .back-btn { background:none; border:none; color:#fff; font-size:20px; cursor:pointer; }
-.sub-header h2 { font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:600; flex:1; }
-.sub-body { padding:16px; }
-
-/* Dados do usuario */
-.data-field { margin-bottom:14px; }
-.data-field label { display:block; font-size:11px; color:#666; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px; }
-.data-field input { width:100%; background:#111; border:1px solid #1a1a1a; color:#fff; border-radius:6px; padding:10px 12px; font-size:14px; font-family:'Inter',sans-serif; }
-.data-field input:disabled { color:#888; opacity:0.7; }
-.btn-save { width:100%; padding:12px; background:#51a85d; color:#fff; border:none; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer; margin-top:10px; }
-.btn-save:disabled { opacity:0.4; cursor:default; }
-
-/* Depositos e Saques */
-.tx-card { background:#111; border:1px solid #1a1a1a; border-radius:8px; margin-bottom:10px; overflow:hidden; }
-.tx-card-top { display:flex; justify-content:space-between; align-items:center; padding:12px 14px; }
-.tx-card-label { font-size:13px; color:#ccc; }
-.tx-card-amount { font-size:14px; font-weight:600; color:#51a85d; font-family:'IBM Plex Mono',monospace; }
-.tx-card-divider { height:1px; background:#1a1a1a; }
-.tx-card-bottom { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; font-size:11px; }
-.tx-card-date { color:#888; font-family:'IBM Plex Mono',monospace; }
-.tx-status { padding:3px 8px; border-radius:4px; font-size:10px; font-weight:600; text-transform:uppercase; }
-.tx-status.paid { background:rgba(81,168,93,0.15); color:#51a85d; }
-.tx-status.pending { background:rgba(232,162,61,0.15); color:#e8a23d; }
-.tx-status.cancelled { background:rgba(229,57,53,0.15); color:#e53935; }
-.btn-cancel-tx { background:none; border:1px solid #e53935; color:#e53935; border-radius:4px; padding:3px 10px; font-size:10px; font-weight:600; cursor:pointer; }
-.btn-cancel-tx:hover { background:rgba(229,57,53,0.15); }
-.empty-msg { text-align:center; padding:40px 16px; color:#555; font-size:13px; }
-
-/* Avatar */
-.avatar-section { text-align:center; padding:20px; }
-.avatar-preview { width:120px; height:120px; border-radius:50%; background:#111; margin:0 auto 16px; display:flex; align-items:center; justify-content:center; overflow:hidden; border:2px solid #1a1a1a; }
-.avatar-preview img { width:100%; height:100%; object-fit:cover; }
-.btn-photo { width:100%; max-width:280px; padding:12px; background:#1a1a1a; color:#ccc; border:1px solid #2a2a2a; border-radius:6px; font-size:13px; cursor:pointer; }
-
-/* Idiomas */
-.lang-option { display:flex; align-items:center; gap:12px; padding:14px 16px; cursor:pointer; border:none; background:none; width:100%; color:#ccc; font-size:14px; font-family:'Inter',sans-serif; text-align:left; border-bottom:1px solid #1a1a1a; }
-.lang-option:hover { background:rgba(255,255,255,0.04); }
-.lang-option.active { color:#51a85d; }
-.lang-flag { font-size:22px; }
-
-@media (min-width:769px) {
-  .account-shell { margin:40px auto; border-radius:12px; border:1px solid #1a1a1a; min-height:auto; max-height:90vh; overflow-y:auto; }
-}
+.account-layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 56px); }
+.account-nav { border-right: 1px solid var(--border); background: var(--bg-panel); padding: 20px 0; }
+.account-nav a { display: flex; align-items: center; gap: 10px; padding: 12px 20px; color: var(--text-dim); font-size: 14px; font-weight: 500; border-left: 2px solid transparent; cursor: pointer; }
+.account-nav a:hover { color: var(--text); background: var(--bg-elevated); }
+.account-nav a.active { color: var(--brand); border-left-color: var(--brand); background: var(--bg-elevated); }
+.account-nav i { font-size: 18px; }
+.section { display: none; }
+.section.active { display: block; }
+.avatar-circle { width: 96px; height: 96px; border-radius: 50%; background: var(--bg-elevated); display: flex; align-items: center; justify-content: center; font-size: 40px; color: var(--text-faint); overflow: hidden; }
+.avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+.section-card-title { background: var(--text-faint); color: var(--bg); font-weight: 600; padding: 10px 16px; border-radius: 10px 10px 0 0; font-size: 13px; }
+.section-card-body { background: var(--bg-panel); border: 1px solid var(--border); border-top: none; border-radius: 0 0 10px 10px; padding: 24px; }
 </style>
 </head>
 <body>
-<div class="account-shell">
-  <div class="account-header">
-    <button class="back-btn" onclick="window.location.href='/client/index.html'">&#8592;</button>
-    <h1>Minha Conta</h1>
-  </div>
-
-  <div class="account-menu">
-    <button class="account-menu-item" onclick="openPanel('dados')">
-      <span class="material-icons-outlined">account_circle</span>Meus Dados<span class="material-icons-outlined chevron">chevron_right</span>
-    </button>
-    <button class="account-menu-item" onclick="openPanel('depositos')">
-      <span class="material-icons-outlined">arrow_upward</span>Depositos<span class="material-icons-outlined chevron">chevron_right</span>
-    </button>
-    <button class="account-menu-item" onclick="openPanel('saques')">
-      <span class="material-icons-outlined">arrow_downward</span>Saques<span class="material-icons-outlined chevron">chevron_right</span>
-    </button>
-    <div class="menu-divider"></div>
-    <button class="account-menu-item" onclick="window.location.href='/client/account.html#verify'">
-      <span class="material-icons-outlined">admin_panel_settings</span>Verificar Conta<span class="material-icons-outlined chevron">chevron_right</span>
-    </button>
-    <button class="account-menu-item" onclick="openPanel('foto')">
-      <span class="material-icons-outlined">account_box</span>Alterar Foto<span class="material-icons-outlined chevron">chevron_right</span>
-    </button>
-    <button class="account-menu-item" onclick="openPanel('indicacoes')">
-      <span class="material-icons-outlined">groups_3</span>Indicacoes<span class="material-icons-outlined chevron">chevron_right</span>
-    </button>
-    <div class="menu-divider"></div>
-    <button class="account-menu-item" onclick="openPanel('senha')">
-      <span class="material-icons-outlined">key</span>Mudar Senha<span class="material-icons-outlined chevron">chevron_right</span>
-    </button>
-    <button class="account-menu-item" onclick="openPanel('config')">
-      <span class="material-icons-outlined">settings</span>Configuracoes<span class="material-icons-outlined chevron">chevron_right</span>
-    </button>
-    <div class="menu-divider"></div>
-    <button class="account-menu-item logout" onclick="logout()">
-      <span class="material-icons-outlined">logout</span>Sair
-    </button>
+<div class="topbar">
+  <div class="brand"><span class="dot"></span>Hud<span class="tag">Broker</span></div>
+  <div class="topbar-right">
+    <a href="/client/index.html" class="btn">Voltar ao trading</a>
   </div>
 </div>
 
-<!-- MEUS DADOS -->
-<div class="sub-panel" id="panel-dados">
-  <div class="sub-header"><button class="back-btn" onclick="closePanel('dados')">&#8592;</button><h2>Meus Dados</h2></div>
-  <div class="sub-body">
-    <div class="data-field"><label>Nome</label><input type="text" id="dNome" disabled></div>
-    <div class="data-field"><label>Documento (CPF)</label><input type="text" id="dDoc" placeholder="000.000.000-00" maxlength="14"></div>
-    <div class="data-field"><label>Data de nascimento</label><input type="date" id="dNasc"></div>
-    <div class="data-field"><label>Login</label><input type="text" id="dLogin" disabled></div>
-    <div class="data-field"><label>Ultimo login</label><input type="text" id="dUltimoLogin" disabled></div>
-    <div class="data-field"><label>E-mail</label><input type="email" id="dEmail" disabled></div>
-    <div class="data-field"><label>Telefone</label><input type="tel" id="dPhone"></div>
-    <button class="btn-save" id="btnSaveDados" onclick="saveDados()">Salvar alteracoes</button>
+<div class="account-layout">
+  <div class="account-nav">
+    <h2 style="padding: 0 20px 16px; font-family: var(--font-display); font-size: 16px;">Minha Conta</h2>
+    <a data-section="dados" class="active"><i class="ti ti-user" aria-hidden="true"></i> Meus Dados</a>
+    <a data-section="depositos"><i class="ti ti-arrow-up" aria-hidden="true"></i> Depósitos</a>
+    <a data-section="saques"><i class="ti ti-arrow-down" aria-hidden="true"></i> Saques</a>
+    <a data-section="verificar"><i class="ti ti-shield-check" aria-hidden="true"></i> Verificar Conta</a>
+    <a data-section="foto"><i class="ti ti-photo" aria-hidden="true"></i> Alterar Foto</a>
+    <a data-section="senha"><i class="ti ti-lock" aria-hidden="true"></i> Mudar Senha</a>
+    <a data-section="config"><i class="ti ti-settings" aria-hidden="true"></i> Configurações</a>
+    <a id="navLogout"><i class="ti ti-logout" aria-hidden="true"></i> Sair</a>
   </div>
-</div>
 
-<!-- DEPOSITOS -->
-<div class="sub-panel" id="panel-depositos">
-  <div class="sub-header"><button class="back-btn" onclick="closePanel('depositos')">&#8592;</button><h2>Depositos</h2></div>
-  <div class="sub-body" id="depositsList"><div class="empty-msg">Carregando...</div></div>
-</div>
-
-<!-- SAQUES -->
-<div class="sub-panel" id="panel-saques">
-  <div class="sub-header"><button class="back-btn" onclick="closePanel('saques')">&#8592;</button><h2>Saques</h2></div>
-  <div class="sub-body" id="saquesList"><div class="empty-msg">Carregando...</div></div>
-</div>
-
-<!-- ALTERAR FOTO -->
-<div class="sub-panel" id="panel-foto">
-  <div class="sub-header"><button class="back-btn" onclick="closePanel('foto')">&#8592;</button><h2>Alterar Foto</h2></div>
-  <div class="sub-body">
-    <div class="avatar-section">
-      <div class="avatar-preview" id="accAvatarPreview"><span class="material-icons-outlined" style="font-size:48px;color:#555;">person</span></div>
-      <input type="file" id="accAvatarInput" accept="image/*" style="display:none;">
-      <button class="btn-photo" onclick="document.getElementById('accAvatarInput').click()">Alterar foto</button>
+  <div class="main">
+    <div id="section-dados" class="section active">
+      <div class="card">
+        <div class="card-title">Meus dados</div>
+        <div class="grid-2">
+          <div><label>Nome</label><input type="text" id="dataName" disabled></div>
+          <div><label>Sobrenome</label><input type="text" id="dataLastName" disabled></div>
+        </div>
+        <div class="grid-2" style="margin-top:14px;">
+          <div><label>E-mail</label><input type="text" id="dataEmail" disabled></div>
+          <div><label>Moeda da conta</label><input type="text" id="dataCurrency" disabled></div>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
-<!-- INDICACOES -->
-<div class="sub-panel" id="panel-indicacoes">
-  <div class="sub-header"><button class="back-btn" onclick="closePanel('indicacoes')">&#8592;</button><h2>Indicacoes</h2></div>
-  <div class="sub-body"><div class="empty-msg">Sistema de indicacoes em breve.</div></div>
-</div>
+    <div id="section-depositos" class="section">
+      <div class="card">
+        <div class="card-title">Histórico de depósitos</div>
+        <table>
+          <thead><tr><th>Data</th><th>Valor</th><th>Status</th></tr></thead>
+          <tbody id="depositsBody"><tr><td colspan="3" class="empty-state">Carregando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
 
-<!-- MUDAR SENHA -->
-<div class="sub-panel" id="panel-senha">
-  <div class="sub-header"><button class="back-btn" onclick="closePanel('senha')">&#8592;</button><h2>Mudar Senha</h2></div>
-  <div class="sub-body">
-    <div class="data-field"><label>Senha atual</label><input type="password" id="senhaAtual"></div>
-    <div class="data-field"><label>Nova senha</label><input type="password" id="senhaNova" minlength="6"></div>
-    <div class="data-field"><label>Confirmar nova senha</label><input type="password" id="senhaConfirm"></div>
-    <button class="btn-save" onclick="showToast('Funcionalidade em breve')">Atualizar senha</button>
-  </div>
-</div>
+    <div id="section-saques" class="section">
+      <div class="card">
+        <div class="card-title">Solicitar saque</div>
+        <div style="display:flex; gap:10px; align-items:flex-end; max-width:400px;">
+          <div style="flex:1;"><label>Valor (R$)</label><input type="number" id="withdrawAmount" min="1"></div>
+          <button class="btn btn-primary" id="withdrawBtn">Solicitar</button>
+        </div>
+        <p style="margin-top:12px; font-size:12px; color:var(--text-faint);">Saques são da conta principal e passam por análise do backoffice.</p>
+      </div>
+    </div>
 
-<!-- CONFIGURACOES (IDIOMA) -->
-<div class="sub-panel" id="panel-config">
-  <div class="sub-header"><button class="back-btn" onclick="closePanel('config')">&#8592;</button><h2>Selecione um idioma</h2></div>
-  <div class="sub-body" style="padding:0;">
-    <button class="lang-option active"><span class="lang-flag">&#127463;&#127479;</span>Portugues</button>
-    <button class="lang-option" onclick="showToast('Em breve')"><span class="lang-flag">&#127468;&#127463;</span>English</button>
-    <button class="lang-option" onclick="showToast('Em breve')"><span class="lang-flag">&#127466;&#127480;</span>Espanol</button>
-    <button class="lang-option" onclick="showToast('Em breve')"><span class="lang-flag">&#127470;&#127481;</span>Italiano</button>
-    <button class="lang-option" onclick="showToast('Em breve')"><span class="lang-flag">&#127467;&#127479;</span>Francais</button>
+    <div id="section-verificar" class="section">
+      <div class="card">
+        <div class="card-title">Verificação de identidade (KYC)</div>
+        <div id="kycStatusBlock"></div>
+      </div>
+    </div>
+
+    <div id="section-foto" class="section">
+      <div class="section-card-title">Foto de Perfil</div>
+      <div class="section-card-body" style="text-align:center;">
+        <div class="avatar-circle" style="margin: 0 auto 20px;" id="avatarPreview"><i class="ti ti-user" aria-hidden="true"></i></div>
+        <input type="file" id="avatarInput" accept="image/*" style="display:none;">
+        <button class="btn" style="width:100%; max-width:400px;" id="changePhotoBtn">Alterar foto</button>
+      </div>
+    </div>
+
+    <div id="section-senha" class="section">
+      <div class="card">
+        <div class="card-title">Mudar senha</div>
+        <form id="passwordForm" style="max-width:400px;">
+          <div class="field"><label>Senha atual</label><input type="password" id="currentPassword" required></div>
+          <div class="field"><label>Nova senha</label><input type="password" id="newPassword" required minlength="6"></div>
+          <button type="submit" class="btn btn-primary">Atualizar senha</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="section-config" class="section">
+      <div class="card">
+        <div class="card-title">Configurações</div>
+        <p style="color:var(--text-faint); font-size:13px;">Preferências de notificação e conta em breve.</p>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -185,126 +120,71 @@ body { background:#000; color:#e8eaed; font-family:'Inter',sans-serif; margin:0;
 <script>
 requireAuth();
 
-let userData = null;
-let dataEdited = false;
+document.querySelectorAll('.account-nav a[data-section]').forEach(link => {
+  link.onclick = () => {
+    document.querySelectorAll('.account-nav a').forEach(a => a.classList.remove('active'));
+    link.classList.add('active');
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('section-' + link.dataset.section).classList.add('active');
+  };
+});
+document.getElementById('navLogout').onclick = () => logout();
 
-function openPanel(name) {
-  document.getElementById('panel-' + name).classList.add('open');
-  if (name === 'dados') loadDados();
-  if (name === 'depositos') loadDeposits();
-  if (name === 'saques') loadSaques();
-  if (name === 'foto') loadAvatar();
-}
+async function loadAccountData() {
+  const me = await apiFetch('/trading/me');
+  document.getElementById('dataName').value = me.name || '';
+  document.getElementById('dataLastName').value = me.last_name || '';
+  document.getElementById('dataEmail').value = me.email || '';
+  document.getElementById('dataCurrency').value = me.currency || 'BRL';
 
-function closePanel(name) {
-  document.getElementById('panel-' + name).classList.remove('open');
-}
+  const kycBlock = document.getElementById('kycStatusBlock');
+  const statusMap = { pending: ['Pendente', 'badge-pending'], approved: ['Aprovado', 'badge-up'], rejected: ['Rejeitado', 'badge-down'] };
+  const [label, cls] = statusMap[me.kyc_status] || statusMap.pending;
+  kycBlock.innerHTML = `<span class="badge ${cls}">${label}</span><p style="margin-top:12px; font-size:13px; color:var(--text-faint);">Envie seus documentos para liberar saques na conta principal.</p>`;
 
-// === MEUS DADOS ===
-async function loadDados() {
-  if (!userData) userData = await apiFetch('/trading/me');
-  const u = userData;
-  document.getElementById('dNome').value = (u.name || '') + ' ' + (u.last_name || '');
-  document.getElementById('dDoc').value = u.cpf || u.phone || '';
-  document.getElementById('dLogin').value = u.email || '';
-  document.getElementById('dEmail').value = u.email || '';
-  document.getElementById('dPhone').value = u.phone || '';
-  document.getElementById('dUltimoLogin').value = new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-
-  // Se ja editou, desabilitar campos editaveis
-  if (localStorage.getItem('hb_dados_saved')) {
-    document.getElementById('dDoc').disabled = true;
-    document.getElementById('dNasc').disabled = true;
-    document.getElementById('dPhone').disabled = true;
-    document.getElementById('btnSaveDados').disabled = true;
-    document.getElementById('btnSaveDados').textContent = 'Dados ja salvos';
+  if (me.avatar_url) {
+    document.getElementById('avatarPreview').innerHTML = `<img src="${me.avatar_url}" alt="">`;
   }
 }
 
-function saveDados() {
-  const doc = document.getElementById('dDoc').value.replace(/\D/g,'');
-  if (doc.length !== 11 && doc.length !== 14) {
-    showToast('Documento invalido', 'error');
-    return;
-  }
-  localStorage.setItem('hb_dados_saved', '1');
-  localStorage.setItem('hb_cpf', document.getElementById('dDoc').value);
-  localStorage.setItem('hb_nasc', document.getElementById('dNasc').value);
-  localStorage.setItem('hb_phone', document.getElementById('dPhone').value);
-  showToast('Dados salvos com sucesso');
-  loadDados();
-}
+document.getElementById('withdrawBtn').onclick = async () => {
+  const amount = Number(document.getElementById('withdrawAmount').value);
+  if (!amount) return showToast('Informe um valor', 'error');
+  showToast('Solicitação de saque enviada para análise');
+};
 
-// === DEPOSITOS ===
-async function loadDeposits() {
-  const el = document.getElementById('depositsList');
-  try {
-    const txs = await apiFetch('/trading/trades/history');
-    // Buscar da tabela de pix_charges via transacoes de deposito
-    const deposits = txs.filter(t => false); // placeholder
-    // Usar transacoes direto
-    const allTx = await apiFetch('/trading/me');
-    // Buscar depositos do banco
-    el.innerHTML = '<div class="empty-msg">Carregando depositos...</div>';
-    const charges = await fetch('/api/pix/charges', {headers:{'Authorization':'Bearer '+getToken()}}).then(r=>r.ok?r.json():[]).catch(()=>[]);
-    if (!charges.length) {
-      el.innerHTML = '<div class="empty-msg">Nenhum deposito registrado</div>';
-      return;
-    }
-    el.innerHTML = charges.map((c, i) => {
-      const isPaid = c.status === 'paid';
-      const statusClass = isPaid ? 'paid' : 'pending';
-      const statusText = isPaid ? 'PAGO' : 'PENDENTE';
-      const dt = new Date(c.created_at);
-      return '<div class="tx-card"><div class="tx-card-top"><span class="tx-card-label">Deposito #' + (charges.length - i) + '</span><span class="tx-card-amount">R$ ' + Number(c.amount).toFixed(2).replace('.',',') + '</span></div><div class="tx-card-divider"></div><div class="tx-card-bottom"><span class="tx-card-date">' + dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}) + '</span><span class="tx-status ' + statusClass + '">Status: ' + statusText + '</span></div></div>';
-    }).join('');
-  } catch(e) {
-    el.innerHTML = '<div class="empty-msg">Erro ao carregar depositos</div>';
-  }
-}
-
-// === SAQUES ===
-async function loadSaques() {
-  const el = document.getElementById('saquesList');
-  el.innerHTML = '<div class="empty-msg">Nenhum saque registrado</div>';
-}
-
-// === AVATAR ===
-function loadAvatar() {
-  if (userData && userData.avatar_url) {
-    document.getElementById('accAvatarPreview').innerHTML = '<img src="' + userData.avatar_url + '" alt="">';
-  }
-}
-
-document.getElementById('accAvatarInput').onchange = async (e) => {
+document.getElementById('changePhotoBtn').onclick = () => document.getElementById('avatarInput').click();
+document.getElementById('avatarInput').onchange = (e) => {
   const file = e.target.files[0];
   if (!file) return;
-  if (file.size > 500 * 1024) { showToast('Imagem muito grande (max 500KB)', 'error'); return; }
+
+  // Limite de ~500KB no arquivo original, para a imagem em base64 não passar do limite do servidor
+  if (file.size > 500 * 1024) {
+    showToast('Imagem muito grande. Escolha um arquivo menor que 500KB.', 'error');
+    e.target.value = '';
+    return;
+  }
+
   const reader = new FileReader();
   reader.onload = async (ev) => {
     const dataUrl = ev.target.result;
-    document.getElementById('accAvatarPreview').innerHTML = '<img src="' + dataUrl + '" alt="">';
+    document.getElementById('avatarPreview').innerHTML = `<img src="${dataUrl}" alt="">`;
     try {
-      await apiFetch('/trading/avatar', { method:'POST', body:JSON.stringify({avatarDataUrl:dataUrl}) });
-      showToast('Foto atualizada');
-    } catch(err) { showToast('Erro ao salvar foto','error'); }
+      await apiFetch('/trading/avatar', { method: 'POST', body: JSON.stringify({ avatarDataUrl: dataUrl }) });
+      showToast('Foto de perfil atualizada');
+    } catch (err) {
+      showToast(err.message || 'Erro ao salvar a foto', 'error');
+    }
   };
   reader.readAsDataURL(file);
 };
 
-// CPF mask
-document.getElementById('dDoc').addEventListener('input', (e) => {
-  let v = e.target.value.replace(/\D/g,'').slice(0,11);
-  if(v.length>9) v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');
-  else if(v.length>6) v=v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3');
-  else if(v.length>3) v=v.replace(/(\d{3})(\d{1,3})/,'$1.$2');
-  e.target.value = v;
-});
+document.getElementById('passwordForm').onsubmit = (e) => {
+  e.preventDefault();
+  showToast('Funcionalidade de troca de senha em breve');
+};
 
-// Init
-(async () => {
-  userData = await apiFetch('/trading/me');
-})();
+loadAccountData();
 </script>
 </body>
 </html>

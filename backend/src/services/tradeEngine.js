@@ -129,12 +129,12 @@ export async function getOpenTrades(userId, accountType) {
 export async function getTradeHistory(userId, accountType, limit = 50) {
   if (accountType) {
     return query(
-      `SELECT * FROM trades WHERE user_id = $1 AND account_type = $2 ORDER BY opened_at DESC LIMIT $3`,
+      `SELECT * FROM trades WHERE user_id = $1 AND account_type = $2 AND status != 'open' ORDER BY opened_at DESC LIMIT $3`,
       [userId, accountType, limit]
     );
   }
   return query(
-    `SELECT * FROM trades WHERE user_id = $1 ORDER BY opened_at DESC LIMIT $2`,
+    `SELECT * FROM trades WHERE user_id = $1 AND status != 'open' ORDER BY opened_at DESC LIMIT $2`,
     [userId, limit]
   );
 }
