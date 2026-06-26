@@ -1204,6 +1204,15 @@ async function openTrade(direction) {
   try {
     const durationSeconds = durationOptions[t.durationIndex].sec;
     const syncedDuration = secondsUntilNextCandleClose(durationSeconds);
+    // Atualização otimista — saldo muda na hora do click
+    if (cachedUser) {
+      if (activeAccount === 'real') {
+        cachedUser.balance = Math.max(0, cachedUser.balance - t.stakeValue);
+      } else {
+        cachedUser.demo_balance = Math.max(0, cachedUser.demo_balance - t.stakeValue);
+      }
+      renderBalance();
+    }
     const data = await apiFetch('/trading/trades', {
       method: 'POST',
       body: JSON.stringify({
@@ -1218,13 +1227,13 @@ async function openTrade(direction) {
     showSuccessPopup('Transação efetuada com sucesso!');
     refreshBalance();
     refreshOpenTrades();
-    // Refresh histórico imediato
     loadHistory();
-    // Rastrear resultado
     if (data && data.tradeId) {
       trackTradeResult(data.tradeId, syncedDuration);
     }
   } catch (err) {
+    // Se falhou, restaura o saldo do servidor
+    refreshBalance();
     showToast(err.message, 'error');
   }
 }
