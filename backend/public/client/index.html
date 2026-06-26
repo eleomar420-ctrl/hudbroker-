@@ -434,8 +434,8 @@ html, body { height: 100%; overflow: hidden; }
   .account-pill .label { display: block; font-size: 11px; }
   .account-pill .value { font-size: 16px; }
   .btn-deposit {
-    order: 3; flex: 5 1 0; min-width: 0; font-size: 15px; font-weight: 700; padding: 0 12px; height: 48px;
-    background: #51a85d; color: #ffffff; border-color: #51a85d; border-radius: 4px;
+    order: 3; flex: 5 1 0; min-width: 0; font-size: 14px; font-weight: 700; padding: 0 12px; height: 42px;
+    background: transparent; color: #2d9f4a; border: 1px solid #2d9f4a; border-radius: 4px;
   }
 
   .trade-body { flex-direction: column; overflow-y: auto; }
@@ -527,24 +527,24 @@ html, body { height: 100%; overflow: hidden; }
   /* === MOBILE V2 LAYOUT === */
   .mobile-panel { display:none !important; }
   .desktop-footer { display:none !important; }
-  .m2-panel { display:block; background:#000; position:relative; z-index:20; }
+  .m2-panel { display:block; background:#0e1525; position:relative; z-index:20; }
   .m2-buysell { display:flex; gap:8px; padding:8px 10px; position:relative; z-index:21; }
   .m2-buy, .m2-sell { flex:1; display:flex; align-items:center; justify-content:space-between; padding:16px; border:none; border-radius:8px; font-size:17px; font-weight:500; cursor:pointer; color:#fff; touch-action:manipulation; font-family:'Inter',sans-serif; }
-  .m2-buy { background:#51a85d; }
-  .m2-sell { background:#e15b44; }
+  .m2-buy { background:#2d9f4a; }
+  .m2-sell { background:#d94e3a; }
   .m2-buy svg, .m2-sell svg { width:24px; height:24px; }
   .m2-steppers { display:flex; gap:0; padding:0 10px 4px; position:relative; z-index:21; }
   .m2-col { flex:1; text-align:center; }
   .m2-label { font-size:11px; color:#888; margin-bottom:4px; }
-  .m2-stepper { display:flex; align-items:center; background:#1c1c1c; border-radius:6px; overflow:hidden; height:38px; }
-  .m2-stepper button { background:#1a1a1a; border:none; color:#888; font-size:18px; width:38px; height:100%; cursor:pointer; touch-action:manipulation; flex-shrink:0; -webkit-tap-highlight-color:transparent; }
+  .m2-stepper { display:flex; align-items:center; background:#1a2235; border-radius:6px; overflow:hidden; height:38px; }
+  .m2-stepper button { background:#151d2e; border:none; color:#888; font-size:18px; width:38px; height:100%; cursor:pointer; touch-action:manipulation; flex-shrink:0; -webkit-tap-highlight-color:transparent; }
   .m2-stepper button:active { background:#333; color:#fff; }
   .m2-stepper span { flex:1; text-align:center; color:#fff; font-size:14px; font-weight:500; }
   .m2-return { display:flex; justify-content:space-between; align-items:center; padding:6px 14px 10px; position:relative; z-index:21; }
   .m2-return-left { font-size:12px; color:#888; }
   .m2-profit { color:#51a85d; font-weight:600; }
   .m2-timer { font-size:13px; color:#e15b44; font-family:'IBM Plex Mono',monospace; font-weight:600; }
-  .m2-nav { display:flex; position:fixed; bottom:0; left:0; right:0; background:#111; border-top:1px solid #1a1a1a; z-index:50; padding:6px 0; padding-bottom:max(6px, env(safe-area-inset-bottom)); }
+  .m2-nav { display:flex; position:fixed; bottom:0; left:0; right:0; background:#0e1525; border-top:1px solid #1a1a1a; z-index:50; padding:6px 0; padding-bottom:max(6px, env(safe-area-inset-bottom)); }
   .m2-nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border:none; color:#555; font-size:9px; font-weight:500; cursor:pointer; padding:4px 0; font-family:'Inter',sans-serif; letter-spacing:0.5px; }
   .m2-nav-btn .material-icons-outlined { font-size:20px; }
   .m2-nav-btn.active { color:#51a85d; }
@@ -1313,37 +1313,51 @@ function showSuccessPopup(message) {
   }, 2200);
 }
 
-// === SONS ===
-var _sndClick = null;
-var _sndTrade = null;
+// === SONS (Web Audio API) ===
+var _actx = null;
+var _bufClick = null, _bufTrade = null;
+try { _actx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
 
-function _initSound(url) {
-  var a = new Audio(url);
-  a.preload = 'auto';
-  a.load();
-  return a;
+async function _loadBuf(url) {
+  if (!_actx) return null;
+  try {
+    var res = await fetch(url);
+    if (!res.ok) return null;
+    var arr = await res.arrayBuffer();
+    return await _actx.decodeAudioData(arr);
+  } catch(e) { return null; }
 }
 
-_sndClick = _initSound('/sounds/click.mp3');
-_sndTrade = _initSound('/sounds/trade.mp3');
+(async function() {
+  _bufClick = await _loadBuf('/sounds/click.mp3');
+  _bufTrade = await _loadBuf('/sounds/trade.mp3');
+})();
 
-function _playSound(snd) {
-  if (!snd) return;
-  try {
-    var clone = snd.cloneNode();
-    clone.volume = snd.volume;
-    clone.play().catch(function(){});
-  } catch(e) {}
+function _playBuf(buf) {
+  if (!buf || !_actx) return;
+  if (_actx.state === 'suspended') _actx.resume();
+  var src = _actx.createBufferSource();
+  src.buffer = buf;
+  src.connect(_actx.destination);
+  src.start(0);
 }
 
 function playClick() {
   if (typeof soundEnabled !== 'undefined' && !soundEnabled) return;
-  _playSound(_sndClick);
+  _playBuf(_bufClick);
 }
 function playTrade() {
   if (typeof soundEnabled !== 'undefined' && !soundEnabled) return;
-  _playSound(_sndTrade);
+  _playBuf(_bufTrade);
 }
+
+// Desbloquear audio no primeiro toque mobile
+document.addEventListener('click', function() {
+  if (_actx && _actx.state === 'suspended') _actx.resume();
+}, { once: true });
+document.addEventListener('touchstart', function() {
+  if (_actx && _actx.state === 'suspended') _actx.resume();
+}, { once: true });
 
 document.getElementById('buyBtn').onclick = () => { playTrade(); openTrade('up'); };
 document.getElementById('sellBtn').onclick = () => { playTrade(); openTrade('down'); };
