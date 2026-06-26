@@ -415,6 +415,10 @@ html, body { height: 100%; overflow: hidden; }
 @media(max-width:768px) { .account-panel,.acc-sub { width:100%; } }
 
 
+
+/* Mobile v2 - hidden on desktop */
+.m2-panel { display:none; }
+.m2-nav { display:none; }
 @media (max-width: 768px) {
   .trade-topbar { padding: 0 10px; gap: 8px; height: 60px; justify-content: space-between; }
   .asset-tabs-row { display: none; }
@@ -519,6 +523,33 @@ html, body { height: 100%; overflow: hidden; }
   .m-asset-drawer-item .sym { margin-left: auto; color: var(--text-faint); font-size: 12px; font-family: var(--font-mono); }
   .m-asset-drawer-remove { background: none; border: none; color: var(--text-faint); font-size: 16px; cursor: pointer; padding: 4px 6px; margin-left: 6px; flex-shrink: 0; }
   .m-asset-drawer-remove:hover { color: var(--down); }
+
+  /* === MOBILE V2 LAYOUT === */
+  .mobile-panel { display:none !important; }
+  .desktop-footer { display:none !important; }
+  .m2-panel { display:block; background:#000; }
+  .m2-buysell { display:flex; gap:8px; padding:8px 10px; }
+  .m2-buy, .m2-sell { flex:1; display:flex; align-items:center; justify-content:space-between; padding:16px; border:none; border-radius:8px; font-size:17px; font-weight:500; cursor:pointer; color:#fff; touch-action:manipulation; font-family:'Inter',sans-serif; }
+  .m2-buy { background:#51a85d; }
+  .m2-sell { background:#e15b44; }
+  .m2-buy svg, .m2-sell svg { width:24px; height:24px; }
+  .m2-steppers { display:flex; gap:0; padding:0 10px 4px; }
+  .m2-col { flex:1; text-align:center; }
+  .m2-label { font-size:11px; color:#888; margin-bottom:4px; }
+  .m2-stepper { display:flex; align-items:center; background:#1c1c1c; border-radius:6px; overflow:hidden; height:38px; }
+  .m2-stepper button { background:#1a1a1a; border:none; color:#888; font-size:18px; width:38px; height:100%; cursor:pointer; touch-action:manipulation; flex-shrink:0; }
+  .m2-stepper button:active { background:#333; color:#fff; }
+  .m2-stepper span { flex:1; text-align:center; color:#fff; font-size:14px; font-weight:500; }
+  .m2-return { display:flex; justify-content:space-between; align-items:center; padding:6px 14px 10px; }
+  .m2-return-left { font-size:12px; color:#888; }
+  .m2-profit { color:#51a85d; font-weight:600; }
+  .m2-timer { font-size:13px; color:#e15b44; font-family:'IBM Plex Mono',monospace; font-weight:600; }
+  .m2-nav { display:flex; position:fixed; bottom:0; left:0; right:0; background:#111; border-top:1px solid #1a1a1a; z-index:50; padding:6px 0; padding-bottom:max(6px, env(safe-area-inset-bottom)); }
+  .m2-nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border:none; color:#555; font-size:9px; font-weight:500; cursor:pointer; padding:4px 0; font-family:'Inter',sans-serif; letter-spacing:0.5px; }
+  .m2-nav-btn .material-icons-outlined { font-size:20px; }
+  .m2-nav-btn.active { color:#51a85d; }
+  .trade-body { padding-bottom:140px; }
+
 }
 
 
@@ -696,6 +727,28 @@ html, body { height: 100%; overflow: hidden; }
       </div>
 
       <div class="m-live-clock" id="m_liveClock">Hora atual: --:--:--</div>
+
+    <!-- Mobile V2 Panel -->
+    <div class="m2-panel" id="m2Panel">
+      <div class="m2-buysell">
+        <button class="m2-buy" id="m2BuyBtn"><span>Comprar</span><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></button>
+        <button class="m2-sell" id="m2SellBtn"><span>Vender</span><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg></button>
+      </div>
+      <div class="m2-steppers">
+        <div class="m2-col"><div class="m2-label">Valor</div><div class="m2-stepper"><button id="m2StakeMinus">−</button><span id="m2StakeVal">5,00</span><button id="m2StakePlus">+</button></div></div>
+        <div class="m2-col"><div class="m2-label">Expiração</div><div class="m2-stepper"><button id="m2DurMinus">−</button><span id="m2DurVal">1 min</span><button id="m2DurPlus">+</button></div></div>
+      </div>
+      <div class="m2-return"><span class="m2-return-left">Retorno: <span class="m2-profit" id="m2Profit">+R$ 4,25</span></span><span class="m2-timer" id="m2Timer">01:00</span></div>
+    </div>
+
+    <!-- Bottom Nav V2 -->
+    <div class="m2-nav" id="m2Nav">
+      <button class="m2-nav-btn active" data-m2tab="trade"><span class="material-icons-outlined">candlestick_chart</span>TRADE</button>
+      <button class="m2-nav-btn" data-m2tab="history"><span class="material-icons-outlined">schedule</span>HISTÓRICO</button>
+      <button class="m2-nav-btn" data-m2tab="copytrade"><span class="material-icons-outlined">content_copy</span>COPY TRADE</button>
+      <button class="m2-nav-btn" data-m2tab="menu"><span class="material-icons-outlined">menu</span>MENU</button>
+    </div>
+
     </div>
 
     <div class="m-asset-drawer" id="mAssetDrawer">
@@ -1024,9 +1077,11 @@ function renderPanelForActiveTab() {
   const stakeLabel = t.stakeValue.toFixed(2).replace('.', ',');
   setText('durValue', durLabel);
   setText('m_durValue', durLabel);
+  setText('m2DurVal', durLabel);
   const stakeEl = document.getElementById('stakeValue');
   if (stakeEl) stakeEl.value = stakeLabel;
   setText('m_stakeValue', stakeLabel);
+  setText('m2StakeVal', stakeLabel);
   setText('m_assetName', t.catalog.name);
   const iconEl = document.getElementById('m_assetIcon');
   if (iconEl) {
@@ -1040,6 +1095,7 @@ function updateProfitAmount() {
   const t = getActiveTab();
   if (!t) return;
   setText('profitAmount', '+' + formatMoney(t.stakeValue * 0.85));
+  setText('m2Profit', '+' + formatMoney(t.stakeValue * 0.85));
 }
 
 function updateLiveCountdown() {
@@ -1051,6 +1107,7 @@ function updateLiveCountdown() {
   const widthPct = ((remaining / durationSeconds) * 100) + '%';
   setText('countdownLabel', label);
   setText('m_countdownLabel', label);
+  setText('m2Timer', label);
   setWidth('countdownFill', widthPct);
   setWidth('m_countdownFill', widthPct);
 
@@ -1948,6 +2005,36 @@ document.getElementById('accAvInput').onchange = function(e) {
 
 
 
+
+
+// === MOBILE V2 HANDLERS ===
+// Buy/Sell
+var m2b = document.getElementById('m2BuyBtn');
+var m2s = document.getElementById('m2SellBtn');
+if (m2b) m2b.onclick = function() { playTrade(); openTrade('up'); };
+if (m2s) m2s.onclick = function() { playTrade(); openTrade('down'); };
+
+// Steppers
+var m2sm = document.getElementById('m2StakeMinus');
+var m2sp = document.getElementById('m2StakePlus');
+var m2dm = document.getElementById('m2DurMinus');
+var m2dp = document.getElementById('m2DurPlus');
+if (m2sm) m2sm.onclick = function() { playClick(); adjustStake(-1); };
+if (m2sp) m2sp.onclick = function() { playClick(); adjustStake(1); };
+if (m2dm) m2dm.onclick = function() { playClick(); adjustDuration(-1); };
+if (m2dp) m2dp.onclick = function() { playClick(); adjustDuration(1); };
+
+// Bottom Nav
+document.querySelectorAll('.m2-nav-btn').forEach(function(btn) {
+  btn.onclick = function() {
+    var tab = btn.dataset.m2tab;
+    document.querySelectorAll('.m2-nav-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    if (tab === 'history') openHistoryPanel();
+    else if (tab === 'menu') document.getElementById('sideMenuOverlay').classList.add('open');
+    else if (tab === 'copytrade') showToast('Copy Trade em breve');
+  };
+});
 
 </script>
 
