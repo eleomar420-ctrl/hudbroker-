@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>HudBroker — Cadastro</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/shared.css">
+<style>
+:root { --bg:#111728; }
+body { background:#111728; }
+.auth-shell { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+.auth-card { width:100%; max-width:420px; background:#1a2035; border-radius:12px; padding:32px; }
+.brand { font-family:'Space Grotesk',sans-serif; font-size:28px; font-weight:700; color:#fff; margin-bottom:8px; }
+.brand .dot { display:inline-block; width:8px; height:8px; border-radius:50%; background:#51a85d; margin-right:4px; vertical-align:middle; }
+.brand .tag { color:#e8a23d; }
+.login-link { font-size:13px; color:#888; margin-bottom:20px; }
+.login-link a { color:#e8a23d; text-decoration:none; }
+.login-link a:hover { text-decoration:underline; }
+.divider { font-size:14px; color:#fff; font-weight:600; margin-bottom:20px; }
+.country-row { display:flex; align-items:center; gap:8px; background:#111728; border:1px solid #2a3050; border-radius:8px; padding:10px 12px; color:#fff; font-size:14px; margin-bottom:14px; }
+.country-flag { font-size:20px; }
+.field { margin-bottom:14px; }
+.field label { display:block; font-size:12px; color:#888; margin-bottom:5px; }
+.field input { width:100%; background:#111728; border:1px solid #2a3050; color:#fff; border-radius:8px; padding:11px 12px; font-size:14px; font-family:'Inter',sans-serif; }
+.field input:focus { border-color:#51a85d; outline:none; }
+.field input:disabled { color:#888; opacity:0.7; }
+.phone-row { display:flex; gap:8px; }
+.phone-code { width:65px; flex-shrink:0; text-align:center; }
+.checkbox-row { display:flex; align-items:flex-start; gap:10px; margin:18px 0; font-size:12px; color:#888; line-height:1.5; }
+.checkbox-row input[type=checkbox] { width:18px; height:18px; margin-top:1px; flex-shrink:0; accent-color:#51a85d; }
+.checkbox-row a { color:#e8a23d; text-decoration:none; }
+.btn-register { width:100%; padding:13px; background:#51a85d; color:#fff; border:none; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif; }
+.btn-register:hover { background:#459e52; }
+.btn-register:disabled { opacity:0.5; cursor:default; }
+.toast { position:fixed; top:20px; left:50%; transform:translateX(-50%); padding:10px 20px; border-radius:8px; font-size:13px; z-index:999; background:#1a1a1a; color:#fff; border:1px solid #333; }
+.toast.error { border-color:#e53935; color:#e53935; }
+@media(max-width:480px) {
+  .auth-card { padding:24px 18px; border-radius:0; }
+  .auth-shell { padding:0; align-items:flex-start; }
+}
+</style>
+</head>
+<body>
+<div class="auth-shell">
+  <div class="auth-card">
+    <div class="brand"><span class="dot"></span>Hud<span class="tag">Broker</span></div>
+
+    <div class="login-link">Ja possui uma conta? <a href="/client/login.html">Acesse sua conta</a></div>
+    <div class="divider">Ou registre-se</div>
+
+    <div class="country-row">
+      <span class="country-flag">&#127463;&#127479;</span>
+      <span>Brazil</span>
+    </div>
+
+    <form id="registerForm">
+      <div class="field">
+        <label>Nome</label>
+        <input type="text" id="regName" required placeholder="Seu nome">
+      </div>
+      <div class="field">
+        <label>Sobrenome</label>
+        <input type="text" id="regLastName" required placeholder="Seu sobrenome">
+      </div>
+      <div class="field">
+        <label>E-mail</label>
+        <input type="email" id="regEmail" required placeholder="seu@email.com">
+      </div>
+      <div class="field">
+        <label>Telefone</label>
+        <div class="phone-row">
+          <input type="text" class="phone-code" value="+55" disabled>
+          <input type="tel" id="regPhone" placeholder="DDD + numero" required style="flex:1;">
+        </div>
+      </div>
+      <div class="country-row">
+        <span class="country-flag">&#127463;&#127479;</span>
+        <span>Real Brasileiro</span>
+      </div>
+      <div class="field">
+        <label>Login</label>
+        <input type="text" id="regLogin" required placeholder="Escolha um login">
+      </div>
+      <div class="field">
+        <label>Senha</label>
+        <input type="password" id="regPassword" required minlength="6" placeholder="Minimo 6 caracteres">
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="regTerms" required>
+        <label for="regTerms">Confirmo que tenho 18 anos ou mais, e concordo com os <a href="#">Termos de Uso</a>.</label>
+      </div>
+      <button type="submit" class="btn-register" id="btnRegister">Criar conta</button>
+    </form>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+// Tracking de afiliados
+(async function() {
+  var params = new URLSearchParams(location.search);
+  var ref = params.get('ref');
+  if (ref && !localStorage.getItem('hb_click_id')) {
+    try {
+      var result = await apiFetch('/affiliates/track', { method: 'POST', body: JSON.stringify({ refCode: ref }) });
+      localStorage.setItem('hb_click_id', result.clickId);
+    } catch(e) {}
+  }
+})();
+
+document.getElementById('registerForm').onsubmit = async function(e) {
+  e.preventDefault();
+  var btn = document.getElementById('btnRegister');
+  var name = document.getElementById('regName').value.trim();
+  var lastName = document.getElementById('regLastName').value.trim();
+  var email = document.getElementById('regEmail').value.trim();
+  var phone = document.getElementById('regPhone').value.trim();
+  var login = document.getElementById('regLogin').value.trim();
+  var password = document.getElementById('regPassword').value;
+  var terms = document.getElementById('regTerms').checked;
+
+  if (!terms) { showToast('Aceite os termos de uso', 'error'); return; }
+  if (password.length < 6) { showToast('Senha precisa ter no minimo 6 caracteres', 'error'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Criando conta...';
+
+  try {
+    var data = await apiFetch('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: name,
+        lastName: lastName,
+        email: email,
+        phone: '+55' + phone.replace(/\D/g, ''),
+        password: password,
+        country: 'BR',
+        currency: 'BRL',
+        clickId: localStorage.getItem('hb_click_id') || undefined
+      })
+    });
+    setToken(data.token);
+    window.location.href = '/client/index.html';
+  } catch(err) {
+    showToast(err.message || 'Erro ao criar conta', 'error');
+    btn.disabled = false;
+    btn.textContent = 'Criar conta';
+  }
+};
+</script>
+</body>
+</html>
