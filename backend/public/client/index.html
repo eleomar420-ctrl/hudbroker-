@@ -420,7 +420,7 @@ html, body { height: 100%; overflow: hidden; }
 .m2-panel { display:none; }
 .m2-nav { display:none; }
 @media (max-width: 768px) {
-  .trade-topbar { padding: 0 10px; gap: 8px; height: 60px; justify-content: space-between; }
+  .trade-topbar { padding: 0 10px; gap: 8px; height: 60px; justify-content: space-between; background:#111728; }
   .asset-tabs-row { display: none; }
   .asset-add-square { display: none; }
   .topbar-spacer { display: none; }
@@ -451,7 +451,7 @@ html, body { height: 100%; overflow: hidden; }
   .side-menu-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); width: auto; pointer-events: auto; }
   .side-menu-overlay.open { display: block; }
   .side-menu { width: 72px; max-width: 72px; }
-  .trade-shell { margin-left: 0; }
+  .trade-shell { margin-left: 0; background:#111728; }
   .history-panel { left: 0; width: 100vw; }
   .assets-screen-body { flex-direction: column; }
   .assets-categories { width: 100%; display: flex; overflow-x: auto; padding: 8px 0; border-right: none; border-bottom: 1px solid var(--border); }
@@ -527,7 +527,7 @@ html, body { height: 100%; overflow: hidden; }
   /* === MOBILE V2 LAYOUT === */
   .mobile-panel { display:none !important; }
   .desktop-footer { display:none !important; }
-  .m2-panel { display:block; background:#0e1525; position:relative; z-index:20; }
+  .m2-panel { display:block; background:#111728; position:relative; z-index:20; }
   .m2-buysell { display:flex; gap:8px; padding:8px 10px; position:relative; z-index:21; }
   .m2-buy, .m2-sell { flex:1; display:flex; align-items:center; justify-content:space-between; padding:16px; border:none; border-radius:8px; font-size:17px; font-weight:500; cursor:pointer; color:#fff; touch-action:manipulation; font-family:'Inter',sans-serif; }
   .m2-buy { background:#2d9f4a; }
@@ -536,15 +536,15 @@ html, body { height: 100%; overflow: hidden; }
   .m2-steppers { display:flex; gap:0; padding:0 10px 4px; position:relative; z-index:21; }
   .m2-col { flex:1; text-align:center; }
   .m2-label { font-size:11px; color:#888; margin-bottom:4px; }
-  .m2-stepper { display:flex; align-items:center; background:#1a2235; border-radius:6px; overflow:hidden; height:38px; }
-  .m2-stepper button { background:#151d2e; border:none; color:#888; font-size:18px; width:38px; height:100%; cursor:pointer; touch-action:manipulation; flex-shrink:0; -webkit-tap-highlight-color:transparent; }
+  .m2-stepper { display:flex; align-items:center; background:#192030; border-radius:6px; overflow:hidden; height:38px; }
+  .m2-stepper button { background:#151c2a; border:none; color:#888; font-size:18px; width:38px; height:100%; cursor:pointer; touch-action:manipulation; flex-shrink:0; -webkit-tap-highlight-color:transparent; }
   .m2-stepper button:active { background:#333; color:#fff; }
   .m2-stepper span { flex:1; text-align:center; color:#fff; font-size:14px; font-weight:500; }
   .m2-return { display:flex; justify-content:space-between; align-items:center; padding:6px 14px 10px; position:relative; z-index:21; }
   .m2-return-left { font-size:12px; color:#888; }
   .m2-profit { color:#51a85d; font-weight:600; }
   .m2-timer { font-size:13px; color:#e15b44; font-family:'IBM Plex Mono',monospace; font-weight:600; }
-  .m2-nav { display:flex; position:fixed; bottom:0; left:0; right:0; background:#0e1525; border-top:1px solid #1a1a1a; z-index:50; padding:6px 0; padding-bottom:max(6px, env(safe-area-inset-bottom)); }
+  .m2-nav { display:flex; position:fixed; bottom:0; left:0; right:0; background:#111728; border-top:1px solid #1a1a1a; z-index:50; padding:6px 0; padding-bottom:max(6px, env(safe-area-inset-bottom)); }
   .m2-nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border:none; color:#555; font-size:9px; font-weight:500; cursor:pointer; padding:4px 0; font-family:'Inter',sans-serif; letter-spacing:0.5px; }
   .m2-nav-btn .material-icons-outlined { font-size:20px; }
   .m2-nav-btn.active { color:#51a85d; }
