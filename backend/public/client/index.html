@@ -710,12 +710,12 @@ html, body { height: 100%; overflow: hidden; }
   <!-- Footer bar desktop -->
   <div class="desktop-footer" id="desktopFooter">
     <div class="footer-left">
-      <button class="footer-support-btn" onclick="showToast('Suporte em breve')">SUPORTE</button>
+      <button class="footer-support-btn" onclick="showToast('Suporte em breve')"><span class="material-icons-outlined" style="font-size:13px;vertical-align:middle;margin-right:3px;">chat</span>SUPORTE</button>
       <span class="footer-email">support@hudbroker.com</span>
       <span class="footer-slogan">CONTE CONOSCO, SEMPRE QUE PRECISAR</span>
     </div>
     <div class="footer-right">
-      <button class="footer-icon-btn" id="footerSoundBtn" title="Som">🔊</button>
+      <button class="footer-icon-btn" id="footerSoundBtn" title="Som"><span class="material-icons-outlined" style="font-size:18px;">volume_up</span></button>
       <button class="footer-icon-btn" id="footerSettingsBtn" title="Configurações" onclick="showToast('Configurações em breve')">⚙</button>
       <button class="footer-icon-btn" id="footerFullscreenBtn" title="Tela cheia">⛶</button>
       <span class="footer-clock" id="footerClock">HORA ATUAL <strong>--:--:--</strong></span>
@@ -1769,7 +1769,7 @@ document.getElementById('footerFullscreenBtn').onclick = () => {
 let soundEnabled = true;
 document.getElementById('footerSoundBtn').onclick = () => {
   soundEnabled = !soundEnabled;
-  document.getElementById('footerSoundBtn').textContent = soundEnabled ? '🔊' : '🔇';
+  document.getElementById('footerSoundBtn').innerHTML = soundEnabled ? '<span class="material-icons-outlined" style="font-size:18px;">volume_up</span>' : '<span class="material-icons-outlined" style="font-size:18px;">volume_off</span>';
   showToast(soundEnabled ? 'Som ativado' : 'Som desativado');
 };
 
