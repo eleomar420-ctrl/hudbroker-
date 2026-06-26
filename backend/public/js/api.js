@@ -24,15 +24,19 @@ function logout(redirectUrl) {
 async function apiFetch(path, opts = {}) {
   const headers = { 'Content-Type': 'application/json' };
   const token = getToken();
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (token) headers['Authorization'] = 'Bearer ' + token;
 
-  const res = await fetch(API_BASE + path, { ...opts, headers });
-  const text = await res.text();
-  let data = {};
-  try { data = text ? JSON.parse(text) : {}; } catch(e) { data = {}; }
+  const res = await fetch(API_BASE + path, Object.assign({}, opts, { headers: headers }));
+  var data = {};
+  try {
+    var text = await res.text();
+    if (text) data = JSON.parse(text);
+  } catch(e) {
+    data = {};
+  }
 
   if (!res.ok) {
-    throw new Error(data.error || `Erro ${res.status}`);
+    throw new Error(data.error || 'Erro ' + res.status);
   }
   return data;
 }
@@ -44,18 +48,18 @@ function formatMoney(value) {
 
 function formatDate(iso) {
   if (!iso) return '--';
-  const d = new Date(iso);
+  var d = new Date(iso);
   return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
 
 function showToast(msg, type) {
-  const existing = document.querySelector('.toast');
+  var existing = document.querySelector('.toast');
   if (existing) existing.remove();
 
-  const el = document.createElement('div');
+  var el = document.createElement('div');
   el.className = 'toast' + (type ? ' ' + type : '');
   el.textContent = msg;
   document.body.appendChild(el);
 
-  setTimeout(() => el.remove(), 4000);
+  setTimeout(function() { el.remove(); }, 4000);
 }
