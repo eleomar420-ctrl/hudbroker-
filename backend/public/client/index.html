@@ -543,7 +543,7 @@ html, body { height: 100%; overflow: hidden; }
       </svg>
     </div>
     <div class="account-dropdown" id="accountDropdown">
-      <div class="acc-drop-title">Contas de Operacao</div>
+      <div class="acc-drop-title">Contas de Operação</div>
       <div class="acc-opt-row active" data-account="real" onclick="selectAccount('real')">
         <div class="acc-opt-circle real">R$</div>
         <div class="acc-opt-info">
@@ -557,7 +557,7 @@ html, body { height: 100%; overflow: hidden; }
         <div class="acc-opt-circle demo">R$</div>
         <div class="acc-opt-info">
           <div class="acc-opt-name">Conta Demo</div>
-          <div class="acc-opt-type demo">Demonstracao</div>
+          <div class="acc-opt-type demo">Demonstração</div>
         </div>
         <div class="acc-opt-balance" id="accOptDemoBal">R$ 10.000,00</div>
         <button class="acc-opt-dep-btn" onclick="event.stopPropagation();selectAccount('demo');document.getElementById('accountDropdown').classList.remove('open');">$ Depositar</button>
@@ -583,7 +583,7 @@ html, body { height: 100%; overflow: hidden; }
             <div class="profile-popup-verify-icon">!</div>
             <div>
               <div class="profile-popup-verify-text">Verifique sua conta</div>
-              <div class="profile-popup-verify-sub">Prossiga para a verificacao de conta.</div>
+              <div class="profile-popup-verify-sub">Prossiga para a verificação de conta.</div>
             </div>
           </div>
           <div class="profile-popup-meta">
@@ -591,7 +591,7 @@ html, body { height: 100%; overflow: hidden; }
           </div>
           <div class="profile-popup-meta">
             <div class="profile-popup-detail">Registro<strong id="profileDate">--/--/----</strong></div>
-            <div class="profile-popup-detail">ID de usuario<strong id="profileId">------</strong></div>
+            <div class="profile-popup-detail">ID de usuário<strong id="profileId">------</strong></div>
           </div>
         </div>
         <div class="profile-popup-right">
@@ -599,7 +599,7 @@ html, body { height: 100%; overflow: hidden; }
           <button class="profile-popup-item" onclick="closeProfilePopup();openAccountPanel();setTimeout(()=>openAccSub('foto'),100);"><span class="material-icons-outlined">account_box</span>Alterar Foto</button>
           <button class="profile-popup-item" onclick="closeProfilePopup();openDepositModal();"><span class="material-icons-outlined">arrow_upward</span>Depositar</button>
           <button class="profile-popup-item" onclick="showToast('Saques em breve')"><span class="material-icons-outlined">arrow_downward</span>Sacar</button>
-          <button class="profile-popup-item" onclick="closeProfilePopup();openHistoryPanel();"><span class="material-icons-outlined">history</span>Historico</button>
+          <button class="profile-popup-item" onclick="closeProfilePopup();openHistoryPanel();"><span class="material-icons-outlined">history</span>Histórico</button>
           <button class="profile-popup-item" onclick="showToast('Suporte em breve')"><span class="material-icons-outlined">chat</span>Suporte</button>
           <button class="profile-popup-item" onclick="logout()"><span class="material-icons-outlined">logout</span>Sair</button>
         </div>
@@ -836,19 +836,19 @@ html, body { height: 100%; overflow: hidden; }
     <!-- Step 2: QR Code -->
     <div id="depStep2" style="display:none;">
       <div class="modal-title" style="display:flex;justify-content:space-between;align-items:center;background:#000000;color:#fff;">
-        <span>Pague o seu deposito</span>
+        <span>Pague o seu depósito</span>
         <button onclick="closeDepositModal()" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;">X</button>
       </div>
       <div class="modal-body" style="text-align:center;">
         <div style="background:#fff;border-radius:10px;padding:12px;display:inline-block;">
           <img id="depQrImg" src="" alt="QR Code PIX" style="width:200px;height:200px;">
         </div>
-        <div style="font-size:12px;color:#888;margin-top:12px;">Copie o codigo PIX abaixo</div>
+        <div style="font-size:12px;color:#888;margin-top:12px;">Copie o código PIX abaixo</div>
         <div style="margin-top:6px;">
           <input type="text" id="depPixCode" readonly style="width:100%;background:#111;border:1px solid #2a2a2a;color:#fff;border-radius:6px;padding:8px;font-size:10px;font-family:var(--font-mono);">
         </div>
-        <button onclick="copyDepPix()" style="width:100%;margin-top:10px;padding:12px;background:#51a85d;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;">COPIAR CODIGO</button>
-        <button onclick="closeDepositModal()" style="width:100%;margin-top:8px;padding:12px;background:#1a1a1a;color:#ccc;border:1px solid #2a2a2a;border-radius:6px;font-size:13px;cursor:pointer;">Ja efetuei o pagamento</button>
+        <button onclick="copyDepPix()" style="width:100%;margin-top:10px;padding:12px;background:#51a85d;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;">COPIAR CÓDIGO</button>
+        <button onclick="closeDepositModal()" style="width:100%;margin-top:8px;padding:12px;background:#1a1a1a;color:#ccc;border:1px solid #2a2a2a;border-radius:6px;font-size:13px;cursor:pointer;">Já efetuei o pagamento</button>
       </div>
     </div>
   </div>
@@ -1890,13 +1890,13 @@ function loadAccDados() {
     document.getElementById('accNasc').disabled = true;
     document.getElementById('accPhone').disabled = true;
     document.getElementById('accBtnSave').disabled = true;
-    document.getElementById('accBtnSave').textContent = 'Dados ja salvos';
+    document.getElementById('accBtnSave').textContent = 'Dados já salvos';
   }
 }
 
 function saveAccDados() {
   var doc = document.getElementById('accDoc').value.replace(/\D/g,'');
-  if (doc.length !== 11 && doc.length !== 14) { showToast('Documento invalido','error'); return; }
+  if (doc.length !== 11 && doc.length !== 14) { showToast('Documento inválido','error'); return; }
   localStorage.setItem('hb_dados_saved','1');
   localStorage.setItem('hb_cpf', document.getElementById('accDoc').value);
   localStorage.setItem('hb_nasc', document.getElementById('accNasc').value);
@@ -1965,15 +1965,15 @@ document.getElementById('accAvInput').onchange = function(e) {
   <div class="acc-header"><button class="back-btn" onclick="closeAccountPanel()">&#8592;</button><h2>Minha Conta</h2></div>
   <div>
     <button class="acc-menu-item" onclick="openAccSub('dados')"><span class="material-icons-outlined">account_circle</span>Meus Dados<span class="material-icons-outlined chevron">chevron_right</span></button>
-    <button class="acc-menu-item" onclick="openAccSub('depositos')"><span class="material-icons-outlined">arrow_upward</span>Depositos<span class="material-icons-outlined chevron">chevron_right</span></button>
+    <button class="acc-menu-item" onclick="openAccSub('depositos')"><span class="material-icons-outlined">arrow_upward</span>Depósitos<span class="material-icons-outlined chevron">chevron_right</span></button>
     <button class="acc-menu-item" onclick="openAccSub('saques')"><span class="material-icons-outlined">arrow_downward</span>Saques<span class="material-icons-outlined chevron">chevron_right</span></button>
     <div class="acc-divider"></div>
     <button class="acc-menu-item" onclick="showToast('Verificacao em breve')"><span class="material-icons-outlined">admin_panel_settings</span>Verificar Conta<span class="material-icons-outlined chevron">chevron_right</span></button>
     <button class="acc-menu-item" onclick="openAccSub('foto')"><span class="material-icons-outlined">account_box</span>Alterar Foto<span class="material-icons-outlined chevron">chevron_right</span></button>
-    <button class="acc-menu-item" onclick="openAccSub('indicacoes')"><span class="material-icons-outlined">groups_3</span>Indicacoes<span class="material-icons-outlined chevron">chevron_right</span></button>
+    <button class="acc-menu-item" onclick="openAccSub('indicacoes')"><span class="material-icons-outlined">groups_3</span>Indicações<span class="material-icons-outlined chevron">chevron_right</span></button>
     <div class="acc-divider"></div>
     <button class="acc-menu-item" onclick="openAccSub('senha')"><span class="material-icons-outlined">key</span>Mudar Senha<span class="material-icons-outlined chevron">chevron_right</span></button>
-    <button class="acc-menu-item" onclick="openAccSub('config')"><span class="material-icons-outlined">settings</span>Configuracoes<span class="material-icons-outlined chevron">chevron_right</span></button>
+    <button class="acc-menu-item" onclick="openAccSub('config')"><span class="material-icons-outlined">settings</span>Configurações<span class="material-icons-outlined chevron">chevron_right</span></button>
     <div class="acc-divider"></div>
     <button class="acc-menu-item logout-item" onclick="logout()"><span class="material-icons-outlined">logout</span>Sair</button>
   </div>
@@ -1987,16 +1987,16 @@ document.getElementById('accAvInput').onchange = function(e) {
     <div class="acc-field"><label>Documento (CPF)</label><input type="text" id="accDoc" placeholder="000.000.000-00" maxlength="14"></div>
     <div class="acc-field"><label>Data de nascimento</label><input type="date" id="accNasc"></div>
     <div class="acc-field"><label>Login</label><input type="text" id="accLogin" disabled></div>
-    <div class="acc-field"><label>Ultimo login</label><input type="text" id="accUltimoLogin" disabled></div>
+    <div class="acc-field"><label>Último login</label><input type="text" id="accUltimoLogin" disabled></div>
     <div class="acc-field"><label>E-mail</label><input type="email" id="accEmail" disabled></div>
     <div class="acc-field"><label>Telefone</label><input type="tel" id="accPhone"></div>
     <button class="acc-btn" id="accBtnSave" onclick="saveAccDados()">Salvar alteracoes</button>
   </div>
 </div>
 
-<!-- Depositos -->
+<!-- Depósitos -->
 <div class="acc-sub" id="accSub-depositos">
-  <div class="acc-header"><button class="back-btn" onclick="closeAccSub('depositos')">&#8592;</button><h2>Depositos</h2></div>
+  <div class="acc-header"><button class="back-btn" onclick="closeAccSub('depositos')">&#8592;</button><h2>Depósitos</h2></div>
   <div class="acc-sub-body" id="accDepList"><div class="acc-empty">Carregando...</div></div>
 </div>
 
@@ -2018,9 +2018,9 @@ document.getElementById('accAvInput').onchange = function(e) {
   </div>
 </div>
 
-<!-- Indicacoes -->
+<!-- Indicações -->
 <div class="acc-sub" id="accSub-indicacoes">
-  <div class="acc-header"><button class="back-btn" onclick="closeAccSub('indicacoes')">&#8592;</button><h2>Indicacoes</h2></div>
+  <div class="acc-header"><button class="back-btn" onclick="closeAccSub('indicacoes')">&#8592;</button><h2>Indicações</h2></div>
   <div class="acc-sub-body"><div class="acc-empty">Sistema de indicacoes em breve.</div></div>
 </div>
 
@@ -2035,15 +2035,15 @@ document.getElementById('accAvInput').onchange = function(e) {
   </div>
 </div>
 
-<!-- Configuracoes -->
+<!-- Configurações -->
 <div class="acc-sub" id="accSub-config">
   <div class="acc-header"><button class="back-btn" onclick="closeAccSub('config')">&#8592;</button><h2>Selecione um idioma</h2></div>
   <div style="padding:0;">
-    <button class="acc-lang active">&#127463;&#127479; Portugues</button>
+    <button class="acc-lang active">&#127463;&#127479; Português</button>
     <button class="acc-lang" onclick="showToast('Em breve')">&#127468;&#127463; English</button>
-    <button class="acc-lang" onclick="showToast('Em breve')">&#127466;&#127480; Espanol</button>
+    <button class="acc-lang" onclick="showToast('Em breve')">&#127466;&#127480; Español</button>
     <button class="acc-lang" onclick="showToast('Em breve')">&#127470;&#127481; Italiano</button>
-    <button class="acc-lang" onclick="showToast('Em breve')">&#127467;&#127479; Francais</button>
+    <button class="acc-lang" onclick="showToast('Em breve')">&#127467;&#127479; Français</button>
   </div>
 </div>
 
