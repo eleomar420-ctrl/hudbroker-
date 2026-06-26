@@ -1320,34 +1320,37 @@ function showSuccessPopup(message) {
   }, 2200);
 }
 
-// === SONS (pool de Audio — funciona em todos os navegadores) ===
-function _createPool(url, size) {
-  var pool = [];
-  for (var i = 0; i < size; i++) {
-    var a = new Audio(url);
-    a.preload = 'auto';
-    pool.push(a);
-  }
-  return { pool: pool, idx: 0 };
+// === SONS ===
+var _poolClick = [];
+var _poolTrade = [];
+var _idxClick = 0, _idxTrade = 0;
+var _soundReady = false;
+
+// Criar pool
+for (var _i = 0; _i < 4; _i++) {
+  var _ac = new Audio('/sounds/click.mp3'); _ac.preload = 'auto'; _ac.load(); _poolClick.push(_ac);
+  var _at = new Audio('/sounds/trade.mp3'); _at.preload = 'auto'; _at.load(); _poolTrade.push(_at);
 }
 
-var _poolClick = _createPool('/sounds/click.mp3', 5);
-var _poolTrade = _createPool('/sounds/trade.mp3', 5);
-
-function _playPool(p) {
-  var a = p.pool[p.idx];
-  p.idx = (p.idx + 1) % p.pool.length;
-  a.currentTime = 0;
-  a.play().catch(function(){});
+// Preaquecer no primeiro toque (volume 0 pra desbloquear)
+function _warmUp() {
+  if (_soundReady) return;
+  _soundReady = true;
+  _poolClick.forEach(function(a) { a.volume = 0; a.play().then(function() { a.pause(); a.currentTime = 0; a.volume = 1; }).catch(function(){ a.volume = 1; }); });
+  _poolTrade.forEach(function(a) { a.volume = 0; a.play().then(function() { a.pause(); a.currentTime = 0; a.volume = 1; }).catch(function(){ a.volume = 1; }); });
 }
+document.addEventListener('touchstart', _warmUp, { once: true });
+document.addEventListener('click', _warmUp, { once: true });
 
 function playClick() {
   if (typeof soundEnabled !== 'undefined' && !soundEnabled) return;
-  _playPool(_poolClick);
+  var a = _poolClick[_idxClick]; _idxClick = (_idxClick + 1) % _poolClick.length;
+  a.currentTime = 0; a.play().catch(function(){});
 }
 function playTrade() {
   if (typeof soundEnabled !== 'undefined' && !soundEnabled) return;
-  _playPool(_poolTrade);
+  var a = _poolTrade[_idxTrade]; _idxTrade = (_idxTrade + 1) % _poolTrade.length;
+  a.currentTime = 0; a.play().catch(function(){});
 }
 
 document.getElementById('buyBtn').onclick = () => { playTrade(); openTrade('up'); };
