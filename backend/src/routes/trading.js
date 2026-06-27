@@ -116,19 +116,7 @@ router.get('/deposits', async (req, res) => {
 });
 
 // Listar saques do usuário
-router.get('/withdrawals', async (req, res) => {
-  try {
-    const withdrawals = await query(
-      `SELECT wr.*, ROW_NUMBER() OVER (ORDER BY wr.created_at) as withdrawal_number 
-       FROM withdrawal_requests wr WHERE wr.requester_type = 'user' AND wr.requester_id = $1 ORDER BY wr.created_at DESC`,
-      [req.auth.id]
-    );
-    res.json(withdrawals);
-  } catch (err) {
-    console.error('[trading/withdrawals]', err);
-    res.status(500).json({ error: 'Erro interno' });
-  }
-});
+// withdrawals antigo removido - usando nova rota abaixo
 
 // Solicitar saque
 router.post('/withdrawals', async (req, res) => {
