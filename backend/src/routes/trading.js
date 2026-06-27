@@ -192,7 +192,7 @@ router.patch('/me', async (req, res) => {
 router.post('/withdraw', async (req, res) => {
   try {
     const { amount, pixKey } = req.body;
-    const userId = req.user.id;
+    const userId = req.auth.id;
     const minWithdraw = 150;
     const taxRate = 0.10;
 
@@ -223,7 +223,7 @@ router.get('/withdrawals', async (req, res) => {
   try {
     const rows = await query(
       'SELECT * FROM withdrawals WHERE user_id = $1 ORDER BY created_at DESC',
-      [req.user.id]
+      [req.auth.id]
     );
     res.json(rows);
   } catch (err) {
