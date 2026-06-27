@@ -1857,7 +1857,7 @@ document.getElementById('footerFullscreenBtn').onclick = () => {
 };
 
 // Sound toggle
-let soundEnabled = true;
+var soundEnabled = true;
 document.getElementById('footerSoundBtn').onclick = () => {
   soundEnabled = !soundEnabled;
   document.getElementById('footerSoundBtn').innerHTML = soundEnabled ? '<span class="material-icons-outlined" style="font-size:18px;">volume_up</span>' : '<span class="material-icons-outlined" style="font-size:18px;">volume_off</span>';
