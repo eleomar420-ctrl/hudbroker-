@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HudBroker Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#0b0e18;color:#e0e0e0;font-family:'Inter',sans-serif;display:flex;min-height:100vh;}
+a{text-decoration:none;color:inherit;}
+
+/* SIDEBAR */
+.side{width:220px;background:#10142a;border-right:1px solid #1c2040;position:fixed;top:0;bottom:0;display:flex;flex-direction:column;z-index:10;}
+.side-brand{padding:18px 16px;font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;border-bottom:1px solid #1c2040;}
+.side-brand span{color:#e8a23d;}
+.side-nav{flex:1;padding:8px 0;}
+.side-btn{display:flex;align-items:center;gap:10px;padding:11px 16px;color:#666;font-size:13px;cursor:pointer;border:none;background:none;width:100%;text-align:left;font-family:'Inter',sans-serif;transition:all 0.15s;}
+.side-btn:hover{color:#bbb;background:rgba(255,255,255,0.02);}
+.side-btn.act{color:#e8a23d;background:rgba(232,162,61,0.06);border-right:2px solid #e8a23d;}
+.side-btn .material-icons-outlined{font-size:18px;}
+.side-foot{padding:14px 16px;border-top:1px solid #1c2040;font-size:11px;color:#444;}
+.side-foot a{color:#e8a23d;}
+
+/* MAIN */
+.main{margin-left:220px;flex:1;padding:20px 28px;overflow-y:auto;min-height:100vh;}
+.pg-title{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;margin-bottom:20px;}
+
+/* DASH CARDS */
+.dash-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+.dash-card{background:#10142a;border:1px solid #1c2040;border-radius:10px;padding:18px;}
+.dash-num{font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:800;margin-bottom:2px;}
+.dash-num.gold{color:#e8a23d;}
+.dash-num.green{color:#08c58a;}
+.dash-num.red{color:#fc4b4a;}
+.dash-label{font-size:12px;color:#666;margin-bottom:10px;}
+.dash-sub{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-top:1px solid #1c2040;}
+.dash-sub-label{color:#555;display:flex;align-items:center;gap:4px;}
+.dash-sub-label::before{content:'';width:6px;height:6px;border-radius:50%;}
+.dash-sub-label.gr::before{background:#08c58a;}
+.dash-sub-label.bl::before{background:#5b8def;}
+.dash-sub-label.gd::before{background:#e8a23d;}
+.dash-sub-val{color:#ccc;font-weight:600;}
+
+/* TABLE */
+.tbl-wrap{background:#10142a;border:1px solid #1c2040;border-radius:10px;overflow:hidden;}
+.tbl-head{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #1c2040;}
+.tbl-title{font-size:15px;font-weight:600;}
+.tbl-search{background:#0b0e18;border:1px solid #1c2040;color:#fff;border-radius:6px;padding:7px 12px;font-size:12px;width:220px;}
+.tbl-search:focus{outline:none;border-color:#e8a23d;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;padding:10px 18px;font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #1c2040;}
+td{padding:10px 18px;font-size:12px;border-bottom:1px solid rgba(28,32,64,0.4);}
+tr{cursor:pointer;transition:background 0.1s;}
+tr:hover{background:rgba(255,255,255,0.015);}
+.badge{padding:2px 8px;border-radius:3px;font-size:9px;font-weight:700;text-transform:uppercase;}
+.b-active{background:rgba(8,197,138,0.1);color:#08c58a;}
+.b-blocked{background:rgba(252,75,74,0.1);color:#fc4b4a;}
+.b-pending{background:rgba(232,162,61,0.1);color:#e8a23d;}
+.b-paid{background:rgba(8,197,138,0.1);color:#08c58a;}
+.b-won{background:rgba(8,197,138,0.1);color:#08c58a;}
+.b-lost{background:rgba(252,75,74,0.1);color:#fc4b4a;}
+.btn-s{padding:4px 10px;border-radius:4px;font-size:10px;font-weight:600;cursor:pointer;border:none;}
+.btn-gold{background:rgba(232,162,61,0.1);color:#e8a23d;}.btn-gold:hover{background:rgba(232,162,61,0.2);}
+.btn-grn{background:rgba(8,197,138,0.1);color:#08c58a;}.btn-grn:hover{background:rgba(8,197,138,0.2);}
+.btn-red{background:rgba(252,75,74,0.1);color:#fc4b4a;}.btn-red:hover{background:rgba(252,75,74,0.2);}
+
+/* TABS */
+.tab{display:none;}.tab.act{display:block;}
+
+/* USER DETAIL VIEW */
+.user-detail{display:none;}
+.user-detail.open{display:block;}
+.ud-back{display:flex;align-items:center;gap:8px;color:#888;font-size:13px;cursor:pointer;margin-bottom:16px;border:none;background:none;font-family:'Inter',sans-serif;}
+.ud-back:hover{color:#fff;}
+.ud-header{background:#10142a;border:1px solid #1c2040;border-radius:10px;padding:20px;margin-bottom:16px;}
+.ud-top{display:flex;align-items:center;gap:14px;margin-bottom:14px;}
+.ud-avatar{width:50px;height:50px;border-radius:50%;background:#1c2040;display:flex;align-items:center;justify-content:center;font-size:20px;overflow:hidden;}
+.ud-avatar img{width:100%;height:100%;object-fit:cover;}
+.ud-name{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;}
+.ud-meta{font-size:12px;color:#555;display:flex;gap:16px;margin-top:2px;}
+.ud-stats{display:flex;gap:12px;margin-bottom:16px;}
+.ud-stat{border:1px solid #1c2040;border-radius:8px;padding:10px 16px;min-width:120px;}
+.ud-stat-val{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;display:flex;align-items:center;gap:4px;}
+.ud-stat-val .arrow{font-size:14px;}
+.ud-stat-val .arrow.up{color:#08c58a;}
+.ud-stat-val .arrow.dn{color:#fc4b4a;}
+.ud-stat-label{font-size:11px;color:#555;}
+.ud-tabs{display:flex;gap:0;border-bottom:1px solid #1c2040;}
+.ud-tab{padding:10px 18px;font-size:13px;color:#555;cursor:pointer;border:none;background:none;font-family:'Inter',sans-serif;border-bottom:2px solid transparent;transition:all 0.15s;}
+.ud-tab:hover{color:#ccc;}
+.ud-tab.act{color:#5b8def;border-bottom-color:#5b8def;}
+.ud-tab.del{color:#fc4b4a;}
+.ud-content{background:#10142a;border:1px solid #1c2040;border-radius:0 0 10px 10px;padding:20px;min-height:200px;}
+
+/* User detail panels */
+.ud-panel{display:none;}.ud-panel.act{display:block;}
+.ud-grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.ud-box{border:1px solid #1c2040;border-radius:8px;padding:16px;}
+.ud-box-title{font-size:14px;font-weight:700;margin-bottom:12px;}
+.ud-row{display:flex;justify-content:space-between;padding:6px 0;font-size:12px;border-bottom:1px solid rgba(28,32,64,0.3);}
+.ud-row-label{color:#555;}
+.ud-row-val{color:#ccc;font-weight:500;}
+.ud-row-val.green{color:#08c58a;}
+.ud-row-val.red{color:#fc4b4a;}
+
+/* Edit fields */
+.ed-field{margin-bottom:12px;}
+.ed-field label{display:block;font-size:11px;color:#555;margin-bottom:4px;}
+.ed-field input,.ed-field select{width:100%;background:#0b0e18;border:1px solid #1c2040;color:#fff;border-radius:6px;padding:9px 12px;font-size:13px;}
+.ed-field input:focus,.ed-field select:focus{outline:none;border-color:#e8a23d;}
+.btn-save{padding:10px 24px;background:#e8a23d;color:#000;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;}
+
+.toast{position:fixed;top:16px;right:16px;padding:10px 20px;border-radius:6px;font-size:12px;z-index:999;background:#10142a;color:#fff;border:1px solid #1c2040;animation:fadeIn 0.3s;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+
+<div class="side">
+  <div class="side-brand">Hud<span>Broker</span></div>
+  <div class="side-nav">
+    <button class="side-btn act" onclick="showTab('dashboard',this)"><span class="material-icons-outlined">dashboard</span>Dashboard</button>
+    <button class="side-btn" onclick="showTab('users',this)"><span class="material-icons-outlined">people</span>Usuarios</button>
+    <button class="side-btn" onclick="showTab('deposits',this)"><span class="material-icons-outlined">account_balance</span>Depositos</button>
+    <button class="side-btn" onclick="showTab('withdrawals',this)"><span class="material-icons-outlined">payments</span>Saques</button>
+    <button class="side-btn" onclick="showTab('trades',this)"><span class="material-icons-outlined">candlestick_chart</span>Operacoes</button>
+  </div>
+  <div class="side-foot"><a href="/client/index.html">Voltar ao site</a></div>
+</div>
+
+<div class="main">
+
+<!-- DASHBOARD -->
+<div class="tab act" id="t-dashboard">
+  <div class="pg-title">Dashboard</div>
+  <div class="dash-row">
+    <div class="dash-card">
+      <div class="dash-num gold" id="dUsers">--</div>
+      <div class="dash-label">Cadastros</div>
+      <div class="dash-sub"><span class="dash-sub-label gr">Hoje</span><span class="dash-sub-val" id="dToday">--</span></div>
+      <div class="dash-sub"><span class="dash-sub-label bl">Periodo</span><span class="dash-sub-val" id="dPeriod">--</span></div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-num green" id="dDepTotal">--</div>
+      <div class="dash-label">Depositos</div>
+      <div class="dash-sub"><span class="dash-sub-label gr">Pagos</span><span class="dash-sub-val" id="dDepCount">--</span></div>
+      <div class="dash-sub"><span class="dash-sub-label gd">FTD</span><span class="dash-sub-val" id="dFtd">--</span></div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-num" id="dTrades">--</div>
+      <div class="dash-label">Operacoes</div>
+      <div class="dash-sub"><span class="dash-sub-label gr">Hoje</span><span class="dash-sub-val" id="dTradesToday">--</span></div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-num red" id="dBalance">--</div>
+      <div class="dash-label">Saldo clientes</div>
+    </div>
+  </div>
+</div>
+
+<!-- USERS LIST -->
+<div class="tab" id="t-users">
+  <div class="pg-title">Usuarios</div>
+  <div class="tbl-wrap">
+    <div class="tbl-head"><div class="tbl-title">Todos os Usuarios</div><input class="tbl-search" id="uSearch" placeholder="Buscar..." oninput="filterU()"></div>
+    <table><thead><tr><th>Nome</th><th>Email</th><th>Saldo</th><th>Depositos</th><th>Status</th><th>Cadastro</th></tr></thead><tbody id="uBody"></tbody></table>
+  </div>
+</div>
+
+<!-- DEPOSITS -->
+<div class="tab" id="t-deposits">
+  <div class="pg-title">Depositos</div>
+  <div class="tbl-wrap">
+    <div class="tbl-head"><div class="tbl-title">Todos os Depositos</div></div>
+    <table><thead><tr><th>Usuario</th><th>Valor</th><th>Status</th><th>Data</th><th>ID</th></tr></thead><tbody id="depBody"></tbody></table>
+  </div>
+</div>
+
+<!-- WITHDRAWALS -->
+<div class="tab" id="t-withdrawals">
+  <div class="pg-title">Saques</div>
+  <div class="tbl-wrap">
+    <div class="tbl-head"><div class="tbl-title">Solicitacoes de Saque</div></div>
+    <table><thead><tr><th>Usuario</th><th>Valor</th><th>Chave PIX</th><th>Status</th><th>Data</th><th>Acoes</th></tr></thead><tbody id="wBody"></tbody></table>
+  </div>
+</div>
+
+<!-- TRADES -->
+<div class="tab" id="t-trades">
+  <div class="pg-title">Operacoes</div>
+  <div class="tbl-wrap">
+    <div class="tbl-head"><div class="tbl-title">Todas as Operacoes</div></div>
+    <table><thead><tr><th>Usuario</th><th>Ativo</th><th>Direcao</th><th>Valor</th><th>Resultado</th><th>Status</th><th>Data</th></tr></thead><tbody id="trBody"></tbody></table>
+  </div>
+</div>
+
+<!-- USER DETAIL -->
+<div class="user-detail" id="userDetail">
+  <button class="ud-back" onclick="closeDetail()"><span class="material-icons-outlined" style="font-size:16px;">arrow_back</span>Voltar</button>
+  <div class="ud-header">
+    <div class="ud-top">
+      <div class="ud-avatar" id="udAvatar">?</div>
+      <div>
+        <div class="ud-name" id="udName">--</div>
+        <div class="ud-meta"><span id="udLogin">--</span><span id="udDoc">--</span><span id="udEmail">--</span></div>
+      </div>
+    </div>
+    <div class="ud-stats">
+      <div class="ud-stat"><div class="ud-stat-val"><span class="arrow up">&#8593;</span><span id="udDep">R$ 0</span></div><div class="ud-stat-label">Depositos</div></div>
+      <div class="ud-stat"><div class="ud-stat-val"><span class="arrow dn">&#8595;</span><span id="udSaq">R$ 0</span></div><div class="ud-stat-label">Saques</div></div>
+      <div class="ud-stat"><div class="ud-stat-val"><span class="arrow up">&#8593;</span><span id="udOps">0</span></div><div class="ud-stat-label">Operacoes</div></div>
+    </div>
+    <div class="ud-tabs">
+      <button class="ud-tab act" onclick="showUdTab('resumo',this)">Resumo</button>
+      <button class="ud-tab" onclick="showUdTab('editar',this)">Editar</button>
+      <button class="ud-tab" onclick="showUdTab('uddeps',this)">Depositos</button>
+      <button class="ud-tab" onclick="showUdTab('udsaques',this)">Saques</button>
+      <button class="ud-tab" onclick="showUdTab('udops',this)">Operacoes</button>
+      <button class="ud-tab" onclick="showUdTab('udmov',this)">Movimentacoes</button>
+      <button class="ud-tab del" onclick="if(confirm('Excluir usuario?'))deleteUser()">Excluir</button>
+    </div>
+  </div>
+  <div class="ud-content">
+    <!-- Resumo -->
+    <div class="ud-panel act" id="p-resumo">
+      <div class="ud-grid3">
+        <div class="ud-box"><div class="ud-box-title">Dados Cadastrais</div>
+          <div class="ud-row"><span class="ud-row-label">Nome</span><span class="ud-row-val" id="rNome">--</span></div>
+          <div class="ud-row"><span class="ud-row-label">Login</span><span class="ud-row-val" id="rLogin">--</span></div>
+          <div class="ud-row"><span class="ud-row-label">Documento</span><span class="ud-row-val" id="rDoc">--</span></div>
+          <div class="ud-row"><span class="ud-row-label">Telefone</span><span class="ud-row-val" id="rPhone">--</span></div>
+          <div class="ud-row"><span class="ud-row-label">E-mail</span><span class="ud-row-val" id="rEmail">--</span></div>
+        </div>
+        <div class="ud-box"><div class="ud-box-title">Detalhes</div>
+          <div class="ud-row"><span class="ud-row-label">Cadastro</span><span class="ud-row-val" id="rCad">--</span></div>
+          <div class="ud-row"><span class="ud-row-label">Efetivado?</span><span class="ud-row-val green" id="rEfet">Sim</span></div>
+          <div class="ud-row"><span class="ud-row-label">Verificado (KYC)?</span><span class="ud-row-val" id="rKyc">Nao</span></div>
+          <div class="ud-row"><span class="ud-row-label">Tipo</span><span class="ud-row-val">Cliente</span></div>
+          <div class="ud-row"><span class="ud-row-label">Pais</span><span class="ud-row-val" id="rCountry">BR</span></div>
+        </div>
+        <div class="ud-box"><div class="ud-box-title">Financeiro</div>
+          <div class="ud-row"><span class="ud-row-label">Saldo Real</span><span class="ud-row-val green" id="rBal">R$ 0</span></div>
+          <div class="ud-row"><span class="ud-row-label">Saldo Demo</span><span class="ud-row-val" id="rDemo">R$ 0</span></div>
+          <div class="ud-row"><span class="ud-row-label">Depositos</span><span class="ud-row-val green" id="rDepT">R$ 0</span></div>
+          <div class="ud-row"><span class="ud-row-label">Saques</span><span class="ud-row-val red" id="rSaqT">R$ 0</span></div>
+          <div class="ud-row"><span class="ud-row-label">Moeda</span><span class="ud-row-val">BRL</span></div>
+        </div>
+      </div>
+    </div>
+    <!-- Editar -->
+    <div class="ud-panel" id="p-editar">
+      <div style="max-width:400px;">
+        <div class="ed-field"><label>Saldo Real (R$)</label><input type="number" id="eBalance" step="0.01"></div>
+        <div class="ed-field"><label>Saldo Demo (R$)</label><input type="number" id="eDemoBalance" step="0.01"></div>
+        <div class="ed-field"><label>Status</label><select id="eStatus"><option value="active">Ativo</option><option value="blocked">Bloqueado</option></select></div>
+        <div class="ed-field"><label>KYC</label><select id="eKyc"><option value="pending">Pendente</option><option value="approved">Aprovado</option><option value="rejected">Rejeitado</option></select></div>
+        <button class="btn-save" onclick="saveUserEdit()">Salvar Alteracoes</button>
+      </div>
+    </div>
+    <!-- Depositos do usuario -->
+    <div class="ud-panel" id="p-uddeps"><div id="udDepsContent">Carregando...</div></div>
+    <!-- Saques do usuario -->
+    <div class="ud-panel" id="p-udsaques"><div id="udSaqContent">Carregando...</div></div>
+    <!-- Operacoes do usuario -->
+    <div class="ud-panel" id="p-udops"><div id="udOpsContent">Carregando...</div></div>
+    <!-- Movimentacoes -->
+    <div class="ud-panel" id="p-udmov"><div id="udMovContent">Em breve</div></div>
+  </div>
+</div>
+
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+requireAuth('/admin/login.html');
+var allUsers=[],curUser=null;
+function fmt(v){return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
+function fd(d){if(!d)return'--';var x=new Date(d);return x.toLocaleDateString('pt-BR')+' '+x.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+
+function showTab(n,el){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('act');});
+  document.querySelectorAll('.side-btn').forEach(function(b){b.classList.remove('act');});
+  document.getElementById('t-'+n).classList.add('act');
+  if(el)el.classList.add('act');
+  document.getElementById('userDetail').classList.remove('open');
+  if(n==='dashboard')loadDash();
+  if(n==='users')loadUsers();
+  if(n==='deposits')loadDeps();
+  if(n==='withdrawals')loadW();
+  if(n==='trades')loadTr();
+}
+
+function showUdTab(n,el){
+  document.querySelectorAll('.ud-panel').forEach(function(p){p.classList.remove('act');});
+  document.querySelectorAll('.ud-tab').forEach(function(t){t.classList.remove('act');});
+  document.getElementById('p-'+n).classList.add('act');
+  if(el)el.classList.add('act');
+}
+
+async function loadDash(){
+  try{
+    var s=await apiFetch('/admin/stats');
+    document.getElementById('dUsers').textContent=s.users;
+    document.getElementById('dToday').textContent=s.trades.today;
+    document.getElementById('dPeriod').textContent=s.users;
+    document.getElementById('dDepTotal').textContent=fmt(s.deposits.total);
+    document.getElementById('dDepCount').textContent=s.deposits.count;
+    document.getElementById('dFtd').textContent=fmt(s.deposits.total);
+    document.getElementById('dTrades').textContent=s.trades.total;
+    document.getElementById('dTradesToday').textContent=s.trades.today;
+    document.getElementById('dBalance').textContent=fmt(s.totalBalance);
+  }catch(e){}
+}
+
+async function loadUsers(){
+  try{allUsers=await apiFetch('/admin/users');renderU(allUsers);}catch(e){}
+}
+function renderU(list){
+  document.getElementById('uBody').innerHTML=list.map(function(u){
+    return '<tr onclick="openDetail(\''+u.id+'\')"><td>'+(u.name||'')+' '+(u.last_name||'')+'</td><td>'+u.email+'</td><td>'+fmt(u.balance)+'</td><td style="color:#08c58a;">--</td><td><span class="badge '+(u.status==='active'?'b-active':'b-blocked')+'">'+u.status+'</span></td><td>'+fd(u.created_at)+'</td></tr>';
+  }).join('');
+}
+function filterU(){var q=document.getElementById('uSearch').value.toLowerCase();renderU(allUsers.filter(function(u){return(u.name||'').toLowerCase().includes(q)||(u.email||'').toLowerCase().includes(q);}));}
+
+async function openDetail(id){
+  try{
+    curUser=await apiFetch('/admin/users/'+id);
+    var u=curUser;
+    document.getElementById('udName').textContent=(u.name||'')+' '+(u.last_name||'');
+    document.getElementById('udLogin').textContent=u.email;
+    document.getElementById('udDoc').textContent=u.phone||'--';
+    document.getElementById('udEmail').textContent=u.email;
+    document.getElementById('rNome').textContent=(u.name||'')+' '+(u.last_name||'');
+    document.getElementById('rLogin').textContent=u.email;
+    document.getElementById('rDoc').textContent=u.phone||'--';
+    document.getElementById('rPhone').textContent=u.phone||'--';
+    document.getElementById('rEmail').textContent=u.email;
+    document.getElementById('rCad').textContent=fd(u.created_at);
+    document.getElementById('rKyc').textContent=u.kyc_status==='approved'?'Sim':'Nao';
+    document.getElementById('rCountry').textContent=u.country||'BR';
+    document.getElementById('rBal').textContent=fmt(u.balance);
+    document.getElementById('rDemo').textContent=fmt(u.demo_balance);
+    document.getElementById('udDep').textContent=fmt(0);
+    document.getElementById('udSaq').textContent=fmt(0);
+    document.getElementById('eBalance').value=u.balance||0;
+    document.getElementById('eDemoBalance').value=u.demo_balance||0;
+    document.getElementById('eStatus').value=u.status||'active';
+    document.getElementById('eKyc').value=u.kyc_status||'pending';
+    if(u.avatar_url)document.getElementById('udAvatar').innerHTML='<img src="'+u.avatar_url+'">';
+    else document.getElementById('udAvatar').textContent=(u.name||'?')[0].toUpperCase();
+    document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('act');});
+    document.getElementById('userDetail').classList.add('open');
+    showUdTab('resumo',document.querySelector('.ud-tab'));
+  }catch(e){showToast('Erro ao carregar usuario');}
+}
+
+function closeDetail(){
+  document.getElementById('userDetail').classList.remove('open');
+  showTab('users',document.querySelectorAll('.side-btn')[1]);
+}
+
+async function saveUserEdit(){
+  try{
+    await apiFetch('/admin/users/'+curUser.id+'/balance',{method:'PATCH',body:JSON.stringify({balance:Number(document.getElementById('eBalance').value),demo_balance:Number(document.getElementById('eDemoBalance').value)})});
+    await apiFetch('/admin/users/'+curUser.id+'/status',{method:'PATCH',body:JSON.stringify({status:document.getElementById('eStatus').value})});
+    await apiFetch('/admin/users/'+curUser.id+'/kyc',{method:'PATCH',body:JSON.stringify({kycStatus:document.getElementById('eKyc').value})});
+    showToast('Usuario atualizado');
+    openDetail(curUser.id);
+  }catch(e){showToast('Erro');}
+}
+
+async function deleteUser(){showToast('Funcao em breve');}
+
+async function loadDeps(){
+  try{var d=await apiFetch('/admin/deposits');document.getElementById('depBody').innerHTML=d.map(function(x){return '<tr><td>'+(x.name||x.email||'--')+'</td><td>'+fmt(x.amount)+'</td><td><span class="badge '+(x.status==='paid'?'b-paid':'b-pending')+'">'+x.status+'</span></td><td>'+fd(x.created_at)+'</td><td style="font-size:9px;color:#444;">'+x.txid+'</td></tr>';}).join('');}catch(e){}
+}
+
+async function loadW(){
+  try{var w=await apiFetch('/admin/withdrawals');document.getElementById('wBody').innerHTML=w.map(function(x){var acts=x.status==='pending'?'<button class="btn-s btn-grn" onclick="event.stopPropagation();appW(\''+x.id+'\')">Aprovar</button> <button class="btn-s btn-red" onclick="event.stopPropagation();rejW(\''+x.id+'\')">Rejeitar</button>':'--';return '<tr><td>'+(x.name||x.email||'--')+'</td><td>'+fmt(x.amount)+'</td><td>'+(x.pix_key||'--')+'</td><td><span class="badge '+(x.status==='approved'?'b-paid':x.status==='rejected'?'b-blocked':'b-pending')+'">'+x.status+'</span></td><td>'+fd(x.created_at)+'</td><td>'+acts+'</td></tr>';}).join('');}catch(e){}
+}
+async function appW(id){try{await apiFetch('/admin/withdrawals/'+id+'/approve',{method:'PATCH'});loadW();showToast('Aprovado');}catch(e){}}
+async function rejW(id){try{await apiFetch('/admin/withdrawals/'+id+'/reject',{method:'PATCH'});loadW();showToast('Rejeitado');}catch(e){}}
+
+async function loadTr(){
+  try{var t=await apiFetch('/admin/trades');document.getElementById('trBody').innerHTML=t.map(function(x){var dir=x.direction==='up'?'<span style="color:#08c58a;">Compra</span>':'<span style="color:#fc4b4a;">Venda</span>';return '<tr><td>'+(x.user_id||'').slice(-6)+'</td><td>'+x.asset+'</td><td>'+dir+'</td><td>'+fmt(x.stake)+'</td><td>'+fmt(x.result_amount)+'</td><td><span class="badge '+(x.status==='won'?'b-won':x.status==='lost'?'b-lost':'b-pending')+'">'+x.status+'</span></td><td>'+fd(x.opened_at)+'</td></tr>';}).join('');}catch(e){}
+}
+
+loadDash();
+</script>
+</body>
+</html>
