@@ -97,7 +97,7 @@ requireAuth('/client/login.html');
 
 async function loadBalance() {
   try {
-    var user = await apiFetch('/auth/me');
+    var user = await apiFetch('/trading/me');
     document.getElementById('userBalance').textContent = Number(user.balance || 0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
   } catch(e) {}
 }
