@@ -1345,13 +1345,13 @@ document.addEventListener('mousedown', _unlockAudio, { once: true });
 
 function playClick() {
   if (typeof soundEnabled !== 'undefined' && !soundEnabled) return;
-  _unlockAudio();
+
   var a = _clicks[_ci]; _ci = (_ci + 1) % _clicks.length;
   a.currentTime = 0; a.play().catch(function(){});
 }
 function playTrade() {
   if (typeof soundEnabled !== 'undefined' && !soundEnabled) return;
-  _unlockAudio();
+
   var a = _trades[_ti]; _ti = (_ti + 1) % _trades.length;
   a.currentTime = 0; a.play().catch(function(){});
 }
