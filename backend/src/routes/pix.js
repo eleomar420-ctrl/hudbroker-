@@ -1,18 +1,35 @@
 import { Router } from 'express';
 import { randomUUID } from 'crypto';
-import crypto from 'crypto';
 import { queryOne, query, run, withTransaction } from '../db/index.js';
 import { authRequired, requireRole } from '../middleware/auth.js';
-import { processFirstDeposit } from '../services/commissionEngine.js';
 
 const router = Router();
 
-const IHUB_API = 'https://api.ihubplay.com';
+const ZYRO_API = 'https://gateway-zyropay-api.rancher.codefabrik.dev';
+let zyroToken = null;
+let zyroTokenExp = 0;
 
-function getAuthHeader() {
-  const secretKey = process.env.IHUB_SECRET_KEY;
-  const encoded = Buffer.from('secret:' + secretKey).toString('base64');
-  return 'Basic ' + encoded;
+// Autenticar na ZyroPay e obter token JWT
+async function getZyroToken() {
+  if (zyroToken && Date.now() < zyroTokenExp) return zyroToken;
+  
+  const res = await fetch(`${ZYRO_API}/cli/client/authenticate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      clientId: process.env.ZYRO_CLIENT_ID,
+      password: process.env.ZYRO_SECRET_KEY
+    })
+  });
+  const data = await res.json();
+  if (!data.success || !data.data || !data.data.token) {
+    console.error('[zyro] Auth failed:', JSON.stringify(data));
+    throw new Error('Erro ao autenticar na ZyroPay');
+  }
+  zyroToken = data.data.token;
+  zyroTokenExp = Date.now() + (7 * 60 * 60 * 1000); // 7h
+  console.log('[zyro] Token obtido com sucesso');
+  return zyroToken;
 }
 
 // ============ LISTAR COBRANÇAS DO USUÁRIO ============
@@ -34,74 +51,65 @@ router.get('/charges', authRequired, requireRole('client'), async (req, res) => 
 
 router.post('/charge', authRequired, requireRole('client'), async (req, res) => {
   try {
-    const { amount } = req.body;
+    var { amount } = req.body;
     if (!amount || amount < 1) {
       return res.status(400).json({ error: 'Valor mínimo de R$ 1,00' });
     }
 
-    const user = await queryOne('SELECT * FROM users WHERE id = $1', [req.auth.id]);
-    if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
+    var externalId = 'hud-' + randomUUID().replace(/-/g, '').slice(0, 20);
+    var token = await getZyroToken();
 
-    const externalId = 'hud-' + randomUUID().replace(/-/g, '').slice(0, 20);
-    const amountCents = Math.round(amount * 100);
-    const webhookUrl = process.env.IHUB_WEBHOOK_URL || `https://${req.get('host')}/api/pix/webhook`;
+    console.log('[pix/charge] Gerando PIX:', { amount, externalId });
 
-    const authHeader = getAuthHeader();
-    console.log('[pix/charge] Auth header prefix:', authHeader.substring(0, 20) + '...');
-    console.log('[pix/charge] Enviando para iHub:', JSON.stringify({ amount: amountCents, paymentMethod: 'PIX', externalId }));
-
-    const response = await fetch(`${IHUB_API}/transactions/v2/purchase`, {
+    var response = await fetch(`${ZYRO_API}/cli/payment/pix/generate-pix`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': authHeader
+        'Authorization': 'Bearer ' + token
       },
       body: JSON.stringify({
-        name: user.name || 'Cliente',
-        email: user.email,
-        cpf: user.phone ? user.phone.replace(/\D/g, '').slice(0, 11) : '00000000000',
-        phone: user.phone ? user.phone.replace(/\D/g, '').slice(-11) : '0000000000',
-        amount: amountCents,
-        description: `Depósito HudBroker - ${user.email}`,
-        responsibleDocument: user.phone ? user.phone.replace(/\D/g, '').slice(0, 11) : '00000000000',
-        responsibleExternalId: req.auth.id.slice(0, 10),
-        paymentMethod: 'PIX',
-        currency: 'BRL',
-        externalId: externalId,
-        postbackUrl: webhookUrl
+        value: Number(amount),
+        expiration: 3600,
+        externalId: externalId
       })
     });
 
-    const data = await response.json();
-    console.log('[pix/charge] iHub response FULL:', JSON.stringify(data));
+    var data = await response.json();
+    console.log('[pix/charge] ZyroPay response:', JSON.stringify(data));
 
-    if (!response.ok) {
-      console.error('[pix/charge] iHub status:', response.status);
-      console.error('[pix/charge] iHub response:', JSON.stringify(data));
-      console.error('[pix/charge] iHub headers:', JSON.stringify(Object.fromEntries(response.headers)));
-      return res.status(400).json({ error: data.message || 'Erro ao gerar cobrança PIX' });
+    if (!data.success || !data.data) {
+      console.error('[pix/charge] ZyroPay error:', JSON.stringify(data));
+      // Token expirado? Tentar renovar
+      if (response.status === 401) {
+        zyroToken = null;
+        zyroTokenExp = 0;
+      }
+      return res.status(400).json({ error: data.errors || 'Erro ao gerar cobrança PIX' });
     }
 
+    var pixCode = data.data.pix || '';
+    var paymentId = data.data.paymentId || '';
+    var movId = data.data.movId || '';
+
     // Salvar no banco
-    const txid = externalId;
     await run(
       `INSERT INTO pix_charges (id, txid, user_id, amount, status, loc_id, created_at)
        VALUES ($1, $2, $3, $4, 'pending', 0, now())`,
       [randomUUID(), externalId, req.auth.id, amount]
     );
 
-    // iHub retorna pixCode (copia e cola) — gerar QR via API
-    const pixCode = data.pixCode || '';
-    const qrcodeUrl = pixCode 
-      ? `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(pixCode)}`
+    // QR Code gerado a partir do pixCode
+    var qrcodeUrl = pixCode
+      ? 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' + encodeURIComponent(pixCode)
       : null;
 
     res.json({
       txid: externalId,
       qrcode: qrcodeUrl,
       copiaecola: pixCode,
-      expiracao: Math.max(60, Math.floor((new Date(data.expiresAt) - Date.now()) / 1000))
+      paymentId: paymentId,
+      movId: movId,
+      expiracao: 3600
     });
   } catch (err) {
     console.error('[pix/charge]', err);
@@ -113,7 +121,7 @@ router.post('/charge', authRequired, requireRole('client'), async (req, res) => 
 
 router.get('/charge/:txid', authRequired, requireRole('client'), async (req, res) => {
   try {
-    const charge = await queryOne(
+    var charge = await queryOne(
       'SELECT * FROM pix_charges WHERE txid = $1 AND user_id = $2',
       [req.params.txid, req.auth.id]
     );
@@ -125,63 +133,34 @@ router.get('/charge/:txid', authRequired, requireRole('client'), async (req, res
   }
 });
 
-// ============ WEBHOOK iHub V2 ============
+// ============ WEBHOOK ZyroPay ============
 
 router.post('/webhook', async (req, res) => {
   try {
     console.log('[pix/webhook] Body recebido:', JSON.stringify(req.body));
 
-    // Verificar assinatura (apenas log, não rejeitar)
-    const signature = req.headers['x-signature'] || req.headers['x-webhook-signature'];
-    const webhookKey = process.env.IHUB_WEBHOOK_KEY;
-    if (webhookKey && signature) {
-      const expectedSig = crypto
-        .createHmac('sha256', webhookKey)
-        .update(JSON.stringify(req.body))
-        .digest('hex');
-      if (signature !== expectedSig) {
-        console.warn('[pix/webhook] Assinatura não bate (processando mesmo assim)');
-      }
-    }
+    var type = req.body.type;
+    var status = req.body.status;
+    var externalId = req.body.externalId;
+    var value = req.body.value;
+    var movId = req.body.movId;
+    var paymentId = req.body.paymentId;
 
-    // Suportar V2 (event + payload) e V1 (campos diretos)
-    let event, externalId, amountCents, transactionId;
+    console.log('[pix/webhook] Type:', type, 'Status:', status, 'ExternalId:', externalId, 'Value:', value);
 
-    if (req.body.event && req.body.payload) {
-      // V2
-      event = req.body.event;
-      externalId = req.body.payload.external_id;
-      amountCents = req.body.payload.amount;
-      transactionId = req.body.payload.transaction_id;
-    } else {
-      // V1 - campos diretos
-      const status = req.body.status;
-      externalId = req.body.externalId || req.body.external_id;
-      amountCents = req.body.amount;
-      transactionId = req.body.transactionId || req.body.transaction_id || req.body.id;
-      // Mapear status V1 para evento
-      if (status === 'APPROVED' || status === 1 || status === 'paid') {
-        event = 'cashin.paid';
-      } else if (status === 'REFUNDED' || status === 'refunded') {
-        event = 'cashin.refunded';
-      }
-    }
-
-    console.log(`[pix/webhook] Evento: ${event}, externalId: ${externalId}, amount: ${amountCents}`);
-
-    // Processar pagamento confirmado
-    if (event === 'cashin.paid' && externalId) {
-      const charge = await queryOne(
+    // PIX IN confirmado
+    if (type === 'PixIn' && status === 'CONFIRMED' && externalId) {
+      var charge = await queryOne(
         "SELECT * FROM pix_charges WHERE txid = $1 AND status = 'pending'",
         [externalId]
       );
 
       if (!charge) {
-        console.warn(`[pix/webhook] Cobrança não encontrada ou já paga: ${externalId}`);
+        console.warn('[pix/webhook] Cobrança não encontrada ou já paga:', externalId);
         return res.status(200).json({ ok: true });
       }
 
-      const amountReal = amountCents ? amountCents / 100 : charge.amount;
+      var amountReal = Number(value) || charge.amount;
 
       await withTransaction(async (client) => {
         await client.query(
@@ -199,13 +178,7 @@ router.post('/webhook', async (req, res) => {
         );
       });
 
-      await processFirstDeposit({ userId: charge.user_id });
-      console.log(`[pix/webhook] ✅ Depósito confirmado: R$ ${amountReal} para user ${charge.user_id}`);
-    }
-
-    if (event === 'cashin.refunded' && externalId) {
-      console.log(`[pix/webhook] Reembolso: ${externalId}`);
-      await run("UPDATE pix_charges SET status = 'refunded' WHERE txid = $1", [externalId]);
+      console.log('[pix/webhook] ✅ Depósito confirmado: R$', amountReal, 'para user', charge.user_id);
     }
 
     res.status(200).json({ ok: true });
