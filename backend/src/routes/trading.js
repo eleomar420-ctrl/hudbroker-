@@ -187,3 +187,46 @@ router.patch('/me', async (req, res) => {
     res.status(500).json({ error: 'Erro interno' });
   }
 });
+
+// === SAQUES DO CLIENTE ===
+router.post('/withdraw', async (req, res) => {
+  try {
+    const { amount, pixKey } = req.body;
+    const userId = req.user.id;
+    const minWithdraw = 150;
+    const taxRate = 0.10;
+
+    if (!amount || !pixKey) return res.status(400).json({ error: 'Valor e chave PIX obrigatórios' });
+    if (amount < minWithdraw) return res.status(400).json({ error: `Valor mínimo de saque: R$ ${minWithdraw},00` });
+
+    const user = await queryOne('SELECT balance FROM users WHERE id = $1', [userId]);
+    if (!user || user.balance < amount) return res.status(400).json({ error: 'Saldo insuficiente' });
+
+    const tax = Math.round(amount * taxRate * 100) / 100;
+    const netAmount = Math.round((amount - tax) * 100) / 100;
+    const id = randomUUID();
+
+    await run('UPDATE users SET balance = balance - $1 WHERE id = $2', [amount, userId]);
+    await run(
+      `INSERT INTO withdrawals (id, user_id, amount, net_amount, tax, pix_key, status, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, 'pending', now())`,
+      [id, userId, amount, netAmount, tax, pixKey]
+    );
+
+    res.json({ ok: true, id, amount, netAmount, tax });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/withdrawals', async (req, res) => {
+  try {
+    const rows = await query(
+      'SELECT * FROM withdrawals WHERE user_id = $1 ORDER BY created_at DESC',
+      [req.user.id]
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});

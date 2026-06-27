@@ -109,3 +109,15 @@ CREATE TABLE IF NOT EXISTS pix_charges (
 );
 CREATE INDEX IF NOT EXISTS idx_pix_txid ON pix_charges(txid);
 CREATE INDEX IF NOT EXISTS idx_pix_user ON pix_charges(user_id);
+
+CREATE TABLE IF NOT EXISTS withdrawals (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  amount DOUBLE PRECISION NOT NULL,
+  net_amount DOUBLE PRECISION NOT NULL DEFAULT 0,
+  tax DOUBLE PRECISION NOT NULL DEFAULT 0,
+  pix_key TEXT,
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ
+);

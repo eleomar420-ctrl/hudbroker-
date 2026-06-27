@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HudBroker — Sacar</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#0c0f1a;color:#fff;font-family:'Inter',sans-serif;min-height:100vh;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;background:rgba(0,0,0,0.4);border-bottom:1px solid rgba(255,255,255,0.04);}
+.topbar-brand{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;text-decoration:none;color:#fff;}
+.topbar-brand span{color:#e8a23d;}
+.topbar-right{display:flex;align-items:center;gap:16px;font-size:14px;}
+.topbar-right a{color:#e8a23d;text-decoration:none;font-weight:500;}
+.shell{max-width:700px;margin:40px auto;padding:0 20px;}
+.page-h{text-align:center;font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:800;text-transform:uppercase;margin-bottom:24px;letter-spacing:1px;}
+.card{background:#111728;border:1px solid #1e2438;border-radius:10px;padding:28px;margin-bottom:24px;}
+.pix-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.pix-logo{width:50px;height:50px;background:rgba(8,197,138,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.pix-logo img{width:30px;}
+.pix-title{font-size:16px;font-weight:600;}
+.balance-row{text-align:right;margin-bottom:20px;}
+.balance-label{font-size:12px;color:#888;}
+.balance-val{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;}
+.field{margin-bottom:14px;}
+.field-input{width:100%;background:#0c0f1a;border:1px solid #1e2438;color:#fff;border-radius:6px;padding:14px;font-size:15px;font-family:'Inter',sans-serif;}
+.field-input:focus{outline:none;border-color:#e8a23d;}
+.field-row{display:flex;align-items:center;}
+.field-row .field-input{border-radius:6px 0 0 6px;border-right:none;}
+.field-suffix{background:#1e2438;border:1px solid #1e2438;border-radius:0 6px 6px 0;padding:14px;font-size:13px;color:#888;font-weight:500;white-space:nowrap;}
+.info-row{text-align:center;font-size:13px;color:#888;margin:16px 0;}
+.info-row strong{color:#e8a23d;}
+.btn-withdraw{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:15px;background:#e8a23d;color:#000;border:none;border-radius:6px;font-size:15px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;}
+.btn-withdraw:hover{background:#d4922f;}
+.btn-withdraw:disabled{opacity:0.5;cursor:default;}
+.history-title{text-align:center;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#888;margin-bottom:16px;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;padding:10px 14px;font-size:10px;color:#555;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #1e2438;}
+td{padding:10px 14px;font-size:12px;border-bottom:1px solid rgba(30,36,56,0.4);}
+.badge{padding:2px 8px;border-radius:3px;font-size:9px;font-weight:700;text-transform:uppercase;}
+.b-pending{background:rgba(232,162,61,0.1);color:#e8a23d;}
+.b-approved{background:rgba(8,197,138,0.1);color:#08c58a;}
+.b-rejected{background:rgba(252,75,74,0.1);color:#fc4b4a;}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:8px;font-size:13px;z-index:999;background:#111728;color:#fff;border:1px solid #1e2438;}
+.toast.error{border-color:#fc4b4a;color:#fc4b4a;}
+@media(max-width:480px){.topbar{padding:12px 16px;}.shell{margin:20px auto;}.balance-val{font-size:22px;}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="/client/index.html" class="topbar-brand">Hud<span>Broker</span></a>
+  <div class="topbar-right">
+    <a href="/client/index.html">Voltar ao Trade</a>
+  </div>
+</div>
+
+<div class="shell">
+  <div class="page-h">SACAR</div>
+
+  <div class="card">
+    <div class="pix-header">
+      <div class="pix-logo"><img src="/img/pix-logo.png" alt="PIX"></div>
+      <div class="pix-title">Saque PIX</div>
+    </div>
+    <div class="balance-row">
+      <div class="balance-label">Saldo disponivel</div>
+      <div class="balance-val" id="userBalance">R$ 0,00</div>
+    </div>
+
+    <div class="field">
+      <div class="field-row">
+        <input type="number" class="field-input" id="withdrawAmount" placeholder="Valor desejado" step="0.01" min="150">
+        <div class="field-suffix">&#128176; BRL</div>
+      </div>
+    </div>
+    <div class="field">
+      <input type="text" class="field-input" id="withdrawPixKey" placeholder="Chave PIX (CPF, email, telefone ou aleatoria)">
+    </div>
+    <div class="info-row">Valor minimo de saque: R$ 150,00 &nbsp; <strong>Taxa: 10%</strong></div>
+    <button class="btn-withdraw" id="btnWithdraw" onclick="requestWithdraw()">&#10004; Sacar</button>
+  </div>
+
+  <div class="card">
+    <div class="history-title">SOLICITACOES DE RETIRADA</div>
+    <table>
+      <thead><tr><th>Data</th><th>Valor</th><th>Liquido</th><th>Status</th><th>Chave PIX</th></tr></thead>
+      <tbody id="historyBody"><tr><td colspan="5" style="text-align:center;color:#555;">Nenhum saque</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+requireAuth('/client/login.html');
+
+async function loadBalance() {
+  try {
+    var user = await apiFetch('/auth/me');
+    document.getElementById('userBalance').textContent = Number(user.balance || 0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+  } catch(e) {}
+}
+
+async function loadHistory() {
+  try {
+    var rows = await apiFetch('/trading/withdrawals');
+    if (!rows.length) {
+      document.getElementById('historyBody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#555;">Nenhum saque</td></tr>';
+      return;
+    }
+    document.getElementById('historyBody').innerHTML = rows.map(function(w) {
+      var sc = w.status === 'approved' ? 'b-approved' : w.status === 'rejected' ? 'b-rejected' : 'b-pending';
+      var d = new Date(w.created_at);
+      return '<tr><td>' + d.toLocaleDateString('pt-BR') + '</td><td>R$ ' + Number(w.amount).toFixed(2).replace('.', ',') + '</td><td>R$ ' + Number(w.net_amount).toFixed(2).replace('.', ',') + '</td><td><span class="badge ' + sc + '">' + w.status + '</span></td><td style="font-size:10px;">' + (w.pix_key || '--') + '</td></tr>';
+    }).join('');
+  } catch(e) {}
+}
+
+async function requestWithdraw() {
+  var amount = Number(document.getElementById('withdrawAmount').value);
+  var pixKey = document.getElementById('withdrawPixKey').value.trim();
+  var btn = document.getElementById('btnWithdraw');
+
+  if (!amount || amount < 150) { showToast('Valor minimo: R$ 150,00', 'error'); return; }
+  if (!pixKey) { showToast('Informe sua chave PIX', 'error'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Processando...';
+
+  try {
+    var res = await apiFetch('/trading/withdraw', {
+      method: 'POST',
+      body: JSON.stringify({ amount: amount, pixKey: pixKey })
+    });
+    showToast('Saque solicitado com sucesso!');
+    document.getElementById('withdrawAmount').value = '';
+    document.getElementById('withdrawPixKey').value = '';
+    loadBalance();
+    loadHistory();
+  } catch(e) {
+    showToast(e.message || 'Erro ao solicitar saque', 'error');
+  }
+  btn.disabled = false;
+  btn.innerHTML = '&#10004; Sacar';
+}
+
+loadBalance();
+loadHistory();
+</script>
+</body>
+</html>
