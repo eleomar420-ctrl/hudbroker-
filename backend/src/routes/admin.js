@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { query, queryOne } from '../db/index.js';
+import { query, queryOne, run } from '../db/index.js';
 import { authRequired, requireRole } from '../middleware/auth.js';
 
 const router = Router();
@@ -57,3 +57,86 @@ router.get('/affiliates', async (req, res) => {
 });
 
 export default router;
+
+// Editar saldo do usuário
+router.patch('/users/:id/balance', async (req, res) => {
+  try {
+    const { balance, demo_balance } = req.body;
+    const updates = [];
+    const values = [];
+    let idx = 1;
+    if (balance !== undefined) { updates.push(`balance = $${idx++}`); values.push(Number(balance)); }
+    if (demo_balance !== undefined) { updates.push(`demo_balance = $${idx++}`); values.push(Number(demo_balance)); }
+    if (!updates.length) return res.status(400).json({ error: 'Nada para atualizar' });
+    values.push(req.params.id);
+    await run(`UPDATE users SET ${updates.join(', ')} WHERE id = $${idx}`, values);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Detalhes de um usuário
+router.get('/users/:id', async (req, res) => {
+  try {
+    const user = await queryOne('SELECT * FROM users WHERE id = $1', [req.params.id]);
+    if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
+    delete user.password_hash;
+    res.json(user);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Listar depósitos (pix_charges)
+router.get('/deposits', async (req, res) => {
+  try {
+    const deposits = await query(
+      `SELECT p.*, u.name, u.email FROM pix_charges p LEFT JOIN users u ON p.user_id = u.id ORDER BY p.created_at DESC LIMIT 100`
+    );
+    res.json(deposits);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Listar saques
+router.get('/withdrawals', async (req, res) => {
+  try {
+    const rows = await query(
+      `SELECT w.*, u.name, u.email FROM withdrawals w LEFT JOIN users u ON w.user_id = u.id ORDER BY w.created_at DESC LIMIT 100`
+    );
+    res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Aprovar saque
+router.patch('/withdrawals/:id/approve', async (req, res) => {
+  try {
+    await run("UPDATE withdrawals SET status = 'approved', updated_at = now() WHERE id = $1", [req.params.id]);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Rejeitar saque
+router.patch('/withdrawals/:id/reject', async (req, res) => {
+  try {
+    const w = await queryOne('SELECT * FROM withdrawals WHERE id = $1', [req.params.id]);
+    if (w && w.status === 'pending') {
+      await run('UPDATE users SET balance = balance + $1 WHERE id = $2', [w.amount, w.user_id]);
+      await run("UPDATE withdrawals SET status = 'rejected', updated_at = now() WHERE id = $1", [req.params.id]);
+    }
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Overview completo
+router.get('/stats', async (req, res) => {
+  try {
+    const totalUsers = await queryOne('SELECT COUNT(*) as count FROM users WHERE role = $1', ['client']);
+    const totalDeposits = await queryOne("SELECT COUNT(*) as count, COALESCE(SUM(amount),0) as total FROM pix_charges WHERE status = 'paid'");
+    const totalTrades = await queryOne('SELECT COUNT(*) as count FROM trades');
+    const todayTrades = await queryOne("SELECT COUNT(*) as count FROM trades WHERE opened_at >= CURRENT_DATE");
+    const totalBalance = await queryOne('SELECT COALESCE(SUM(balance),0) as total FROM users');
+    res.json({
+      users: Number(totalUsers.count),
+      deposits: { count: Number(totalDeposits.count), total: Number(totalDeposits.total) },
+      trades: { total: Number(totalTrades.count), today: Number(todayTrades.count) },
+      totalBalance: Number(totalBalance.total)
+    });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
