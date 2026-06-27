@@ -429,7 +429,8 @@ html, body { height: 100%; overflow: hidden; }
 @media (max-width: 768px) {
   .trade-topbar { padding: 6px 10px 4px; gap: 2px 8px; height: auto; min-height: 50px; flex-wrap: wrap; background:#111728; }
   .asset-add-square { display: flex; order: 4; width: 38px; height: 38px; font-size: 18px; flex-shrink: 0; border-radius: 6px; }
-  .asset-tabs-row { display: flex; order: 5; flex: 1 1 auto; gap: 6px; overflow-x: auto; }
+  .asset-tabs-row { display: flex; order: 5; flex: 1 1 0; gap: 6px; overflow-x: auto; flex-wrap: nowrap; max-width: calc(100vw - 70px); -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .asset-tabs-row::-webkit-scrollbar { display: none; }
   .topbar-spacer { display: block; order: 3; flex: 0 0 100%; height: 0; margin: 0; padding: 0; }
 
 
@@ -997,7 +998,7 @@ function renderTabsRow() {
         <div class="name">${t.catalog.name}</div>
         <div class="sub">Crypto</div>
       </div>
-      <i class="ti ti-x close-x" data-close="${t.id}" aria-hidden="true"></i>
+      <span class="close-x" data-close="${t.id}">&times;</span>
     </div>
   `).join('');
   row.querySelectorAll('.asset-tab').forEach(el => {
