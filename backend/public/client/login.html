@@ -2,165 +2,117 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>HudBroker — Entrar</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/shared.css">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-.country-row { display: flex; align-items: center; gap: 8px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
-.country-flag { font-size: 18px; }
-.phone-row { display: flex; gap: 8px; }
-.phone-code { width: 70px; flex-shrink: 0; text-align: center; }
-.checkbox-row { display: flex; align-items: flex-start; gap: 10px; margin: 16px 0; font-size: 13px; color: var(--text-dim); }
-.checkbox-row input { width: auto; margin-top: 2px; }
-.checkbox-row a { color: var(--brand); }
-.auth-card.wide { width: 420px; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#0c0f1a; color:#fff; font-family:'Inter',sans-serif; min-height:100vh; }
+
+.topbar { display:flex; align-items:center; justify-content:space-between; padding:16px 32px; background:rgba(0,0,0,0.4); }
+.topbar-brand { font-family:'Space Grotesk',sans-serif; font-size:24px; font-weight:700; color:#fff; text-decoration:none; }
+.topbar-brand span { color:#e8a23d; }
+.topbar-nav { display:flex; align-items:center; gap:20px; }
+.topbar-btn-enter { color:#fff; text-decoration:none; font-size:14px; font-weight:500; }
+.topbar-btn-create { background:#51e6d1; color:#000; padding:8px 20px; border-radius:4px; text-decoration:none; font-size:14px; font-weight:600; }
+
+.login-shell { max-width:500px; margin:60px auto; padding:0 20px; }
+
+.register-row { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; background:rgba(255,255,255,0.03); border:1px solid #2a2a3a; border-radius:6px; margin-bottom:24px; }
+.register-row-text { font-size:14px; color:#ccc; }
+.register-row-btn { padding:8px 16px; border:1px solid #fff; background:none; color:#fff; border-radius:4px; font-size:13px; font-weight:500; cursor:pointer; text-decoration:none; }
+.register-row-btn:hover { background:rgba(255,255,255,0.08); }
+
+.divider-text { text-align:center; font-size:14px; font-weight:600; color:#fff; letter-spacing:2px; margin-bottom:20px; position:relative; }
+.divider-text::before, .divider-text::after { content:''; position:absolute; top:50%; width:30%; height:1px; background:#2a2a3a; }
+.divider-text::before { left:0; }
+.divider-text::after { right:0; }
+
+.form-group { margin-bottom:12px; }
+.form-input { width:100%; background:#1a1e2e; border:1px solid #2a2e3e; color:#fff; border-radius:4px; padding:14px; font-size:14px; font-family:'Inter',sans-serif; outline:none; }
+.form-input:focus { border-color:#51e6d1; }
+.form-input::placeholder { color:#666; }
+
+.btn-login { width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:14px; background:#51e6d1; color:#000; border:none; border-radius:4px; font-size:15px; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif; margin-top:4px; }
+.btn-login:hover { background:#45d4bf; }
+.btn-login:disabled { opacity:0.5; cursor:default; }
+
+.btn-forgot { width:100%; padding:12px; background:rgba(255,255,255,0.06); color:#ccc; border:none; border-radius:4px; font-size:13px; cursor:pointer; margin-top:8px; font-family:'Inter',sans-serif; }
+.btn-forgot:hover { background:rgba(255,255,255,0.1); color:#fff; }
+
+.toast { position:fixed; top:20px; left:50%; transform:translateX(-50%); padding:10px 20px; border-radius:8px; font-size:13px; z-index:999; background:#1a1a2e; color:#fff; border:1px solid #333; }
+.toast.error { border-color:#e53935; color:#e53935; }
+
+@media(max-width:480px) {
+  .topbar { padding:12px 16px; }
+  .topbar-brand { font-size:20px; }
+  .login-shell { margin:30px auto; }
+}
 </style>
 </head>
 <body>
-<div class="auth-shell">
-  <div class="auth-card wide">
-    <div class="brand" style="margin-bottom: 24px;"><span class="dot"></span>Hud<span class="tag">Broker</span></div>
 
-    <div id="loginView">
-      <h1>Entrar</h1>
-      <div class="sub">Acesse sua conta para operar</div>
-      <form id="loginForm">
-        <div class="field">
-          <label>Email</label>
-          <input type="email" id="loginEmail" required>
-        </div>
-        <div class="field">
-          <label>Senha</label>
-          <input type="password" id="loginPassword" required>
-        </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">Entrar</button>
-      </form>
-      <p style="margin-top: 16px; font-size: 13px; color: var(--text-faint);">
-        Não tem conta? <a href="/client/register.html" style="color: var(--brand);">Cadastre-se</a>
-      </p>
-    </div>
-
-    <div id="registerView" style="display:none;">
-      <h1>Criar conta</h1>
-      <div class="sub">Comece a operar com saldo demo de R$ 10.000</div>
-      <form id="registerForm">
-        <div class="field">
-          <label>País</label>
-          <div class="country-row">
-            <span class="country-flag">🇧🇷</span>
-            <span>Brasil</span>
-          </div>
-        </div>
-        <div class="field">
-          <label>Nome</label>
-          <input type="text" id="regName" required>
-        </div>
-        <div class="field">
-          <label>Sobrenome</label>
-          <input type="text" id="regLastName" required>
-        </div>
-        <div class="field">
-          <label>E-mail</label>
-          <input type="email" id="regEmail" required>
-        </div>
-        <div class="field">
-          <label>Telefone</label>
-          <div class="phone-row">
-            <input type="text" class="phone-code" value="+55" disabled>
-            <input type="tel" id="regPhone" placeholder="DDD + número" required style="flex:1;">
-          </div>
-        </div>
-        <div class="field">
-          <label>Moeda da conta</label>
-          <div class="country-row">
-            <span class="country-flag">🇧🇷</span>
-            <span>Real Brasileiro (BRL)</span>
-          </div>
-        </div>
-        <div class="field">
-          <label>Senha</label>
-          <input type="password" id="regPassword" required minlength="6">
-        </div>
-        <div class="checkbox-row">
-          <input type="checkbox" id="regTerms" required>
-          <label for="regTerms" style="margin:0; color: var(--text-dim);">
-            Confirmo que tenho 18 anos ou mais, e concordo com os <a href="#">Termos de Uso</a>.
-          </label>
-        </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">Criar conta</button>
-      </form>
-      <p style="margin-top: 16px; font-size: 13px; color: var(--text-faint);">
-        Já tem conta? <a href="#" id="goLogin" style="color: var(--brand);">Entrar</a>
-      </p>
-    </div>
+<div class="topbar">
+  <a href="/client/login.html" class="topbar-brand">Hud<span>Broker</span></a>
+  <div class="topbar-nav">
+    <a href="/client/login.html" class="topbar-btn-enter">Entrar</a>
+    <a href="/client/register.html" class="topbar-btn-create">Criar Conta</a>
   </div>
+</div>
+
+<div class="login-shell">
+  <div class="register-row">
+    <span class="register-row-text">Nao possui uma conta?</span>
+    <a href="/client/register.html" class="register-row-btn">Abra agora</a>
+  </div>
+
+  <div class="divider-text">ACESSE SUA CONTA</div>
+
+  <form id="loginForm">
+    <div class="form-group">
+      <input type="email" class="form-input" id="loginEmail" placeholder="E-mail" required>
+    </div>
+    <div class="form-group">
+      <input type="password" class="form-input" id="loginPassword" placeholder="Senha" required>
+    </div>
+    <button type="submit" class="btn-login" id="btnLogin">&#10004; Acessar</button>
+    <button type="button" class="btn-forgot" onclick="showToast('Em breve')">Esqueci minha senha</button>
+  </form>
 </div>
 
 <script src="/js/api.js"></script>
 <script>
-(async () => {
-  const params = new URLSearchParams(location.search);
-  const ref = params.get('ref');
+(async function() {
+  var params = new URLSearchParams(location.search);
+  var ref = params.get('ref');
   if (ref && !localStorage.getItem('hb_click_id')) {
     try {
-      const result = await apiFetch('/affiliates/track', { method: 'POST', body: JSON.stringify({ refCode: ref }) });
+      var result = await apiFetch('/affiliates/track', { method: 'POST', body: JSON.stringify({ refCode: ref }) });
       localStorage.setItem('hb_click_id', result.clickId);
-    } catch (err) { }
+    } catch(e) {}
   }
 })();
-</script>
 
-<script>
-document.getElementById('goRegister').onclick = (e) => {
+document.getElementById('loginForm').onsubmit = async function(e) {
   e.preventDefault();
-  document.getElementById('loginView').style.display = 'none';
-  document.getElementById('registerView').style.display = 'block';
-};
-document.getElementById('goLogin').onclick = (e) => {
-  e.preventDefault();
-  document.getElementById('registerView').style.display = 'none';
-  document.getElementById('loginView').style.display = 'block';
-};
+  var btn = document.getElementById('btnLogin');
+  var email = document.getElementById('loginEmail').value.trim();
+  var password = document.getElementById('loginPassword').value;
 
-document.getElementById('loginForm').onsubmit = async (e) => {
-  e.preventDefault();
+  btn.disabled = true;
+  btn.innerHTML = 'Entrando...';
+
   try {
-    const data = await apiFetch('/auth/login', {
+    var data = await apiFetch('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({
-        email: document.getElementById('loginEmail').value,
-        password: document.getElementById('loginPassword').value
-      })
+      body: JSON.stringify({ email: email, password: password })
     });
     setToken(data.token);
     window.location.href = '/client/index.html';
-  } catch (err) {
-    showToast(err.message, 'error');
-  }
-};
-
-document.getElementById('registerForm').onsubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const clickId = localStorage.getItem('hb_click_id') || null;
-    const data = await apiFetch('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify({
-        name: document.getElementById('regName').value,
-        lastName: document.getElementById('regLastName').value,
-        email: document.getElementById('regEmail').value,
-        phone: '+55' + document.getElementById('regPhone').value,
-        country: 'BR',
-        password: document.getElementById('regPassword').value,
-        clickId
-      })
-    });
-    setToken(data.token);
-    window.location.href = '/client/index.html';
-  } catch (err) {
-    showToast(err.message, 'error');
+  } catch(err) {
+    showToast(err.message || 'Email ou senha incorretos', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '&#10004; Acessar';
   }
 };
 </script>
