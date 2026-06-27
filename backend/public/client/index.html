@@ -427,9 +427,9 @@ html, body { height: 100%; overflow: hidden; }
 .m2-panel { display:none; }
 .m2-nav { display:none; }
 @media (max-width: 768px) {
-  .trade-topbar { padding: 0 10px; gap: 8px; height: 60px; justify-content: space-between; background:#111728; }
-  .asset-tabs-row { display: none; }
-  .asset-add-square { display: none; }
+  .trade-topbar { padding: 8px 10px; gap: 6px; height: auto; min-height: 50px; flex-wrap: wrap; background:#111728; }
+  .asset-tabs-row { display: flex; order: 5; flex: 0 0 auto; gap: 6px; }
+  .asset-add-square { display: flex; order: 4; width: 34px; height: 34px; font-size: 16px; }
   .topbar-spacer { display: none; }
 
   .avatar-btn { order: 1; display: none; }
@@ -441,7 +441,7 @@ html, body { height: 100%; overflow: hidden; }
   .account-pill .label { display: block; font-size: 11px; }
   .account-pill .value { font-size: 16px; color: #ffffff; }
   .btn-deposit {
-    order: 3; flex: 5 1 0; min-width: 0; font-size: 14px; font-weight: 700; padding: 0 12px; height: 42px;
+    order: 3; flex: 0 0 auto; min-width: 0; font-size: 14px; font-weight: 700; padding: 0 12px; height: 42px;
     background: transparent; color: #2d9f4a; border: 1px solid #2d9f4a; border-radius: 4px;
   }
 
