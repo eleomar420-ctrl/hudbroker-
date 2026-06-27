@@ -1033,7 +1033,7 @@ function renderChartArea() {
       theme: 'dark',
       style: '1',
       locale: 'br',
-      toolbar_bg: '#131720',
+      toolbar_bg: '#000000',
       enable_publishing: false,
       hide_top_toolbar: false,
       hide_side_toolbar: false,
@@ -1041,7 +1041,20 @@ function renderChartArea() {
       save_image: true,
       withdateranges: true,
       allow_symbol_change: true,
-      studies: ['MASimple@tv-basicstudies']
+      studies: ['MASimple@tv-basicstudies'],
+      overrides: {
+        "paneProperties.background": "#000000",
+        "paneProperties.backgroundType": "solid",
+        "scalesProperties.backgroundColor": "#000000",
+        "scalesProperties.lineColor": "#1a1a1a",
+        "scalesProperties.textColor": "#666",
+        "mainSeriesProperties.candleStyle.upColor": "#51a85d",
+        "mainSeriesProperties.candleStyle.downColor": "#e15b44",
+        "mainSeriesProperties.candleStyle.wickUpColor": "#51a85d",
+        "mainSeriesProperties.candleStyle.wickDownColor": "#e15b44",
+        "mainSeriesProperties.candleStyle.borderUpColor": "#51a85d",
+        "mainSeriesProperties.candleStyle.borderDownColor": "#e15b44"
+      }
     });
   }
 }
