@@ -1321,54 +1321,38 @@ function showSuccessPopup(message) {
   }, 2200);
 }
 
-// === SONS (hibrido: Web Audio API + fallback) ===
-var _actx = null;
-var _bufClick = null, _bufTrade = null;
-var _fallClick = [], _fallTrade = [];
-var _fIdx = {c:0, t:0};
+// === SONS ===
+var _clicks = [];
+var _trades = [];
+var _ci = 0, _ti = 0;
+var _audioUnlocked = false;
 
-try { _actx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
-
-// Web Audio API - zero delay
-(async function() {
-  if (!_actx) return;
-  try {
-    var r1 = await fetch('/sounds/click.mp3');
-    if (r1.ok) { var a1 = await r1.arrayBuffer(); _bufClick = await _actx.decodeAudioData(a1); }
-  } catch(e) {}
-  try {
-    var r2 = await fetch('/sounds/trade.mp3');
-    if (r2.ok) { var a2 = await r2.arrayBuffer(); _bufTrade = await _actx.decodeAudioData(a2); }
-  } catch(e) {}
-})();
-
-// Fallback pool
-for (var _fi = 0; _fi < 4; _fi++) {
-  var _a1 = new Audio('/sounds/click.mp3'); _a1.preload = 'auto'; _fallClick.push(_a1);
-  var _a2 = new Audio('/sounds/trade.mp3'); _a2.preload = 'auto'; _fallTrade.push(_a2);
+for (var _si = 0; _si < 5; _si++) {
+  var _c = new Audio('/sounds/click.mp3'); _c.preload = 'auto'; _clicks.push(_c);
+  var _t = new Audio('/sounds/trade.mp3'); _t.preload = 'auto'; _trades.push(_t);
 }
 
-function _playWA(buf) {
-  if (!buf || !_actx) return false;
-  try {
-    if (_actx.state === 'suspended') _actx.resume();
-    var s = _actx.createBufferSource(); s.buffer = buf; s.connect(_actx.destination); s.start(0);
-    return true;
-  } catch(e) { return false; }
+function _unlockAudio() {
+  if (_audioUnlocked) return;
+  _audioUnlocked = true;
+  _clicks.forEach(function(a) { a.volume = 0; a.play().then(function() { a.pause(); a.currentTime = 0; a.volume = 1; }).catch(function() { a.volume = 1; }); });
+  _trades.forEach(function(a) { a.volume = 0; a.play().then(function() { a.pause(); a.currentTime = 0; a.volume = 1; }).catch(function() { a.volume = 1; }); });
 }
 
-function _playFB(pool, key) {
-  var a = pool[_fIdx[key]]; _fIdx[key] = (_fIdx[key] + 1) % pool.length;
-  a.currentTime = 0; a.play().catch(function(){});
-}
+document.addEventListener('touchstart', _unlockAudio, { once: true });
+document.addEventListener('mousedown', _unlockAudio, { once: true });
 
 function playClick() {
   if (typeof soundEnabled !== 'undefined' && !soundEnabled) return;
-  if (!_playWA(_bufClick)) _playFB(_fallClick, 'c');
+  _unlockAudio();
+  var a = _clicks[_ci]; _ci = (_ci + 1) % _clicks.length;
+  a.currentTime = 0; a.play().catch(function(){});
 }
 function playTrade() {
   if (typeof soundEnabled !== 'undefined' && !soundEnabled) return;
-  if (!_playWA(_bufTrade)) _playFB(_fallTrade, 't');
+  _unlockAudio();
+  var a = _trades[_ti]; _ti = (_ti + 1) % _trades.length;
+  a.currentTime = 0; a.play().catch(function(){});
 }
 
 document.getElementById('buyBtn').onclick = () => { playTrade(); openTrade('up'); };
