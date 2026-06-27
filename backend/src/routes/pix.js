@@ -17,8 +17,8 @@ async function getZyroToken() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      clientId: process.env.ZYRO_CLIENT_ID,
-      password: process.env.ZYRO_SECRET_KEY
+      clientId: process.env.PIX_CLIENT_ID,
+      password: process.env.PIX_SECRET
     })
   });
   const data = await res.json();
