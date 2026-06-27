@@ -1321,37 +1321,54 @@ function showSuccessPopup(message) {
   }, 2200);
 }
 
-// === SONS ===
-var _poolClick = [];
-var _poolTrade = [];
-var _idxClick = 0, _idxTrade = 0;
-var _soundReady = false;
+// === SONS (hibrido: Web Audio API + fallback) ===
+var _actx = null;
+var _bufClick = null, _bufTrade = null;
+var _fallClick = [], _fallTrade = [];
+var _fIdx = {c:0, t:0};
 
-// Criar pool
-for (var _i = 0; _i < 4; _i++) {
-  var _ac = new Audio('/sounds/click.mp3'); _ac.preload = 'auto'; _ac.load(); _poolClick.push(_ac);
-  var _at = new Audio('/sounds/trade.mp3'); _at.preload = 'auto'; _at.load(); _poolTrade.push(_at);
+try { _actx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+
+// Web Audio API - zero delay
+(async function() {
+  if (!_actx) return;
+  try {
+    var r1 = await fetch('/sounds/click.mp3');
+    if (r1.ok) { var a1 = await r1.arrayBuffer(); _bufClick = await _actx.decodeAudioData(a1); }
+  } catch(e) {}
+  try {
+    var r2 = await fetch('/sounds/trade.mp3');
+    if (r2.ok) { var a2 = await r2.arrayBuffer(); _bufTrade = await _actx.decodeAudioData(a2); }
+  } catch(e) {}
+})();
+
+// Fallback pool
+for (var _fi = 0; _fi < 4; _fi++) {
+  var _a1 = new Audio('/sounds/click.mp3'); _a1.preload = 'auto'; _fallClick.push(_a1);
+  var _a2 = new Audio('/sounds/trade.mp3'); _a2.preload = 'auto'; _fallTrade.push(_a2);
 }
 
-// Preaquecer no primeiro toque (volume 0 pra desbloquear)
-function _warmUp() {
-  if (_soundReady) return;
-  _soundReady = true;
-  _poolClick.forEach(function(a) { a.volume = 0; a.play().then(function() { a.pause(); a.currentTime = 0; a.volume = 1; }).catch(function(){ a.volume = 1; }); });
-  _poolTrade.forEach(function(a) { a.volume = 0; a.play().then(function() { a.pause(); a.currentTime = 0; a.volume = 1; }).catch(function(){ a.volume = 1; }); });
+function _playWA(buf) {
+  if (!buf || !_actx) return false;
+  try {
+    if (_actx.state === 'suspended') _actx.resume();
+    var s = _actx.createBufferSource(); s.buffer = buf; s.connect(_actx.destination); s.start(0);
+    return true;
+  } catch(e) { return false; }
 }
-document.addEventListener('touchstart', _warmUp, { once: true });
-document.addEventListener('click', _warmUp, { once: true });
+
+function _playFB(pool, key) {
+  var a = pool[_fIdx[key]]; _fIdx[key] = (_fIdx[key] + 1) % pool.length;
+  a.currentTime = 0; a.play().catch(function(){});
+}
 
 function playClick() {
   if (typeof soundEnabled !== 'undefined' && !soundEnabled) return;
-  var a = _poolClick[_idxClick]; _idxClick = (_idxClick + 1) % _poolClick.length;
-  a.currentTime = 0; a.play().catch(function(){});
+  if (!_playWA(_bufClick)) _playFB(_fallClick, 'c');
 }
 function playTrade() {
   if (typeof soundEnabled !== 'undefined' && !soundEnabled) return;
-  var a = _poolTrade[_idxTrade]; _idxTrade = (_idxTrade + 1) % _poolTrade.length;
-  a.currentTime = 0; a.play().catch(function(){});
+  if (!_playWA(_bufTrade)) _playFB(_fallTrade, 't');
 }
 
 document.getElementById('buyBtn').onclick = () => { playTrade(); openTrade('up'); };
