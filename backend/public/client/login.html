@@ -53,17 +53,17 @@ body { background:#0c0f1a; color:#fff; font-family:'Inter',sans-serif; min-heigh
 <body>
 
 <div class="topbar">
-  <a href="/client/login.html" class="topbar-brand">Hud<span>Broker</span></a>
+  <a href="/login" class="topbar-brand">Hud<span>Broker</span></a>
   <div class="topbar-nav">
-    <a href="/client/login.html" class="topbar-btn-enter">Entrar</a>
-    <a href="/client/register.html" class="topbar-btn-create">Criar Conta</a>
+    <a href="/login" class="topbar-btn-enter">Entrar</a>
+    <a href="/register" class="topbar-btn-create">Criar Conta</a>
   </div>
 </div>
 
 <div class="login-shell">
   <div class="register-row">
     <span class="register-row-text">Nao possui uma conta?</span>
-    <a href="/client/register.html" class="register-row-btn">Abra agora</a>
+    <a href="/register" class="register-row-btn">Abra agora</a>
   </div>
 
   <div class="divider-text">ACESSE SUA CONTA</div>
@@ -108,7 +108,7 @@ document.getElementById('loginForm').onsubmit = async function(e) {
       body: JSON.stringify({ email: email, password: password })
     });
     setToken(data.token);
-    window.location.href = '/client/index.html';
+    window.location.href = '/trade';
   } catch(err) {
     showToast(err.message || 'Email ou senha incorretos', 'error');
     btn.disabled = false;
