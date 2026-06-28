@@ -1166,7 +1166,8 @@ function adjustDuration(delta) {
 }
 function adjustStake(delta) {
   const t = getActiveTab(); if (!t) return;
-  t.stakeValue = Math.max(1, t.stakeValue + delta);
+  if (delta > 0) t.stakeValue = t.stakeValue * 2;
+  else t.stakeValue = Math.max(1, Math.floor(t.stakeValue / 2));
   renderPanelForActiveTab();
 }
 
@@ -1345,47 +1346,29 @@ function showSuccessPopup(message) {
 }
 
 // === SONS ===
-var _actx = null;
-var _bClick = null, _bTrade = null;
-
-// Criar AudioContext
-try { _actx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
-
-// Carregar e decodificar sons
-(function() {
-  if (!_actx) return;
-  fetch('/sounds/click.mp3').then(function(r){return r.arrayBuffer();}).then(function(buf){
-    _actx.decodeAudioData(buf, function(decoded){ _bClick = decoded; });
-  }).catch(function(){});
-  fetch('/sounds/trade.mp3').then(function(r){return r.arrayBuffer();}).then(function(buf){
-    _actx.decodeAudioData(buf, function(decoded){ _bTrade = decoded; });
-  }).catch(function(){});
-})();
+var _sClick = new Audio('/sounds/click.mp3');
+var _sTrade = new Audio('/sounds/trade.mp3');
+_sClick.preload = 'auto'; _sClick.load();
+_sTrade.preload = 'auto'; _sTrade.load();
 
 // Desbloquear no primeiro toque
-document.addEventListener('touchstart', function(){
-  if (_actx && _actx.state === 'suspended') _actx.resume();
-}, {once: true});
-document.addEventListener('click', function(){
-  if (_actx && _actx.state === 'suspended') _actx.resume();
-}, {once: true});
-
-function _play(buf) {
-  if (!buf || !_actx) return;
-  if (_actx.state === 'suspended') _actx.resume();
-  var s = _actx.createBufferSource();
-  s.buffer = buf;
-  s.connect(_actx.destination);
-  s.start(0);
+var _unlocked = false;
+function _unlock() {
+  if (_unlocked) return;
+  _unlocked = true;
+  _sClick.volume = 0; _sClick.play().then(function(){ _sClick.pause(); _sClick.currentTime = 0; _sClick.volume = 1; }).catch(function(){ _sClick.volume = 1; });
+  _sTrade.volume = 0; _sTrade.play().then(function(){ _sTrade.pause(); _sTrade.currentTime = 0; _sTrade.volume = 1; }).catch(function(){ _sTrade.volume = 1; });
 }
+document.addEventListener('touchstart', _unlock, {once:true});
+document.addEventListener('mousedown', _unlock, {once:true});
 
 function playClick() {
   if (typeof soundEnabled !== 'undefined' && !soundEnabled) return;
-  _play(_bClick);
+  var a = _sClick.cloneNode(); a.volume = _sClick.volume; a.play().catch(function(){});
 }
 function playTrade() {
   if (typeof soundEnabled !== 'undefined' && !soundEnabled) return;
-  _play(_bTrade);
+  var a = _sTrade.cloneNode(); a.volume = _sTrade.volume; a.play().catch(function(){});
 }
 
 document.getElementById('buyBtn').onclick = () => { playTrade(); openTrade('up'); };
