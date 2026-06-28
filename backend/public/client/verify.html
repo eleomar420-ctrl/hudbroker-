@@ -125,11 +125,7 @@ body{background:#0c0f1a;color:#fff;font-family:'Inter',sans-serif;min-height:100
 
   <!-- TABS -->
   <div class="v-tabs">
-    <button class="v-tab active" onclick="showStep(0,this)">
-      <span class="v-tab-icon material-icons-outlined">alternate_email</span>
-      <span class="v-tab-label">Confirmar E-mail</span>
-    </button>
-    <button class="v-tab" onclick="showStep(1,this)">
+    <button class="v-tab active" onclick="showStep(1,this)">
       <span class="v-tab-icon material-icons-outlined">person_outline</span>
       <span class="v-tab-label">Seus Dados</span>
     </button>
@@ -140,7 +136,7 @@ body{background:#0c0f1a;color:#fff;font-family:'Inter',sans-serif;min-height:100
   </div>
 
   <!-- STEP 1: Email -->
-  <div class="v-panel active" id="step0">
+  <div class="v-panel" id="step0" style="display:none!important;">
     <div class="email-center">
       <div class="email-icon">@</div>
       <div class="email-text" id="emailConfirmText">Confirmação de E-mail</div>
@@ -161,7 +157,7 @@ body{background:#0c0f1a;color:#fff;font-family:'Inter',sans-serif;min-height:100
   </div>
 
   <!-- STEP 2: Data -->
-  <div class="v-panel" id="step1">
+  <div class="v-panel active" id="step1">
     <div class="data-note"><span class="material-icons-outlined" style="font-size:16px;">info</span>Preencha seus dados pessoais abaixo. Uma vez preenchido, estes dados NÃO poderão ser alterados.</div>
     <div class="data-grid">
       <div class="data-field"><label>Nome</label><input type="text" id="vName" placeholder="Seu nome"></div>
