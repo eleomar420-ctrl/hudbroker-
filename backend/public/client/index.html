@@ -1504,6 +1504,8 @@ function toggleProfilePopup() {
   if (cachedUser) {
     document.getElementById('profileName').textContent = (cachedUser.name || '') + ' ' + (cachedUser.last_name || '');
     document.getElementById('profileEmail').textContent = cachedUser.email || '';
+    var vBadge = document.getElementById('profileVerifyBadge');
+    if (vBadge) vBadge.style.display = (cachedUser.kyc_status === 'approved') ? 'none' : '';
     const d = new Date(cachedUser.created_at);
     document.getElementById('profileDate').textContent = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
     document.getElementById('profileId').textContent = cachedUser.id ? String(Math.abs(cachedUser.id.split('').reduce(function(a,c){return ((a<<5)-a)+c.charCodeAt(0)},0))).slice(-7) : '---';
