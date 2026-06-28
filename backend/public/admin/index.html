@@ -71,7 +71,7 @@ tr{cursor:pointer;transition:background 0.1s;}tr:hover{background:rgba(255,255,2
 .ed-field label{display:block;font-size:11px;color:#555;margin-bottom:4px;}
 .ed-field input,.ed-field select{width:100%;background:#0b0e18;border:1px solid #1c2040;color:#fff;border-radius:6px;padding:9px 12px;font-size:13px;}
 .btn-save{padding:10px 24px;background:#e8a23d;color:#000;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;}
-.toast{position:fixed;top:16px;right:16px;padding:10px 20px;border-radius:6px;font-size:12px;z-index:999;background:#10142a;color:#fff;border:1px solid #1c2040;}
+.toast{position:fixed;top:16px;right:16px;padding:10px 20px;border-radius:6px;font-size:12px;z-index:9999;background:#10142a;color:#fff;border:1px solid #1c2040;}
 </style>
 </head>
 <body>
@@ -101,7 +101,6 @@ tr{cursor:pointer;transition:background 0.1s;}tr:hover{background:rgba(255,255,2
 <div class="tab" id="t-deposits"><div class="pg-title">Depósitos</div><div class="tbl-wrap"><div class="tbl-head"><div class="tbl-title">Todos os Depósitos</div></div><table><thead><tr><th>Usuário</th><th>Valor</th><th>Status</th><th>Data</th><th>ID</th></tr></thead><tbody id="depBody"></tbody></table></div></div>
 <div class="tab" id="t-withdrawals"><div class="pg-title">Saques</div><div class="tbl-wrap"><div class="tbl-head"><div class="tbl-title">Solicitações de Saque</div></div><table><thead><tr><th>Usuário</th><th>Valor</th><th>Chave PIX</th><th>Status</th><th>Data</th><th>Ações</th></tr></thead><tbody id="wBody"></tbody></table></div></div>
 <div class="tab" id="t-trades"><div class="pg-title">Operações</div><div class="tbl-wrap"><div class="tbl-head"><div class="tbl-title">Todas as Operações</div></div><table><thead><tr><th>Usuário</th><th>Ativo</th><th>Direção</th><th>Valor</th><th>Resultado</th><th>Status</th><th>Data</th></tr></thead><tbody id="trBody"></tbody></table></div></div>
-
 <div class="tab" id="t-config">
   <div class="pg-title">Configurações</div>
   <div style="max-width:400px;background:#10142a;border:1px solid #1c2040;border-radius:10px;padding:24px;">
@@ -112,7 +111,6 @@ tr{cursor:pointer;transition:background 0.1s;}tr:hover{background:rgba(255,255,2
     <button class="btn-save" onclick="changeAdminPass()">Alterar Senha</button>
   </div>
 </div>
-
 <!-- USER DETAIL -->
 <div class="user-detail" id="userDetail">
   <button class="ud-back" onclick="closeDetail()"><span class="material-icons-outlined" style="font-size:16px;">arrow_back</span>Voltar</button>
@@ -148,7 +146,7 @@ tr{cursor:pointer;transition:background 0.1s;}tr:hover{background:rgba(255,255,2
       <div class="ed-field"><label>Status</label><select id="eStatus"><option value="active">Ativo</option><option value="blocked">Bloqueado</option></select></div>
       <div class="ed-field"><label>KYC</label><select id="eKyc"><option value="pending">Pendente</option><option value="approved">Aprovado</option><option value="rejected">Rejeitado</option></select></div>
       <div style="border-top:1px solid #1c2040;margin:16px 0;padding-top:16px;">
-        <div class="ed-field"><label>Nova Senha (deixe vazio para não alterar)</label><input type="text" id="ePassword" placeholder="Mínimo 6 caracteres"></div>
+        <div class="ed-field"><label>Nova Senha do Usuário (vazio = não alterar)</label><input type="text" id="ePassword" placeholder="Mínimo 6 caracteres"></div>
       </div>
       <button class="btn-save" onclick="saveUserEdit()">Salvar Alterações</button>
     </div></div>
@@ -165,7 +163,6 @@ tr{cursor:pointer;transition:background 0.1s;}tr:hover{background:rgba(255,255,2
   </div>
 </div>
 </div>
-
 <script src="/js/api.js"></script>
 <script>
 requireAuth('/admin/login');
@@ -180,26 +177,7 @@ function showTab(n,el){
   document.getElementById('t-'+n).classList.add('act');
   if(el)el.classList.add('act');
   document.getElementById('userDetail').classList.remove('open');
-  if(n==='dashboard')async function changeAdminPass() {
-  var cur = document.getElementById('adminCurPass').value;
-  var nova = document.getElementById('adminNewPass').value;
-  var conf = document.getElementById('adminConfPass').value;
-  if (!cur) { showToast('Digite a senha atual'); return; }
-  if (!nova || nova.length < 6) { showToast('Nova senha precisa ter no mínimo 6 caracteres'); return; }
-  if (nova !== conf) { showToast('As senhas não coincidem'); return; }
-  try {
-    var res = await fetch('/api/auth/login', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'admin@hudbroker.com',password:cur})});
-    if (!res.ok) { showToast('Senha atual incorreta'); return; }
-    var data = await res.json();
-    await apiFetch('/admin/users/'+data.user.id+'/password',{method:'PATCH',body:JSON.stringify({password:nova})});
-    document.getElementById('adminCurPass').value='';
-    document.getElementById('adminNewPass').value='';
-    document.getElementById('adminConfPass').value='';
-    showToast('Senha alterada com sucesso!');
-  } catch(e) { showToast('Erro ao alterar senha'); }
-}
-
-loadDash();
+  if(n==='dashboard')loadDash();
   if(n==='users')loadUsers();
   if(n==='deposits')loadDeps();
   if(n==='withdrawals')loadW();
@@ -257,6 +235,7 @@ async function openDetail(id){
     document.getElementById('eDemoBalance').value=u.demo_balance||0;
     document.getElementById('eStatus').value=u.status||'active';
     document.getElementById('eKyc').value=u.kyc_status||'pending';
+    document.getElementById('ePassword').value='';
     if(u.avatar_url)document.getElementById('udAvatar').innerHTML='<img src="'+u.avatar_url+'">';
     else document.getElementById('udAvatar').textContent=(u.name||'?')[0].toUpperCase();
     try{var t=await apiFetch('/admin/users/'+id+'/totals');
@@ -279,11 +258,9 @@ async function saveUserEdit(){
     await apiFetch('/admin/users/'+curUser.id+'/balance',{method:'PATCH',body:JSON.stringify({balance:Number(document.getElementById('eBalance').value),demo_balance:Number(document.getElementById('eDemoBalance').value)})});
     await apiFetch('/admin/users/'+curUser.id+'/status',{method:'PATCH',body:JSON.stringify({status:document.getElementById('eStatus').value})});
     await apiFetch('/admin/users/'+curUser.id+'/kyc',{method:'PATCH',body:JSON.stringify({kycStatus:document.getElementById('eKyc').value})});
-    var newPass = document.getElementById('ePassword').value;
-    if (newPass) {
-      await apiFetch('/admin/users/'+curUser.id+'/password',{method:'PATCH',body:JSON.stringify({password:newPass})});
-    }
-    document.getElementById('ePassword').value = '';
+    var newPass=document.getElementById('ePassword').value;
+    if(newPass&&newPass.length>=6){await apiFetch('/admin/users/'+curUser.id+'/password',{method:'PATCH',body:JSON.stringify({password:newPass})});}
+    document.getElementById('ePassword').value='';
     showToast('Usuário atualizado');openDetail(curUser.id);
   }catch(e){showToast('Erro');}
 }
@@ -332,6 +309,7 @@ async function loadUserKyc(){
   document.getElementById('kycDocsContent').innerHTML=h;
   }catch(e){document.getElementById('kycDocsContent').innerHTML='Erro ao carregar';}
 }
+
 async function approveDoc(id){try{await apiFetch('/admin/kyc-documents/'+id,{method:'PATCH',body:JSON.stringify({status:'approved'})});loadUserKyc();showToast('Documento aprovado');}catch(e){}}
 async function rejectDoc(id){try{await apiFetch('/admin/kyc-documents/'+id,{method:'PATCH',body:JSON.stringify({status:'rejected'})});loadUserKyc();showToast('Documento rejeitado');}catch(e){}}
 async function approveKyc(){if(!curUser)return;try{await apiFetch('/admin/users/'+curUser.id+'/kyc-approve',{method:'PATCH',body:JSON.stringify({status:'approved'})});curUser.kyc_status='approved';loadUserKyc();showToast('Conta aprovada');}catch(e){}}
@@ -343,23 +321,23 @@ async function appW(id){try{await apiFetch('/admin/withdrawals/'+id+'/approve',{
 async function rejW(id){try{await apiFetch('/admin/withdrawals/'+id+'/reject',{method:'PATCH'});loadW();showToast('Rejeitado');}catch(e){}}
 async function loadTr(){try{var t=await apiFetch('/admin/trades');document.getElementById('trBody').innerHTML=t.map(function(x){var dir=x.direction==='up'?'<span style="color:#08c58a;">Compra</span>':'<span style="color:#fc4b4a;">Venda</span>';return '<tr><td>'+(x.user_id||'').slice(-6)+'</td><td>'+x.asset+'</td><td>'+dir+'</td><td>'+fmt(x.stake)+'</td><td>'+fmt(x.result_amount)+'</td><td><span class="badge '+(x.status==='won'?'b-won':x.status==='lost'?'b-lost':'b-pending')+'">'+x.status+'</span></td><td>'+fd(x.opened_at)+'</td></tr>';}).join('');}catch(e){}}
 
-async function changeAdminPass() {
-  var cur = document.getElementById('adminCurPass').value;
-  var nova = document.getElementById('adminNewPass').value;
-  var conf = document.getElementById('adminConfPass').value;
-  if (!cur) { showToast('Digite a senha atual'); return; }
-  if (!nova || nova.length < 6) { showToast('Nova senha precisa ter no mínimo 6 caracteres'); return; }
-  if (nova !== conf) { showToast('As senhas não coincidem'); return; }
-  try {
-    var res = await fetch('/api/auth/login', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'admin@hudbroker.com',password:cur})});
-    if (!res.ok) { showToast('Senha atual incorreta'); return; }
-    var data = await res.json();
+async function changeAdminPass(){
+  var cur=document.getElementById('adminCurPass').value;
+  var nova=document.getElementById('adminNewPass').value;
+  var conf=document.getElementById('adminConfPass').value;
+  if(!cur){showToast('Digite a senha atual');return;}
+  if(!nova||nova.length<6){showToast('Nova senha precisa ter no mínimo 6 caracteres');return;}
+  if(nova!==conf){showToast('As senhas não coincidem');return;}
+  try{
+    var res=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'admin@hudbroker.com',password:cur})});
+    if(!res.ok){showToast('Senha atual incorreta');return;}
+    var data=await res.json();
     await apiFetch('/admin/users/'+data.user.id+'/password',{method:'PATCH',body:JSON.stringify({password:nova})});
     document.getElementById('adminCurPass').value='';
     document.getElementById('adminNewPass').value='';
     document.getElementById('adminConfPass').value='';
     showToast('Senha alterada com sucesso!');
-  } catch(e) { showToast('Erro ao alterar senha'); }
+  }catch(e){showToast('Erro ao alterar senha');}
 }
 
 loadDash();
