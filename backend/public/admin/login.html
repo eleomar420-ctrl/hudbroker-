@@ -3,65 +3,44 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HudBroker — Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<title>HudBroker Admin</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:#0b0e18;color:#fff;font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;}
+body{background:#0b0e18;color:#fff;font-family:sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;}
 .card{width:380px;background:#10142a;border:1px solid #1c2040;border-radius:12px;padding:32px;}
-.brand{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;margin-bottom:4px;}
+.brand{font-size:24px;font-weight:700;margin-bottom:4px;}
 .brand span{color:#e8a23d;}
 .sub{font-size:13px;color:#666;margin-bottom:24px;}
-.field{margin-bottom:14px;}
-.field label{display:block;font-size:12px;color:#888;margin-bottom:5px;}
-.field input{width:100%;background:#0b0e18;border:1px solid #1c2040;color:#fff;border-radius:6px;padding:11px 12px;font-size:14px;font-family:'Inter',sans-serif;}
-.field input:focus{outline:none;border-color:#e8a23d;}
-.btn{width:100%;padding:12px;background:#e8a23d;color:#000;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
-.btn:hover{background:#d4922f;}
-.btn:disabled{opacity:0.5;}
-.error{color:#fc4b4a;font-size:12px;margin-top:10px;display:none;}
+label{display:block;font-size:12px;color:#888;margin-bottom:5px;}
+input{width:100%;background:#0b0e18;border:1px solid #1c2040;color:#fff;border-radius:6px;padding:11px;font-size:14px;margin-bottom:14px;}
+.btn{width:100%;padding:12px;background:#e8a23d;color:#000;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;}
+.err{color:red;font-size:12px;margin-top:10px;display:none;}
 </style>
 </head>
 <body>
 <div class="card">
-  <div class="brand">Hud<span>Broker</span> <span style="color:#666;font-size:13px;">/ admin</span></div>
-  <div class="sub">Acesso restrito</div>
-  <form id="loginForm">
-    <div class="field"><label>Email</label><input type="email" id="email" required value="admin@hudbroker.com"></div>
-    <div class="field"><label>Senha</label><input type="password" id="password" required value="admin123"></div>
-    <button type="submit" class="btn" id="btnLogin">Entrar</button>
-    <div class="error" id="errorMsg"></div>
-  </form>
+<div class="brand">Hud<span>Broker</span> <span style="color:#666;font-size:13px;">/ admin</span></div>
+<div class="sub">Acesso restrito</div>
+<form id="f">
+<label>Email</label><input type="email" id="e" value="admin@hudbroker.com">
+<label>Senha</label><input type="password" id="p" value="admin123">
+<button type="submit" class="btn" id="b">Entrar</button>
+<div class="err" id="er"></div>
+</form>
 </div>
 <script>
-var API_BASE = '/api';
-document.getElementById('loginForm').onsubmit = async function(e) {
-  e.preventDefault();
-  var btn = document.getElementById('btnLogin');
-  var err = document.getElementById('errorMsg');
-  err.style.display = 'none';
-  btn.disabled = true;
-  btn.textContent = 'Entrando...';
-  try {
-    var res = await fetch(API_BASE + '/auth/login', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        email: document.getElementById('email').value,
-        password: document.getElementById('password').value
-      })
-    });
-    var data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Erro');
-    if (!data.user || data.user.role !== 'admin') throw new Error('Esta conta não tem acesso administrativo');
-    localStorage.setItem('hb_token', data.token);
-    window.location.href = '/admin/index.html';
-  } catch(ex) {
-    err.textContent = ex.message;
-    err.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = 'Entrar';
-  }
+document.getElementById('f').onsubmit=async function(ev){
+ev.preventDefault();
+var b=document.getElementById('b'),er=document.getElementById('er');
+er.style.display='none';b.disabled=true;b.textContent='Entrando...';
+try{
+var r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('e').value,password:document.getElementById('p').value})});
+var d=await r.json();
+if(!r.ok)throw new Error(d.error);
+if(!d.user||d.user.role!=='admin')throw new Error('Sem acesso admin');
+localStorage.setItem('hb_token',d.token);
+window.location.replace('/admin/index.html');
+}catch(x){er.textContent=x.message;er.style.display='block';b.disabled=false;b.textContent='Entrar';}
 };
 </script>
 </body>
