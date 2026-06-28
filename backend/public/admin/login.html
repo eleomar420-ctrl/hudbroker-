@@ -4,42 +4,63 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HudBroker — Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/shared.css">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#0b0e18;color:#fff;font-family:'Inter',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;}
+.card{width:380px;background:#10142a;border:1px solid #1c2040;border-radius:12px;padding:32px;}
+.brand{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;margin-bottom:4px;}
+.brand span{color:#e8a23d;}
+.sub{font-size:13px;color:#666;margin-bottom:24px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:12px;color:#888;margin-bottom:5px;}
+.field input{width:100%;background:#0b0e18;border:1px solid #1c2040;color:#fff;border-radius:6px;padding:11px 12px;font-size:14px;font-family:'Inter',sans-serif;}
+.field input:focus{outline:none;border-color:#e8a23d;}
+.btn{width:100%;padding:12px;background:#e8a23d;color:#000;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;}
+.btn:hover{background:#d4922f;}
+.btn:disabled{opacity:0.5;}
+.error{color:#fc4b4a;font-size:12px;margin-top:10px;display:none;}
+</style>
 </head>
 <body>
-<div class="auth-shell">
-  <div class="auth-card">
-    <div class="brand" style="margin-bottom: 24px;"><span class="dot"></span>Hud<span class="tag">Broker</span><span style="color:var(--text-faint); font-size: 13px; margin-left: 6px;">/ admin</span></div>
-    <h1>Painel administrativo</h1>
-    <div class="sub">Acesso restrito</div>
-    <form id="loginForm">
-      <div class="field">
-        <label>Email</label>
-        <input type="email" id="email" required value="admin@hudbroker.com">
-      </div>
-      <div class="field">
-        <label>Senha</label>
-        <input type="password" id="password" required value="admin123">
-      </div>
-      <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">Entrar</button>
-    </form>
-  </div>
+<div class="card">
+  <div class="brand">Hud<span>Broker</span> <span style="color:#666;font-size:13px;">/ admin</span></div>
+  <div class="sub">Acesso restrito</div>
+  <form id="loginForm">
+    <div class="field"><label>Email</label><input type="email" id="email" required value="admin@hudbroker.com"></div>
+    <div class="field"><label>Senha</label><input type="password" id="password" required value="admin123"></div>
+    <button type="submit" class="btn" id="btnLogin">Entrar</button>
+    <div class="error" id="errorMsg"></div>
+  </form>
 </div>
-<script src="/js/api.js"></script>
 <script>
-document.getElementById('loginForm').onsubmit = async (e) => {
+var API_BASE = '/api';
+document.getElementById('loginForm').onsubmit = async function(e) {
   e.preventDefault();
+  var btn = document.getElementById('btnLogin');
+  var err = document.getElementById('errorMsg');
+  err.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Entrando...';
   try {
-    const data = await apiFetch('/auth/login', {
+    var res = await fetch(API_BASE + '/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email: document.getElementById('email').value, password: document.getElementById('password').value })
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        email: document.getElementById('email').value,
+        password: document.getElementById('password').value
+      })
     });
-    if (data.user.role !== 'admin') throw new Error('Esta conta não tem acesso administrativo');
-    setToken(data.token);
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Erro');
+    if (!data.user || data.user.role !== 'admin') throw new Error('Esta conta não tem acesso administrativo');
+    localStorage.setItem('hb_token', data.token);
     window.location.href = '/admin/index.html';
-  } catch (err) {
-    showToast(err.message, 'error');
+  } catch(ex) {
+    err.textContent = ex.message;
+    err.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
   }
 };
 </script>
