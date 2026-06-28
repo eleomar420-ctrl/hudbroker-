@@ -11,7 +11,7 @@ router.use(authRequired, requireRole('client'));
 // Dados do usuário logado
 router.get('/me', async (req, res) => {
   const user = await queryOne(
-    `SELECT id, name, last_name, email, phone, country, currency, balance, demo_balance, avatar_url, kyc_status, status, created_at
+    `SELECT id, name, last_name, email, phone, country, currency, balance, demo_balance, avatar_url, kyc_status, status, created_at, document, birthdate, data_updated
      FROM users WHERE id = $1`,
     [req.auth.id]
   );
