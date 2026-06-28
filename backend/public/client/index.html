@@ -434,14 +434,14 @@ html, body { height: 100%; overflow: hidden; }
   .topbar-spacer { display: block; order: 3; flex: 0 0 100%; height: 0; margin: 0; padding: 0; }
 
 
-  .avatar-btn { order: 1; display: none; }
-  .account-pill { order: 1; flex: 5 1 0; min-width: 0; justify-content: space-between; align-items: center; gap: 4px; background: none; border: none; padding: 0 8px 0 0; height: 48px; }
+  .avatar-btn { order: 3; width: 34px; height: 34px; flex-shrink: 0; }
+  .account-pill { order: 1; flex: 1 1 0; min-width: 0; background: none; border: none; padding: 0; height: 48px; display: flex; align-items: center; }
   .account-dropdown { position:fixed; top:auto; bottom:0; left:0; right:0; min-width:auto; width:100%; border-radius:12px 12px 0 0; max-height:60vh; }
   .acc-opt-row { flex-wrap:nowrap; gap:8px; padding:10px 12px; }
   .acc-opt-balance { font-size:13px; }
   .acc-opt-dep-btn { padding:5px 8px; font-size:11px; }
-  .account-pill .label { display: block; font-size: 11px; }
-  .account-pill .value { font-size: 16px; color: #ffffff; }
+  .account-pill .label { display: none; }
+  .account-pill .value { display: none; }
   .btn-deposit {
     order: 2; flex: 0 0 auto; min-width: 0; font-size: 14px; font-weight: 700; padding: 0 12px; height: 42px;
     background: transparent; color: #2d9f4a; border: 1px solid #2d9f4a; border-radius: 4px;
@@ -620,7 +620,7 @@ html, body { height: 100%; overflow: hidden; }
               <div class="profile-popup-email" id="profileEmail">---</div>
             </div>
           </div>
-          <div class="profile-popup-verify" onclick="closeProfilePopup();openAccountPanel();">
+          <div class="profile-popup-verify" id="profileVerifyBadge" onclick="window.location.href='/client/verify.html'">
             <div class="profile-popup-verify-icon">!</div>
             <div>
               <div class="profile-popup-verify-text">Verifique sua conta</div>
