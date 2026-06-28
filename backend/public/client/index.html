@@ -418,14 +418,15 @@ html, body { height: 100%; overflow: hidden; }
 
 
 /* Desktop: avatar ao lado do saldo */
-.avatar-btn { order: 89 !important; }
-.account-pill { order: 90 !important; }
-.btn-deposit { order: 91 !important; }
+
+
+
 
 /* Desktop: pill sem fundo */
 @media (min-width: 769px) {
-
-  .account-pill { background: none !important; border: none; padding: 0; }
+  .avatar-btn { order: 89; }
+  .account-pill { order: 90; background: none !important; border: none; padding: 0; }
+  .btn-deposit { order: 91; }
 }
 
 /* Mobile v2 - hidden on desktop */
@@ -2017,7 +2018,7 @@ document.getElementById('accAvInput').onchange = function(e) {
   reader.onload = async function(ev) {
     var dataUrl = ev.target.result;
     document.getElementById('accAvPrev').innerHTML = '<img src="' + dataUrl + '" alt="">';
-    try { await apiFetch('/trading/avatar',{method:'POST',body:JSON.stringify({avatarDataUrl:dataUrl})}); showToast('Foto atualizada'); } catch(err) { showToast('Erro','error'); }
+    try { await apiFetch('/trading/avatar',{method:'POST',body:JSON.stringify({avatarDataUrl:dataUrl})}); showToast('Foto atualizada'); refreshBalance(); } catch(err) { showToast(err.message || 'Erro ao enviar foto','error'); }
   };
   reader.readAsDataURL(file);
 };
