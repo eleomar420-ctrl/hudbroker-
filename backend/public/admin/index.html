@@ -84,7 +84,7 @@ tr{cursor:pointer;transition:background 0.1s;}tr:hover{background:rgba(255,255,2
     <button class="side-btn" onclick="showTab('withdrawals',this)"><span class="material-icons-outlined">payments</span>Saques</button>
     <button class="side-btn" onclick="showTab('trades',this)"><span class="material-icons-outlined">candlestick_chart</span>Operações</button>
   </div>
-  <div class="side-foot"><a href="/client/index.html">← Voltar ao site</a></div>
+  <div class="side-foot"><a href="/trade">← Voltar ao site</a></div>
 </div>
 <div class="main">
 <div class="tab act" id="t-dashboard">
@@ -153,7 +153,7 @@ tr{cursor:pointer;transition:background 0.1s;}tr:hover{background:rgba(255,255,2
 
 <script src="/js/api.js"></script>
 <script>
-requireAuth('/admin/login.html');
+requireAuth('/admin/login');
 var allUsers=[],curUser=null;
 var docTypeNames={id_front:'Identidade (Frente)',id_back:'Identidade (Verso)',selfie:'Selfie com Documento',cnh:'CNH',address:'Comprovante de Residência',passport:'Passaporte'};
 function fmt(v){return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
