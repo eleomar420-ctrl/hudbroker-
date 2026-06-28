@@ -2010,8 +2010,8 @@ function loadAccAvatar() {
   }
 }
 
-document.getElementById('accAvInput').onchange = function(e) {
-  var file = e.target.files[0];
+function handleAvatarUpload(input) {
+  var file = input.files[0];
   if (!file) return;
   if (file.size > 500*1024) { showToast('Max 500KB','error'); return; }
   var reader = new FileReader();
@@ -2021,7 +2021,7 @@ document.getElementById('accAvInput').onchange = function(e) {
     try { await apiFetch('/trading/avatar',{method:'POST',body:JSON.stringify({avatarDataUrl:dataUrl})}); showToast('Foto atualizada'); refreshBalance(); } catch(err) { showToast(err.message || 'Erro ao enviar foto','error'); }
   };
   reader.readAsDataURL(file);
-};
+}
 
 
 
@@ -2132,7 +2132,7 @@ document.querySelectorAll('.m2-nav-btn').forEach(function(btn) {
   <div class="acc-sub-body">
     <div class="acc-avatar-section">
       <div class="acc-avatar-preview" id="accAvPrev"><span class="material-icons-outlined" style="font-size:48px;color:#555;">person</span></div>
-      <input type="file" id="accAvInput" accept="image/*" style="display:none;">
+      <input type="file" id="accAvInput" accept="image/*" style="display:none;" onchange="handleAvatarUpload(this)">
       <button class="acc-btn" style="background:#1a1a1a;color:#ccc;max-width:280px;margin:0 auto;" onclick="document.getElementById('accAvInput').click()">Alterar foto</button>
     </div>
   </div>
