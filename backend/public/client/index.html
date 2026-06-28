@@ -1348,14 +1348,25 @@ function showSuccessPopup(message) {
 var _clicks = [];
 var _trades = [];
 var _ci = 0, _ti = 0;
+var _audioReady = false;
 
-for (var _si = 0; _si < 3; _si++) {
-  var _c = new Audio('/sounds/click.mp3'); _c.preload = 'auto'; _clicks.push(_c);
-  var _t = new Audio('/sounds/trade.mp3'); _t.preload = 'auto'; _trades.push(_t);
+for (var _si = 0; _si < 5; _si++) {
+  var _c = new Audio('/sounds/click.mp3'); _c.preload = 'auto'; _c.load(); _clicks.push(_c);
+  var _t = new Audio('/sounds/trade.mp3'); _t.preload = 'auto'; _t.load(); _trades.push(_t);
 }
+
+function _warmAudio() {
+  if (_audioReady) return;
+  _audioReady = true;
+  _clicks.forEach(function(a){a.volume=0;a.play().then(function(){a.pause();a.currentTime=0;a.volume=1;}).catch(function(){a.volume=1;});});
+  _trades.forEach(function(a){a.volume=0;a.play().then(function(){a.pause();a.currentTime=0;a.volume=1;}).catch(function(){a.volume=1;});});
+}
+document.addEventListener('touchstart', _warmAudio, {once:true});
+document.addEventListener('mousedown', _warmAudio, {once:true});
 
 function playClick() {
   if (typeof soundEnabled !== 'undefined' && !soundEnabled) return;
+  _warmAudio();
   var a = _clicks[_ci]; _ci = (_ci + 1) % _clicks.length;
   a.currentTime = 0; a.play().catch(function(){});
 }
