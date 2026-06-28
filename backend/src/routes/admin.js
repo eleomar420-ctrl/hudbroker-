@@ -216,3 +216,15 @@ router.patch('/users/:id/kyc-approve', async (req, res) => {
     res.json({ ok: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
+
+// Alterar senha do usuario
+router.patch('/users/:id/password', async (req, res) => {
+  try {
+    const { password } = req.body;
+    if (!password || password.length < 6) return res.status(400).json({ error: 'Senha precisa ter no mínimo 6 caracteres' });
+    const bcrypt = await import('bcryptjs');
+    const hash = await bcrypt.default.hash(password, 10);
+    await run('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, req.params.id]);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
