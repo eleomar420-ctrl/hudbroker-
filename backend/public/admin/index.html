@@ -83,6 +83,7 @@ tr{cursor:pointer;transition:background 0.1s;}tr:hover{background:rgba(255,255,2
     <button class="side-btn" onclick="showTab('deposits',this)"><span class="material-icons-outlined">account_balance</span>Depósitos</button>
     <button class="side-btn" onclick="showTab('withdrawals',this)"><span class="material-icons-outlined">payments</span>Saques</button>
     <button class="side-btn" onclick="showTab('trades',this)"><span class="material-icons-outlined">candlestick_chart</span>Operações</button>
+    <button class="side-btn" onclick="showTab('config',this)"><span class="material-icons-outlined">settings</span>Configurações</button>
   </div>
   <div class="side-foot"><a href="/trade">← Voltar ao site</a></div>
 </div>
@@ -100,6 +101,17 @@ tr{cursor:pointer;transition:background 0.1s;}tr:hover{background:rgba(255,255,2
 <div class="tab" id="t-deposits"><div class="pg-title">Depósitos</div><div class="tbl-wrap"><div class="tbl-head"><div class="tbl-title">Todos os Depósitos</div></div><table><thead><tr><th>Usuário</th><th>Valor</th><th>Status</th><th>Data</th><th>ID</th></tr></thead><tbody id="depBody"></tbody></table></div></div>
 <div class="tab" id="t-withdrawals"><div class="pg-title">Saques</div><div class="tbl-wrap"><div class="tbl-head"><div class="tbl-title">Solicitações de Saque</div></div><table><thead><tr><th>Usuário</th><th>Valor</th><th>Chave PIX</th><th>Status</th><th>Data</th><th>Ações</th></tr></thead><tbody id="wBody"></tbody></table></div></div>
 <div class="tab" id="t-trades"><div class="pg-title">Operações</div><div class="tbl-wrap"><div class="tbl-head"><div class="tbl-title">Todas as Operações</div></div><table><thead><tr><th>Usuário</th><th>Ativo</th><th>Direção</th><th>Valor</th><th>Resultado</th><th>Status</th><th>Data</th></tr></thead><tbody id="trBody"></tbody></table></div></div>
+
+<div class="tab" id="t-config">
+  <div class="pg-title">Configurações</div>
+  <div style="max-width:400px;background:#10142a;border:1px solid #1c2040;border-radius:10px;padding:24px;">
+    <div style="font-size:16px;font-weight:700;margin-bottom:16px;">Alterar Senha do Admin</div>
+    <div class="ed-field"><label>Senha Atual</label><input type="password" id="adminCurPass"></div>
+    <div class="ed-field"><label>Nova Senha</label><input type="password" id="adminNewPass" placeholder="Mínimo 6 caracteres"></div>
+    <div class="ed-field"><label>Confirmar Nova Senha</label><input type="password" id="adminConfPass"></div>
+    <button class="btn-save" onclick="changeAdminPass()">Alterar Senha</button>
+  </div>
+</div>
 
 <!-- USER DETAIL -->
 <div class="user-detail" id="userDetail">
@@ -135,6 +147,9 @@ tr{cursor:pointer;transition:background 0.1s;}tr:hover{background:rgba(255,255,2
       <div class="ed-field"><label>Saldo Demo (R$)</label><input type="number" id="eDemoBalance" step="0.01"></div>
       <div class="ed-field"><label>Status</label><select id="eStatus"><option value="active">Ativo</option><option value="blocked">Bloqueado</option></select></div>
       <div class="ed-field"><label>KYC</label><select id="eKyc"><option value="pending">Pendente</option><option value="approved">Aprovado</option><option value="rejected">Rejeitado</option></select></div>
+      <div style="border-top:1px solid #1c2040;margin:16px 0;padding-top:16px;">
+        <div class="ed-field"><label>Nova Senha (deixe vazio para não alterar)</label><input type="text" id="ePassword" placeholder="Mínimo 6 caracteres"></div>
+      </div>
       <button class="btn-save" onclick="saveUserEdit()">Salvar Alterações</button>
     </div></div>
     <div class="ud-panel" id="p-uddeps"><div id="udDepsContent">Carregando...</div></div>
@@ -165,7 +180,26 @@ function showTab(n,el){
   document.getElementById('t-'+n).classList.add('act');
   if(el)el.classList.add('act');
   document.getElementById('userDetail').classList.remove('open');
-  if(n==='dashboard')loadDash();
+  if(n==='dashboard')async function changeAdminPass() {
+  var cur = document.getElementById('adminCurPass').value;
+  var nova = document.getElementById('adminNewPass').value;
+  var conf = document.getElementById('adminConfPass').value;
+  if (!cur) { showToast('Digite a senha atual'); return; }
+  if (!nova || nova.length < 6) { showToast('Nova senha precisa ter no mínimo 6 caracteres'); return; }
+  if (nova !== conf) { showToast('As senhas não coincidem'); return; }
+  try {
+    var res = await fetch('/api/auth/login', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'admin@hudbroker.com',password:cur})});
+    if (!res.ok) { showToast('Senha atual incorreta'); return; }
+    var data = await res.json();
+    await apiFetch('/admin/users/'+data.user.id+'/password',{method:'PATCH',body:JSON.stringify({password:nova})});
+    document.getElementById('adminCurPass').value='';
+    document.getElementById('adminNewPass').value='';
+    document.getElementById('adminConfPass').value='';
+    showToast('Senha alterada com sucesso!');
+  } catch(e) { showToast('Erro ao alterar senha'); }
+}
+
+loadDash();
   if(n==='users')loadUsers();
   if(n==='deposits')loadDeps();
   if(n==='withdrawals')loadW();
@@ -245,6 +279,11 @@ async function saveUserEdit(){
     await apiFetch('/admin/users/'+curUser.id+'/balance',{method:'PATCH',body:JSON.stringify({balance:Number(document.getElementById('eBalance').value),demo_balance:Number(document.getElementById('eDemoBalance').value)})});
     await apiFetch('/admin/users/'+curUser.id+'/status',{method:'PATCH',body:JSON.stringify({status:document.getElementById('eStatus').value})});
     await apiFetch('/admin/users/'+curUser.id+'/kyc',{method:'PATCH',body:JSON.stringify({kycStatus:document.getElementById('eKyc').value})});
+    var newPass = document.getElementById('ePassword').value;
+    if (newPass) {
+      await apiFetch('/admin/users/'+curUser.id+'/password',{method:'PATCH',body:JSON.stringify({password:newPass})});
+    }
+    document.getElementById('ePassword').value = '';
     showToast('Usuário atualizado');openDetail(curUser.id);
   }catch(e){showToast('Erro');}
 }
@@ -303,6 +342,25 @@ async function loadW(){try{var w=await apiFetch('/admin/withdrawals');document.g
 async function appW(id){try{await apiFetch('/admin/withdrawals/'+id+'/approve',{method:'PATCH'});loadW();showToast('Aprovado');}catch(e){}}
 async function rejW(id){try{await apiFetch('/admin/withdrawals/'+id+'/reject',{method:'PATCH'});loadW();showToast('Rejeitado');}catch(e){}}
 async function loadTr(){try{var t=await apiFetch('/admin/trades');document.getElementById('trBody').innerHTML=t.map(function(x){var dir=x.direction==='up'?'<span style="color:#08c58a;">Compra</span>':'<span style="color:#fc4b4a;">Venda</span>';return '<tr><td>'+(x.user_id||'').slice(-6)+'</td><td>'+x.asset+'</td><td>'+dir+'</td><td>'+fmt(x.stake)+'</td><td>'+fmt(x.result_amount)+'</td><td><span class="badge '+(x.status==='won'?'b-won':x.status==='lost'?'b-lost':'b-pending')+'">'+x.status+'</span></td><td>'+fd(x.opened_at)+'</td></tr>';}).join('');}catch(e){}}
+
+async function changeAdminPass() {
+  var cur = document.getElementById('adminCurPass').value;
+  var nova = document.getElementById('adminNewPass').value;
+  var conf = document.getElementById('adminConfPass').value;
+  if (!cur) { showToast('Digite a senha atual'); return; }
+  if (!nova || nova.length < 6) { showToast('Nova senha precisa ter no mínimo 6 caracteres'); return; }
+  if (nova !== conf) { showToast('As senhas não coincidem'); return; }
+  try {
+    var res = await fetch('/api/auth/login', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'admin@hudbroker.com',password:cur})});
+    if (!res.ok) { showToast('Senha atual incorreta'); return; }
+    var data = await res.json();
+    await apiFetch('/admin/users/'+data.user.id+'/password',{method:'PATCH',body:JSON.stringify({password:nova})});
+    document.getElementById('adminCurPass').value='';
+    document.getElementById('adminNewPass').value='';
+    document.getElementById('adminConfPass').value='';
+    showToast('Senha alterada com sucesso!');
+  } catch(e) { showToast('Erro ao alterar senha'); }
+}
 
 loadDash();
 </script>
