@@ -297,6 +297,55 @@ function showUdTab(n,el){
   document.querySelectorAll('.ud-tab').forEach(function(t){t.classList.remove('act');});
   document.getElementById('p-'+n).classList.add('act');
   if(el)el.classList.add('act');
+  if(n==='uddeps') loadUserDeposits();
+  if(n==='udsaques') loadUserWithdrawals();
+  if(n==='udops') loadUserTrades();
+}
+
+async function loadUserDeposits(){
+  if(!curUser)return;
+  try{
+    var deps=await apiFetch('/admin/users/'+curUser.id+'/deposits');
+    if(!deps.length){document.getElementById('udDepsContent').innerHTML='<div style="text-align:center;color:#555;padding:20px;">Nenhum deposito</div>';return;}
+    var html='<table><thead><tr><th>Data</th><th>Valor</th><th>Status</th><th>TxID</th></tr></thead><tbody>';
+    deps.forEach(function(d){
+      var sc=d.status==='paid'?'b-paid':'b-pending';
+      html+='<tr><td>'+fd(d.created_at)+'</td><td>'+fmt(d.amount)+'</td><td><span class="badge '+sc+'">'+d.status+'</span></td><td style="font-size:9px;color:#444;">'+(d.txid||'--')+'</td></tr>';
+    });
+    html+='</tbody></table>';
+    document.getElementById('udDepsContent').innerHTML=html;
+  }catch(e){document.getElementById('udDepsContent').innerHTML='Erro ao carregar';}
+}
+
+async function loadUserWithdrawals(){
+  if(!curUser)return;
+  try{
+    var ws=await apiFetch('/admin/users/'+curUser.id+'/withdrawals');
+    if(!ws.length){document.getElementById('udSaqContent').innerHTML='<div style="text-align:center;color:#555;padding:20px;">Nenhum saque</div>';return;}
+    var html='<table><thead><tr><th>Data</th><th>Valor</th><th>Liquido</th><th>Taxa</th><th>Chave PIX</th><th>Status</th></tr></thead><tbody>';
+    ws.forEach(function(w){
+      var sc=w.status==='approved'?'b-paid':w.status==='rejected'?'b-blocked':'b-pending';
+      html+='<tr><td>'+fd(w.created_at)+'</td><td>'+fmt(w.amount)+'</td><td>'+fmt(w.net_amount)+'</td><td>'+fmt(w.tax)+'</td><td style="font-size:10px;">'+(w.pix_key||'--')+'</td><td><span class="badge '+sc+'">'+w.status+'</span></td></tr>';
+    });
+    html+='</tbody></table>';
+    document.getElementById('udSaqContent').innerHTML=html;
+  }catch(e){document.getElementById('udSaqContent').innerHTML='Erro ao carregar';}
+}
+
+async function loadUserTrades(){
+  if(!curUser)return;
+  try{
+    var ts=await apiFetch('/admin/users/'+curUser.id+'/trades');
+    if(!ts.length){document.getElementById('udOpsContent').innerHTML='<div style="text-align:center;color:#555;padding:20px;">Nenhuma operacao</div>';return;}
+    var html='<table><thead><tr><th>Data</th><th>Ativo</th><th>Direcao</th><th>Valor</th><th>Resultado</th><th>Status</th></tr></thead><tbody>';
+    ts.forEach(function(t){
+      var dir=t.direction==='up'?'<span style="color:#08c58a;">Compra</span>':'<span style="color:#fc4b4a;">Venda</span>';
+      var sc=t.status==='won'?'b-won':t.status==='lost'?'b-lost':'b-pending';
+      html+='<tr><td>'+fd(t.opened_at)+'</td><td>'+t.asset+'</td><td>'+dir+'</td><td>'+fmt(t.stake)+'</td><td>'+fmt(t.result_amount)+'</td><td><span class="badge '+sc+'">'+t.status+'</span></td></tr>';
+    });
+    html+='</tbody></table>';
+    document.getElementById('udOpsContent').innerHTML=html;
+  }catch(e){document.getElementById('udOpsContent').innerHTML='Erro ao carregar';}
 }
 
 async function loadDash(){
@@ -342,8 +391,18 @@ async function openDetail(id){
     document.getElementById('rCountry').textContent=u.country||'BR';
     document.getElementById('rBal').textContent=fmt(u.balance);
     document.getElementById('rDemo').textContent=fmt(u.demo_balance);
-    document.getElementById('udDep').textContent=fmt(0);
-    document.getElementById('udSaq').textContent=fmt(0);
+    // Load totals
+    try {
+      var totals = await apiFetch('/admin/users/'+id+'/totals');
+      document.getElementById('udDep').textContent=fmt(totals.deposits);
+      document.getElementById('udSaq').textContent=fmt(totals.withdrawals);
+      document.getElementById('udOps').textContent=totals.trades;
+      document.getElementById('rDepT').textContent=fmt(totals.deposits);
+      document.getElementById('rSaqT').textContent=fmt(totals.withdrawals);
+    } catch(e) {
+      document.getElementById('udDep').textContent=fmt(0);
+      document.getElementById('udSaq').textContent=fmt(0);
+    }
     document.getElementById('eBalance').value=u.balance||0;
     document.getElementById('eDemoBalance').value=u.demo_balance||0;
     document.getElementById('eStatus').value=u.status||'active';

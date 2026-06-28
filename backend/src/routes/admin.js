@@ -140,3 +140,50 @@ router.get('/stats', async (req, res) => {
     });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
+
+// Depositos de um usuario
+router.get('/users/:id/deposits', async (req, res) => {
+  try {
+    const deps = await query(
+      'SELECT * FROM pix_charges WHERE user_id = $1 ORDER BY created_at DESC',
+      [req.params.id]
+    );
+    res.json(deps);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Saques de um usuario
+router.get('/users/:id/withdrawals', async (req, res) => {
+  try {
+    const rows = await query(
+      'SELECT * FROM withdrawals WHERE user_id = $1 ORDER BY created_at DESC',
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Trades de um usuario
+router.get('/users/:id/trades', async (req, res) => {
+  try {
+    const rows = await query(
+      'SELECT * FROM trades WHERE user_id = $1 ORDER BY opened_at DESC LIMIT 100',
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Total depositos de um usuario
+router.get('/users/:id/totals', async (req, res) => {
+  try {
+    const deps = await queryOne("SELECT COALESCE(SUM(amount),0) as total FROM pix_charges WHERE user_id = $1 AND status = 'paid'", [req.params.id]);
+    const saqs = await queryOne("SELECT COALESCE(SUM(amount),0) as total FROM withdrawals WHERE user_id = $1 AND status = 'approved'", [req.params.id]);
+    const ops = await queryOne("SELECT COUNT(*) as count FROM trades WHERE user_id = $1", [req.params.id]);
+    res.json({
+      deposits: Number(deps.total),
+      withdrawals: Number(saqs.total),
+      trades: Number(ops.count)
+    });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
