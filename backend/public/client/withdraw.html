@@ -204,8 +204,8 @@ async function loadHistory() {
     document.getElementById('historyBody').innerHTML = rows.map(function(w) {
       var d = new Date(w.created_at);
       var dateStr = d.toLocaleDateString('pt-BR') + ', ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
-      var statusClass = w.status === 'approved' ? 'b-approved' : w.status === 'rejected' ? 'b-rejected' : 'b-pending';
-      var statusText = w.status === 'approved' ? 'Aprovado' : w.status === 'rejected' ? 'Rejeitado' : 'Em andamento';
+      var statusClass = w.status === 'approved' ? 'b-approved' : w.status === 'rejected' ? 'b-rejected' : w.status === 'cancelled' ? 'b-rejected' : 'b-pending';
+      var statusText = w.status === 'approved' ? 'Aprovado' : w.status === 'rejected' ? 'Rejeitado' : w.status === 'cancelled' ? 'Cancelado pelo usuario' : 'Em andamento';
       var cancelBtn = w.status === 'pending' ? '<button class="btn-cancel" onclick="cancelWithdraw(\'' + w.id + '\')">Cancelar</button>' : '';
       return '<tr><td>' + dateStr + '<br><span style="font-size:10px;color:#555;">PIX (CPF)</span></td><td>R$ ' + Number(w.amount).toLocaleString('pt-BR', {minimumFractionDigits:2}) + '</td><td>R$ ' + Number(w.tax || 0).toLocaleString('pt-BR', {minimumFractionDigits:2}) + '</td><td class="' + statusClass + '">' + statusText + '</td><td>--</td><td>' + cancelBtn + '</td></tr>';
     }).join('');
@@ -213,8 +213,8 @@ async function loadHistory() {
     document.getElementById('historyCards').innerHTML = rows.map(function(w) {
       var d = new Date(w.created_at);
       var dateStr = d.toLocaleDateString('pt-BR') + ', ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
-      var sc = w.status === 'approved' ? 'b-approved' : w.status === 'rejected' ? 'b-rejected' : 'b-pending';
-      var st = w.status === 'approved' ? 'Fundos enviados' : w.status === 'rejected' ? 'Rejeitado' : 'Em andamento';
+      var sc = w.status === 'approved' ? 'b-approved' : w.status === 'rejected' ? 'b-rejected' : w.status === 'cancelled' ? 'b-rejected' : 'b-pending';
+      var st = w.status === 'approved' ? 'Fundos enviados' : w.status === 'rejected' ? 'Rejeitado' : w.status === 'cancelled' ? 'Cancelado pelo usuario' : 'Em andamento';
       var cx = w.status === 'pending' ? '<button class="h-card-cancel" onclick="cancelWithdraw(\'' + w.id + '\')">&#10005;</button>' : '';
       return '<div class="h-card"><div class="h-card-top"><div><div class="h-card-date">' + dateStr + '</div><div class="h-card-method">PIX (CPF)</div></div><div><div class="h-card-vals">R$ ' + Number(w.amount).toLocaleString('pt-BR',{minimumFractionDigits:2}) + '</div><div class="h-card-commission">R$ ' + Number(w.tax||0).toLocaleString('pt-BR',{minimumFractionDigits:2}) + '</div></div></div><div class="h-card-bottom"><span class="h-card-status ' + sc + '">' + st + '</span>' + cx + '</div></div>';
     }).join('');
@@ -257,7 +257,7 @@ function newRequest() {
 }
 
 async function cancelWithdraw(id) {
-  if (!confirm('Cancelar este saque? O saldo sera devolvido.')) return;
+  
   try {
     await apiFetch('/trading/withdrawals/' + id + '/cancel', { method: 'PATCH' });
     showToast('Saque cancelado. Saldo devolvido.');
