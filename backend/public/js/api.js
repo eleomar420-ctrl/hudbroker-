@@ -12,13 +12,13 @@ function setToken(token) {
 
 function requireAuth(loginUrl) {
   if (!getToken()) {
-    window.location.href = loginUrl || '/client/login.html';
+    window.location.href = loginUrl || '/login';
   }
 }
 
 function logout(redirectUrl) {
   localStorage.removeItem('hb_token');
-  window.location.href = redirectUrl || '/client/login.html';
+  window.location.href = redirectUrl || '/login';
 }
 
 async function apiFetch(path, opts = {}) {
