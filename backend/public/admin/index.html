@@ -257,7 +257,7 @@ async function saveUserEdit(){
   try{
     await apiFetch('/admin/users/'+curUser.id+'/balance',{method:'PATCH',body:JSON.stringify({balance:Number(document.getElementById('eBalance').value),demo_balance:Number(document.getElementById('eDemoBalance').value)})});
     await apiFetch('/admin/users/'+curUser.id+'/status',{method:'PATCH',body:JSON.stringify({status:document.getElementById('eStatus').value})});
-    await apiFetch('/admin/users/'+curUser.id+'/kyc',{method:'PATCH',body:JSON.stringify({kycStatus:document.getElementById('eKyc').value})});
+    await apiFetch('/admin/users/'+curUser.id+'/kyc',{method:'PATCH',body:JSON.stringify({kyc_status:document.getElementById('eKyc').value})});
     var newPass=document.getElementById('ePassword').value;
     if(newPass&&newPass.length>=6){await apiFetch('/admin/users/'+curUser.id+'/password',{method:'PATCH',body:JSON.stringify({password:newPass})});}
     document.getElementById('ePassword').value='';
