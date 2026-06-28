@@ -55,7 +55,7 @@ document.getElementById('loginForm').onsubmit = async function(e) {
     if (!res.ok) throw new Error(data.error || 'Erro');
     if (!data.user || data.user.role !== 'admin') throw new Error('Esta conta não tem acesso administrativo');
     localStorage.setItem('hb_token', data.token);
-    window.location.href = '/admin/index.html';
+    window.location.href = '/admin';
   } catch(ex) {
     err.textContent = ex.message;
     err.style.display = 'block';
