@@ -140,24 +140,7 @@ router.post('/withdrawals', async (req, res) => {
   }
 });
 
-// Cancelar saque pendente
-router.patch('/withdrawals/:id/cancel', async (req, res) => {
-  try {
-    const wr = await queryOne(
-      "SELECT * FROM withdrawal_requests WHERE id = $1 AND requester_id = $2 AND status = 'pending'",
-      [req.params.id, req.auth.id]
-    );
-    if (!wr) return res.status(404).json({ error: 'Saque não encontrado ou já processado' });
-    await withTransaction(async (client) => {
-      await client.query("UPDATE withdrawal_requests SET status = 'cancelled' WHERE id = $1", [wr.id]);
-      await client.query('UPDATE users SET balance = balance + $1 WHERE id = $2', [wr.amount, req.auth.id]);
-    });
-    res.json({ ok: true });
-  } catch (err) {
-    console.error('[trading/withdrawals/cancel]', err);
-    res.status(500).json({ error: 'Erro interno' });
-  }
-});
+// cancel antigo removido - usando nova rota abaixo
 
 // Atualizar dados do usuário (apenas uma vez)
 router.patch('/me', async (req, res) => {
@@ -214,6 +197,22 @@ router.get('/withdrawals', async (req, res) => {
       [req.auth.id]
     );
     res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Cancelar saque (lead cancela)
+router.patch('/withdrawals/:id/cancel', async (req, res) => {
+  try {
+    const w = await queryOne(
+      "SELECT * FROM withdrawals WHERE id = $1 AND user_id = $2 AND status = 'pending'",
+      [req.params.id, req.auth.id]
+    );
+    if (!w) return res.status(400).json({ error: 'Saque não encontrado ou já processado' });
+    await run("UPDATE withdrawals SET status = 'cancelled', updated_at = now() WHERE id = $1", [w.id]);
+    await run('UPDATE users SET balance = balance + $1 WHERE id = $2', [w.amount, req.auth.id]);
+    res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
