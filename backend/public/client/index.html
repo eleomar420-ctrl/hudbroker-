@@ -1345,35 +1345,47 @@ function showSuccessPopup(message) {
 }
 
 // === SONS ===
-var _clicks = [];
-var _trades = [];
-var _ci = 0, _ti = 0;
-var _audioReady = false;
+var _actx = null;
+var _bClick = null, _bTrade = null;
 
-for (var _si = 0; _si < 5; _si++) {
-  var _c = new Audio('/sounds/click.mp3'); _c.preload = 'auto'; _c.load(); _clicks.push(_c);
-  var _t = new Audio('/sounds/trade.mp3'); _t.preload = 'auto'; _t.load(); _trades.push(_t);
-}
+// Criar AudioContext
+try { _actx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
 
-function _warmAudio() {
-  if (_audioReady) return;
-  _audioReady = true;
-  _clicks.forEach(function(a){a.volume=0;a.play().then(function(){a.pause();a.currentTime=0;a.volume=1;}).catch(function(){a.volume=1;});});
-  _trades.forEach(function(a){a.volume=0;a.play().then(function(){a.pause();a.currentTime=0;a.volume=1;}).catch(function(){a.volume=1;});});
+// Carregar e decodificar sons
+(function() {
+  if (!_actx) return;
+  fetch('/sounds/click.mp3').then(function(r){return r.arrayBuffer();}).then(function(buf){
+    _actx.decodeAudioData(buf, function(decoded){ _bClick = decoded; });
+  }).catch(function(){});
+  fetch('/sounds/trade.mp3').then(function(r){return r.arrayBuffer();}).then(function(buf){
+    _actx.decodeAudioData(buf, function(decoded){ _bTrade = decoded; });
+  }).catch(function(){});
+})();
+
+// Desbloquear no primeiro toque
+document.addEventListener('touchstart', function(){
+  if (_actx && _actx.state === 'suspended') _actx.resume();
+}, {once: true});
+document.addEventListener('click', function(){
+  if (_actx && _actx.state === 'suspended') _actx.resume();
+}, {once: true});
+
+function _play(buf) {
+  if (!buf || !_actx) return;
+  if (_actx.state === 'suspended') _actx.resume();
+  var s = _actx.createBufferSource();
+  s.buffer = buf;
+  s.connect(_actx.destination);
+  s.start(0);
 }
-document.addEventListener('touchstart', _warmAudio, {once:true});
-document.addEventListener('mousedown', _warmAudio, {once:true});
 
 function playClick() {
   if (typeof soundEnabled !== 'undefined' && !soundEnabled) return;
-  _warmAudio();
-  var a = _clicks[_ci]; _ci = (_ci + 1) % _clicks.length;
-  a.currentTime = 0; a.play().catch(function(){});
+  _play(_bClick);
 }
 function playTrade() {
   if (typeof soundEnabled !== 'undefined' && !soundEnabled) return;
-  var a = _trades[_ti]; _ti = (_ti + 1) % _trades.length;
-  a.currentTime = 0; a.play().catch(function(){});
+  _play(_bTrade);
 }
 
 document.getElementById('buyBtn').onclick = () => { playTrade(); openTrade('up'); };
