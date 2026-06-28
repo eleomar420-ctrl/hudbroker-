@@ -82,6 +82,18 @@ body{background:#f4f4f6;color:#333;font-family:'Inter',sans-serif;min-height:100
 .dropzone-file{font-size:12px;color:#08c58a;margin-top:8px;}
 .docs-btn{padding:12px 28px;background:#e8a23d;color:#000;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;}
 .docs-btn:disabled{opacity:0.5;}
+.uploaded-docs{margin-top:20px;border-top:1px solid #e0e0e0;padding-top:16px;}
+.uploaded-title{font-size:14px;font-weight:700;color:#333;margin-bottom:12px;}
+.uploaded-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#f9f9f9;border:1px solid #e8e8e8;border-radius:6px;margin-bottom:8px;}
+.uploaded-info{display:flex;align-items:center;gap:10px;}
+.uploaded-icon{color:#08c58a;font-size:20px;}
+.uploaded-name{font-size:13px;font-weight:500;color:#333;}
+.uploaded-type{font-size:11px;color:#999;}
+.uploaded-status{font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px;}
+.uploaded-status.pending{background:rgba(232,162,61,0.1);color:#e8a23d;}
+.uploaded-status.approved{background:rgba(8,197,138,0.1);color:#08c58a;}
+.uploaded-status.rejected{background:rgba(252,75,74,0.1);color:#fc4b4a;}
+.uploaded-date{font-size:10px;color:#bbb;}
 
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:8px;font-size:13px;z-index:999;background:#333;color:#fff;border:1px solid #555;}
 .toast.error{border-color:#fc4b4a;color:#fc4b4a;}
@@ -201,6 +213,7 @@ body{background:#f4f4f6;color:#333;font-family:'Inter',sans-serif;min-height:100
         </div>
         <input type="file" id="fileInput" accept="image/*,.pdf" style="display:none;" onchange="fileSelected(this)">
         <button class="docs-btn" id="btnUpload" onclick="uploadDocument()" disabled>Enviar documento</button>
+        <div class="uploaded-docs" id="uploadedDocs"></div>
       </div>
     </div>
   </div>
@@ -342,6 +355,7 @@ async function uploadDocument() {
           body: JSON.stringify({ type: docType, file: reader.result, fileName: selectedFile.name })
         });
         showToast('Documento enviado com sucesso!');
+        loadDocs();
         document.getElementById('fileName').textContent = '';
         selectedFile = null;
         document.getElementById('docType').value = '';
@@ -360,7 +374,48 @@ async function uploadDocument() {
   }
 }
 
+var docTypeNames = {
+  id_front: 'Identidade (Frente)',
+  id_back: 'Identidade (Verso)',
+  selfie: 'Selfie com Documento',
+  cnh: 'CNH',
+  address: 'Comprovante de Residência',
+  passport: 'Passaporte'
+};
+
+async function loadDocs() {
+  try {
+    var docs = await apiFetch('/trading/kyc-documents');
+    if (!docs.length) {
+      document.getElementById('uploadedDocs').innerHTML = '';
+      return;
+    }
+    var html = '<div class="uploaded-title">Documentos Enviados</div>';
+    docs.forEach(function(d) {
+      var statusClass = d.status === 'approved' ? 'approved' : d.status === 'rejected' ? 'rejected' : 'pending';
+      var statusText = d.status === 'approved' ? 'Aprovado' : d.status === 'rejected' ? 'Rejeitado' : 'Em análise';
+      var date = new Date(d.created_at).toLocaleDateString('pt-BR') + ' ' + new Date(d.created_at).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+      html += '<div class="uploaded-item"><div class="uploaded-info"><span class="material-icons-outlined uploaded-icon">description</span><div><div class="uploaded-name">' + (docTypeNames[d.doc_type] || d.doc_type) + '</div><div class="uploaded-type">' + (d.file_name || '--') + ' · <span class="uploaded-date">' + date + '</span></div></div></div><span class="uploaded-status ' + statusClass + '">' + statusText + '</span></div>';
+    });
+
+    document.getElementById('uploadedDocs').innerHTML = html;
+
+    // Update required docs icons
+    var uploaded = docs.map(function(d){ return d.doc_type; });
+    document.querySelectorAll('.doc-req-item').forEach(function(item) {
+      var text = item.textContent.trim();
+      var done = false;
+      if (text.includes('Frente') && uploaded.includes('id_front')) done = true;
+      if (text.includes('Verso') && uploaded.includes('id_back')) done = true;
+      if (text.includes('Selfie') && uploaded.includes('selfie')) done = true;
+      var icon = item.querySelector('.doc-req-icon');
+      if (done && icon) { icon.classList.add('done'); icon.textContent = 'check_circle'; }
+    });
+  } catch(e) {}
+}
+
 loadUser();
+loadDocs();
 </script>
 </body>
 </html>

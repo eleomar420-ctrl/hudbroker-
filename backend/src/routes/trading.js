@@ -239,3 +239,16 @@ router.post('/kyc-document', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Listar documentos KYC do usuario
+router.get('/kyc-documents', async (req, res) => {
+  try {
+    const docs = await query(
+      'SELECT id, doc_type, file_name, status, created_at FROM kyc_documents WHERE user_id = $1 ORDER BY created_at DESC',
+      [req.auth.id]
+    );
+    res.json(docs);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
