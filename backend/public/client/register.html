@@ -76,17 +76,17 @@ body { background:#0c0f1a; color:#fff; font-family:'Inter',sans-serif; min-heigh
 <body>
 
 <div class="topbar">
-  <a href="/client/login.html" class="topbar-brand">Hud<span>Broker</span></a>
+  <a href="/login" class="topbar-brand">Hud<span>Broker</span></a>
   <div class="topbar-nav">
-    <a href="/client/login.html" class="topbar-btn-enter">Entrar</a>
-    <a href="/client/register.html" class="topbar-btn-create">Criar Conta</a>
+    <a href="/login" class="topbar-btn-enter">Entrar</a>
+    <a href="/register" class="topbar-btn-create">Criar Conta</a>
   </div>
 </div>
 
 <div class="register-shell">
   <div class="login-row">
     <span class="login-row-text">Ja possui uma conta?</span>
-    <a href="/client/login.html" class="login-row-btn">Acesse sua conta</a>
+    <a href="/login" class="login-row-btn">Acesse sua conta</a>
   </div>
 
   <div class="divider-text">OU REGISTRE-SE</div>
@@ -199,7 +199,7 @@ document.getElementById('registerForm').onsubmit = async function(e) {
       })
     });
     setToken(data.token);
-    window.location.href = '/client/index.html';
+    window.location.href = '/trade';
   } catch(err) {
     showToast(err.message || 'Erro ao criar conta', 'error');
     btn.disabled = false;
