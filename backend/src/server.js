@@ -26,7 +26,16 @@ async function bootstrap() {
   app.use(cors());
   app.use(express.json({ limit: '2mb' }));
 
-  app.use(express.static(path.join(__dirname, '../public')));
+  app.use(express.static(path.join(__dirname, '../public'), { extensions: ['html'] }));
+
+  // URLs limpas (sem .html)
+  app.get('/login', (req, res) => res.sendFile(path.join(__dirname, '../public/client/login.html')));
+  app.get('/register', (req, res) => res.sendFile(path.join(__dirname, '../public/client/register.html')));
+  app.get('/trade', (req, res) => res.sendFile(path.join(__dirname, '../public/client/index.html')));
+  app.get('/withdraw', (req, res) => res.sendFile(path.join(__dirname, '../public/client/withdraw.html')));
+  app.get('/verify', (req, res) => res.sendFile(path.join(__dirname, '../public/client/verify.html')));
+  app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, '../public/admin/index.html')));
+  app.get('/admin/login', (req, res) => res.sendFile(path.join(__dirname, '../public/admin/login.html')));
 
   app.use('/api/auth', authRoutes);
   app.use('/api/trading', tradingRoutes);
