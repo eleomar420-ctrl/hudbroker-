@@ -119,7 +119,7 @@ body{background:#0c0f1a;color:#fff;font-family:'Inter',sans-serif;min-height:100
     <div class="status-badge">
       <strong>Status:</strong>
       <span class="status-icon pending" id="statusIcon"><span class="material-icons-outlined" style="font-size:14px;">close</span></span>
-      <span id="statusText">Conta nao verificada</span>
+      <span id="statusText">Conta não verificada</span>
     </div>
   </div>
 
@@ -143,9 +143,9 @@ body{background:#0c0f1a;color:#fff;font-family:'Inter',sans-serif;min-height:100
   <div class="v-panel active" id="step0">
     <div class="email-center">
       <div class="email-icon">@</div>
-      <div class="email-text" id="emailConfirmText">Confirmaremos de E-mail</div>
-      <div class="email-text">Enviaremos um codigo de uso unico para<br><span class="email-addr" id="emailAddr">--</span> para validar seu e-mail.</div>
-      <button class="email-btn" id="btnSendCode" onclick="sendEmailCode()">Obtenha um codigo</button>
+      <div class="email-text" id="emailConfirmText">Confirmação de E-mail</div>
+      <div class="email-text">Enviaremos um código de uso único para<br><span class="email-addr" id="emailAddr">--</span> para validar seu e-mail.</div>
+      <button class="email-btn" id="btnSendCode" onclick="sendEmailCode()">Obtenha um código</button>
       <div id="codeArea" style="display:none;">
         <div class="code-row">
           <input class="code-input" maxlength="1" id="c0" oninput="codeNext(0)">
@@ -162,7 +162,7 @@ body{background:#0c0f1a;color:#fff;font-family:'Inter',sans-serif;min-height:100
 
   <!-- STEP 2: Data -->
   <div class="v-panel" id="step1">
-    <div class="data-note"><span class="material-icons-outlined" style="font-size:16px;">info</span>Preencha seus dados pessoais abaixo. Uma vez preenchido, estes dados NAO poderao ser alterados.</div>
+    <div class="data-note"><span class="material-icons-outlined" style="font-size:16px;">info</span>Preencha seus dados pessoais abaixo. Uma vez preenchido, estes dados NÃO poderão ser alterados.</div>
     <div class="data-grid">
       <div class="data-field"><label>Nome</label><input type="text" id="vName" placeholder="Seu nome"></div>
       <div class="data-field"><label>Sobrenome</label><input type="text" id="vLastName" placeholder="Seu sobrenome"></div>
@@ -177,8 +177,8 @@ body{background:#0c0f1a;color:#fff;font-family:'Inter',sans-serif;min-height:100
     <div class="docs-layout">
       <div>
         <div class="docs-instructions">
-          <h3>Instrucoes</h3>
-          <p>Para verificar sua conta, e necessario que voce envie os documentos marcados abaixo. Sua conta so sera verificada apos a validacao destes documentos.</p>
+          <h3>Instruções</h3>
+          <p>Para verificar sua conta, é necessário que você envie os documentos marcados abaixo. Sua conta só será verificada após a validação destes documentos.</p>
         </div>
         <div class="docs-required">
           <h4>Documentos Requeridos</h4>
@@ -194,7 +194,7 @@ body{background:#0c0f1a;color:#fff;font-family:'Inter',sans-serif;min-height:100
           <option value="id_back">Identidade (Verso)</option>
           <option value="selfie">Selfie com Documento</option>
           <option value="cnh">CNH</option>
-          <option value="address">Comprovante de Residencia</option>
+          <option value="address">Comprovante de Residência</option>
           <option value="passport">Passaporte</option>
         </select>
         <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
@@ -230,7 +230,7 @@ async function loadUser() {
     } else if (userData.kyc_status === 'pending_review') {
       document.getElementById('statusIcon').className = 'status-icon review';
       document.getElementById('statusIcon').innerHTML = '<span class="material-icons-outlined" style="font-size:14px;">schedule</span>';
-      document.getElementById('statusText').textContent = 'Em analise';
+      document.getElementById('statusText').textContent = 'Em análise';
     }
 
     if (userData.document) {
@@ -254,10 +254,10 @@ function showStep(n, el) {
 }
 
 function sendEmailCode() {
-  document.getElementById('btnSendCode').textContent = 'Codigo enviado!';
+  document.getElementById('btnSendCode').textContent = 'Código enviado!';
   document.getElementById('btnSendCode').disabled = true;
   document.getElementById('codeArea').style.display = 'block';
-  showToast('Codigo enviado para seu e-mail');
+  showToast('Código enviado para seu e-mail');
 }
 
 function codeNext(i) {
@@ -331,7 +331,7 @@ async function uploadDocument() {
   var docType = document.getElementById('docType').value;
   if (!docType) { showToast('Selecione o tipo de documento', 'error'); return; }
   if (!selectedFile) { showToast('Selecione um arquivo', 'error'); return; }
-  if (selectedFile.size > 5 * 1024 * 1024) { showToast('Arquivo muito grande (max 5MB)', 'error'); return; }
+  if (selectedFile.size > 5 * 1024 * 1024) { showToast('Arquivo muito grande (máx 5MB)', 'error'); return; }
 
   var btn = document.getElementById('btnUpload');
   btn.disabled = true;
