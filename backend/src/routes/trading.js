@@ -217,3 +217,25 @@ router.patch('/withdrawals/:id/cancel', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Upload KYC document
+router.post('/kyc-document', async (req, res) => {
+  try {
+    const { type, file, fileName } = req.body;
+    const userId = req.auth.id;
+    const id = randomUUID();
+
+    await run(
+      `INSERT INTO kyc_documents (id, user_id, doc_type, file_data, file_name, status, created_at)
+       VALUES ($1, $2, $3, $4, $5, 'pending', now())`,
+      [id, userId, type, file, fileName]
+    );
+
+    // Update user KYC status to pending_review
+    await run("UPDATE users SET kyc_status = 'pending_review' WHERE id = $1", [userId]);
+
+    res.json({ ok: true, id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
