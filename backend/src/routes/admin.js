@@ -187,3 +187,32 @@ router.get('/users/:id/totals', async (req, res) => {
     });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
+
+// Listar documentos KYC de um usuario
+router.get('/users/:id/kyc-documents', async (req, res) => {
+  try {
+    const docs = await query(
+      'SELECT * FROM kyc_documents WHERE user_id = $1 ORDER BY created_at DESC',
+      [req.params.id]
+    );
+    res.json(docs);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Aprovar/Rejeitar documento KYC
+router.patch('/kyc-documents/:id', async (req, res) => {
+  try {
+    const { status } = req.body;
+    await run('UPDATE kyc_documents SET status = $1 WHERE id = $2', [status, req.params.id]);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Aprovar/Rejeitar conta (KYC status)
+router.patch('/users/:id/kyc-approve', async (req, res) => {
+  try {
+    const { status } = req.body;
+    await run('UPDATE users SET kyc_status = $1 WHERE id = $2', [status, req.params.id]);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});

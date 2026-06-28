@@ -219,6 +219,7 @@ tr:hover{background:rgba(255,255,255,0.015);}
       <button class="ud-tab" onclick="showUdTab('udsaques',this)">Saques</button>
       <button class="ud-tab" onclick="showUdTab('udops',this)">Operacoes</button>
       <button class="ud-tab" onclick="showUdTab('udmov',this)">Movimentacoes</button>
+      <button class="ud-tab" onclick="showUdTab('udkyc',this)">KYC</button>
       <button class="ud-tab del" onclick="if(confirm('Excluir usuario?'))deleteUser()">Excluir</button>
     </div>
   </div>
@@ -267,6 +268,20 @@ tr:hover{background:rgba(255,255,255,0.015);}
     <div class="ud-panel" id="p-udops"><div id="udOpsContent">Carregando...</div></div>
     <!-- Movimentacoes -->
     <div class="ud-panel" id="p-udmov"><div id="udMovContent">Em breve</div></div>
+    <!-- KYC -->
+    <div class="ud-panel" id="p-udkyc">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div>
+          <div style="font-size:14px;font-weight:700;">Status da Conta</div>
+          <div style="font-size:12px;color:#888;margin-top:4px;" id="kycCurrentStatus">--</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-s btn-grn" onclick="approveKyc()">Aprovar Conta</button>
+          <button class="btn-s btn-red" onclick="rejectKyc()">Rejeitar Conta</button>
+        </div>
+      </div>
+      <div style="border-top:1px solid #1c2040;padding-top:16px;" id="kycDocsContent">Carregando...</div>
+    </div>
   </div>
 </div>
 
@@ -285,7 +300,64 @@ function showTab(n,el){
   document.getElementById('t-'+n).classList.add('act');
   if(el)el.classList.add('act');
   document.getElementById('userDetail').classList.remove('open');
-  if(n==='dashboard')loadDash();
+  if(n==='dashboard')var docTypeNames = {
+  id_front: 'Identidade (Frente)',
+  id_back: 'Identidade (Verso)',
+  selfie: 'Selfie com Documento',
+  cnh: 'CNH',
+  address: 'Comprovante de Residência',
+  passport: 'Passaporte'
+};
+
+async function loadUserKyc(){
+  if(!curUser) return;
+  var statusText = curUser.kyc_status === 'approved' ? 'Conta Verificada' : curUser.kyc_status === 'pending_review' ? 'Em Análise' : curUser.kyc_status === 'rejected' ? 'Rejeitada' : 'Pendente';
+  var statusColor = curUser.kyc_status === 'approved' ? '#08c58a' : curUser.kyc_status === 'rejected' ? '#fc4b4a' : '#e8a23d';
+  document.getElementById('kycCurrentStatus').innerHTML = '<span style="color:'+statusColor+';font-weight:600;">'+statusText+'</span>';
+  try {
+    var docs = await apiFetch('/admin/users/'+curUser.id+'/kyc-documents');
+    if (!docs.length) {
+      document.getElementById('kycDocsContent').innerHTML = '<div style="text-align:center;color:#555;padding:20px;">Nenhum documento enviado</div>';
+      return;
+    }
+    var html = '<div style="font-size:14px;font-weight:700;margin-bottom:12px;">Documentos Enviados</div>';
+    docs.forEach(function(d) {
+      var sc = d.status === 'approved' ? 'b-paid' : d.status === 'rejected' ? 'b-blocked' : 'b-pending';
+      var st = d.status === 'approved' ? 'Aprovado' : d.status === 'rejected' ? 'Rejeitado' : 'Pendente';
+      var date = fd(d.created_at);
+      var preview = d.file_data && d.file_data.startsWith('data:image') ? '<img src="'+d.file_data+'" style="max-width:200px;max-height:120px;border-radius:4px;margin-top:8px;display:block;">' : '';
+      html += '<div style="border:1px solid #1c2040;border-radius:8px;padding:14px;margin-bottom:10px;">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
+      html += '<div><div style="font-size:13px;font-weight:600;">'+(docTypeNames[d.doc_type]||d.doc_type)+'</div><div style="font-size:11px;color:#555;">'+d.file_name+' · '+date+'</div></div>';
+      html += '<div style="display:flex;align-items:center;gap:8px;"><span class="badge '+sc+'">'+st+'</span>';
+      if (d.status === 'pending') {
+        html += '<button class="btn-s btn-grn" onclick="approveDoc(''+d.id+'')">Aprovar</button>';
+        html += '<button class="btn-s btn-red" onclick="rejectDoc(''+d.id+'')">Rejeitar</button>';
+      }
+      html += '</div></div>';
+      html += preview;
+      html += '</div>';
+    });
+    document.getElementById('kycDocsContent').innerHTML = html;
+  } catch(e) { document.getElementById('kycDocsContent').innerHTML = 'Erro ao carregar'; }
+}
+
+async function approveDoc(id) {
+  try { await apiFetch('/admin/kyc-documents/'+id, {method:'PATCH', body:JSON.stringify({status:'approved'})}); loadUserKyc(); showToast('Documento aprovado'); } catch(e) {}
+}
+async function rejectDoc(id) {
+  try { await apiFetch('/admin/kyc-documents/'+id, {method:'PATCH', body:JSON.stringify({status:'rejected'})}); loadUserKyc(); showToast('Documento rejeitado'); } catch(e) {}
+}
+async function approveKyc() {
+  if(!curUser) return;
+  try { await apiFetch('/admin/users/'+curUser.id+'/kyc-approve', {method:'PATCH', body:JSON.stringify({status:'approved'})}); curUser.kyc_status='approved'; loadUserKyc(); showToast('Conta aprovada'); } catch(e) {}
+}
+async function rejectKyc() {
+  if(!curUser) return;
+  try { await apiFetch('/admin/users/'+curUser.id+'/kyc-approve', {method:'PATCH', body:JSON.stringify({status:'rejected'})}); curUser.kyc_status='rejected'; loadUserKyc(); showToast('Conta rejeitada'); } catch(e) {}
+}
+
+loadDash();
   if(n==='users')loadUsers();
   if(n==='deposits')loadDeps();
   if(n==='withdrawals')loadW();
@@ -297,6 +369,56 @@ function showUdTab(n,el){
   document.querySelectorAll('.ud-tab').forEach(function(t){t.classList.remove('act');});
   document.getElementById('p-'+n).classList.add('act');
   if(el)el.classList.add('act');
+  if(n==='uddeps') loadUserDeposits();
+  if(n==='udsaques') loadUserWithdrawals();
+  if(n==='udops') loadUserTrades();
+  if(n==='udkyc') loadUserKyc();
+}
+
+async function loadUserDeposits(){
+  if(!curUser)return;
+  try{
+    var deps=await apiFetch('/admin/users/'+curUser.id+'/deposits');
+    if(!deps.length){document.getElementById('udDepsContent').innerHTML='<div style="text-align:center;color:#555;padding:20px;">Nenhum deposito</div>';return;}
+    var html='<table><thead><tr><th>Data</th><th>Valor</th><th>Status</th><th>TxID</th></tr></thead><tbody>';
+    deps.forEach(function(d){
+      var sc=d.status==='paid'?'b-paid':'b-pending';
+      html+='<tr><td>'+fd(d.created_at)+'</td><td>'+fmt(d.amount)+'</td><td><span class="badge '+sc+'">'+d.status+'</span></td><td style="font-size:9px;color:#444;">'+(d.txid||'--')+'</td></tr>';
+    });
+    html+='</tbody></table>';
+    document.getElementById('udDepsContent').innerHTML=html;
+  }catch(e){document.getElementById('udDepsContent').innerHTML='Erro ao carregar';}
+}
+
+async function loadUserWithdrawals(){
+  if(!curUser)return;
+  try{
+    var ws=await apiFetch('/admin/users/'+curUser.id+'/withdrawals');
+    if(!ws.length){document.getElementById('udSaqContent').innerHTML='<div style="text-align:center;color:#555;padding:20px;">Nenhum saque</div>';return;}
+    var html='<table><thead><tr><th>Data</th><th>Valor</th><th>Liquido</th><th>Taxa</th><th>Chave PIX</th><th>Status</th></tr></thead><tbody>';
+    ws.forEach(function(w){
+      var sc=w.status==='approved'?'b-paid':w.status==='rejected'?'b-blocked':'b-pending';
+      html+='<tr><td>'+fd(w.created_at)+'</td><td>'+fmt(w.amount)+'</td><td>'+fmt(w.net_amount)+'</td><td>'+fmt(w.tax)+'</td><td style="font-size:10px;">'+(w.pix_key||'--')+'</td><td><span class="badge '+sc+'">'+w.status+'</span></td></tr>';
+    });
+    html+='</tbody></table>';
+    document.getElementById('udSaqContent').innerHTML=html;
+  }catch(e){document.getElementById('udSaqContent').innerHTML='Erro ao carregar';}
+}
+
+async function loadUserTrades(){
+  if(!curUser)return;
+  try{
+    var ts=await apiFetch('/admin/users/'+curUser.id+'/trades');
+    if(!ts.length){document.getElementById('udOpsContent').innerHTML='<div style="text-align:center;color:#555;padding:20px;">Nenhuma operacao</div>';return;}
+    var html='<table><thead><tr><th>Data</th><th>Ativo</th><th>Direcao</th><th>Valor</th><th>Resultado</th><th>Status</th></tr></thead><tbody>';
+    ts.forEach(function(t){
+      var dir=t.direction==='up'?'<span style="color:#08c58a;">Compra</span>':'<span style="color:#fc4b4a;">Venda</span>';
+      var sc=t.status==='won'?'b-won':t.status==='lost'?'b-lost':'b-pending';
+      html+='<tr><td>'+fd(t.opened_at)+'</td><td>'+t.asset+'</td><td>'+dir+'</td><td>'+fmt(t.stake)+'</td><td>'+fmt(t.result_amount)+'</td><td><span class="badge '+sc+'">'+t.status+'</span></td></tr>';
+    });
+    html+='</tbody></table>';
+    document.getElementById('udOpsContent').innerHTML=html;
+  }catch(e){document.getElementById('udOpsContent').innerHTML='Erro ao carregar';}
 }
 
 async function loadDash(){
@@ -342,8 +464,18 @@ async function openDetail(id){
     document.getElementById('rCountry').textContent=u.country||'BR';
     document.getElementById('rBal').textContent=fmt(u.balance);
     document.getElementById('rDemo').textContent=fmt(u.demo_balance);
-    document.getElementById('udDep').textContent=fmt(0);
-    document.getElementById('udSaq').textContent=fmt(0);
+    // Load totals
+    try {
+      var totals = await apiFetch('/admin/users/'+id+'/totals');
+      document.getElementById('udDep').textContent=fmt(totals.deposits);
+      document.getElementById('udSaq').textContent=fmt(totals.withdrawals);
+      document.getElementById('udOps').textContent=totals.trades;
+      document.getElementById('rDepT').textContent=fmt(totals.deposits);
+      document.getElementById('rSaqT').textContent=fmt(totals.withdrawals);
+    } catch(e) {
+      document.getElementById('udDep').textContent=fmt(0);
+      document.getElementById('udSaq').textContent=fmt(0);
+    }
     document.getElementById('eBalance').value=u.balance||0;
     document.getElementById('eDemoBalance').value=u.demo_balance||0;
     document.getElementById('eStatus').value=u.status||'active';
@@ -385,6 +517,63 @@ async function rejW(id){try{await apiFetch('/admin/withdrawals/'+id+'/reject',{m
 
 async function loadTr(){
   try{var t=await apiFetch('/admin/trades');document.getElementById('trBody').innerHTML=t.map(function(x){var dir=x.direction==='up'?'<span style="color:#08c58a;">Compra</span>':'<span style="color:#fc4b4a;">Venda</span>';return '<tr><td>'+(x.user_id||'').slice(-6)+'</td><td>'+x.asset+'</td><td>'+dir+'</td><td>'+fmt(x.stake)+'</td><td>'+fmt(x.result_amount)+'</td><td><span class="badge '+(x.status==='won'?'b-won':x.status==='lost'?'b-lost':'b-pending')+'">'+x.status+'</span></td><td>'+fd(x.opened_at)+'</td></tr>';}).join('');}catch(e){}
+}
+
+var docTypeNames = {
+  id_front: 'Identidade (Frente)',
+  id_back: 'Identidade (Verso)',
+  selfie: 'Selfie com Documento',
+  cnh: 'CNH',
+  address: 'Comprovante de Residência',
+  passport: 'Passaporte'
+};
+
+async function loadUserKyc(){
+  if(!curUser) return;
+  var statusText = curUser.kyc_status === 'approved' ? 'Conta Verificada' : curUser.kyc_status === 'pending_review' ? 'Em Análise' : curUser.kyc_status === 'rejected' ? 'Rejeitada' : 'Pendente';
+  var statusColor = curUser.kyc_status === 'approved' ? '#08c58a' : curUser.kyc_status === 'rejected' ? '#fc4b4a' : '#e8a23d';
+  document.getElementById('kycCurrentStatus').innerHTML = '<span style="color:'+statusColor+';font-weight:600;">'+statusText+'</span>';
+  try {
+    var docs = await apiFetch('/admin/users/'+curUser.id+'/kyc-documents');
+    if (!docs.length) {
+      document.getElementById('kycDocsContent').innerHTML = '<div style="text-align:center;color:#555;padding:20px;">Nenhum documento enviado</div>';
+      return;
+    }
+    var html = '<div style="font-size:14px;font-weight:700;margin-bottom:12px;">Documentos Enviados</div>';
+    docs.forEach(function(d) {
+      var sc = d.status === 'approved' ? 'b-paid' : d.status === 'rejected' ? 'b-blocked' : 'b-pending';
+      var st = d.status === 'approved' ? 'Aprovado' : d.status === 'rejected' ? 'Rejeitado' : 'Pendente';
+      var date = fd(d.created_at);
+      var preview = d.file_data && d.file_data.startsWith('data:image') ? '<img src="'+d.file_data+'" style="max-width:200px;max-height:120px;border-radius:4px;margin-top:8px;display:block;">' : '';
+      html += '<div style="border:1px solid #1c2040;border-radius:8px;padding:14px;margin-bottom:10px;">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;">';
+      html += '<div><div style="font-size:13px;font-weight:600;">'+(docTypeNames[d.doc_type]||d.doc_type)+'</div><div style="font-size:11px;color:#555;">'+d.file_name+' · '+date+'</div></div>';
+      html += '<div style="display:flex;align-items:center;gap:8px;"><span class="badge '+sc+'">'+st+'</span>';
+      if (d.status === 'pending') {
+        html += '<button class="btn-s btn-grn" onclick="approveDoc(''+d.id+'')">Aprovar</button>';
+        html += '<button class="btn-s btn-red" onclick="rejectDoc(''+d.id+'')">Rejeitar</button>';
+      }
+      html += '</div></div>';
+      html += preview;
+      html += '</div>';
+    });
+    document.getElementById('kycDocsContent').innerHTML = html;
+  } catch(e) { document.getElementById('kycDocsContent').innerHTML = 'Erro ao carregar'; }
+}
+
+async function approveDoc(id) {
+  try { await apiFetch('/admin/kyc-documents/'+id, {method:'PATCH', body:JSON.stringify({status:'approved'})}); loadUserKyc(); showToast('Documento aprovado'); } catch(e) {}
+}
+async function rejectDoc(id) {
+  try { await apiFetch('/admin/kyc-documents/'+id, {method:'PATCH', body:JSON.stringify({status:'rejected'})}); loadUserKyc(); showToast('Documento rejeitado'); } catch(e) {}
+}
+async function approveKyc() {
+  if(!curUser) return;
+  try { await apiFetch('/admin/users/'+curUser.id+'/kyc-approve', {method:'PATCH', body:JSON.stringify({status:'approved'})}); curUser.kyc_status='approved'; loadUserKyc(); showToast('Conta aprovada'); } catch(e) {}
+}
+async function rejectKyc() {
+  if(!curUser) return;
+  try { await apiFetch('/admin/users/'+curUser.id+'/kyc-approve', {method:'PATCH', body:JSON.stringify({status:'rejected'})}); curUser.kyc_status='rejected'; loadUserKyc(); showToast('Conta rejeitada'); } catch(e) {}
 }
 
 loadDash();
