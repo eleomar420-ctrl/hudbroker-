@@ -191,7 +191,7 @@ label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 
   padding: 12px 18px;
   font-size: 13px;
   max-width: 320px;
-  z-index: 100;
+  z-index: 9999;
 }
 .toast.error { border-color: var(--down); color: var(--down); }
 .toast.success { border-color: var(--up); color: var(--up); }
