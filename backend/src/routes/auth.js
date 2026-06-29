@@ -32,6 +32,7 @@ router.post('/register', async (req, res) => {
     }
 
     const token = signToken({ id, email, role: 'client' });
+    sendWelcomeEmail(email, name).catch(() => {});
     res.json({ token, user: { id, name, lastName, email, balance: 0, demoBalance: 10000, currency: 'BRL' } });
   } catch (err) {
     console.error('[auth/register]', err);
