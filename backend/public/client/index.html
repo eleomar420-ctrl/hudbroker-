@@ -486,7 +486,7 @@ html, body { height: 100%; overflow: hidden; }
   .assets-table { width: 100%; }
   .assets-table thead { display: none; }
   .assets-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); }
-  .asset-row { display: flex; align-items: center; }
+  
   .asset-row-icon { width: 36px; height: 36px; font-size: 14px; }
   .asset-row-name .label { font-size: 15px; font-weight: 500; }
   .asset-row-name .sub { display: none; }
@@ -858,6 +858,7 @@ html, body { height: 100%; overflow: hidden; }
     <div class="assets-categories">
       <div class="category-item active" data-category="all"><i class="ti ti-grid-dots" aria-hidden="true"></i> Todos</div>
       <div class="category-item" data-category="crypto"><i class="ti ti-currency-bitcoin" aria-hidden="true"></i> Cripto</div>
+      <div class="category-item" data-category="forex"><i class="ti ti-arrows-exchange" aria-hidden="true"></i> Forex</div>
     </div>
     <div class="assets-list-area">
       <input type="text" class="assets-search-input" id="assetsSearchInput" placeholder="Pesquisar um ativo...">
@@ -943,12 +944,45 @@ html, body { height: 100%; overflow: hidden; }
 requireAuth();
 
 const ASSET_CATALOG = [
-  { asset: 'BTCUSDT', name: 'Bitcoin', symbol: 'BTC/USDT', category: 'crypto', color: '#F7931A', initial: 'B', icon: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/btc.svg' },
-  { asset: 'ETHUSDT', name: 'Ethereum', symbol: 'ETH/USDT', category: 'crypto', color: '#627EEA', initial: 'E', icon: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/eth.svg' },
-  { asset: 'SOLUSDT', name: 'Solana', symbol: 'SOL/USDT', category: 'crypto', color: '#14F195', initial: 'S', icon: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/sol.svg' },
-  { asset: 'BNBUSDT', name: 'BNB', symbol: 'BNB/USDT', category: 'crypto', color: '#F3BA2F', initial: 'B', icon: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/bnb.svg' },
-  { asset: 'LTCUSDT', name: 'Litecoin', symbol: 'LTC/USDT', category: 'crypto', color: '#345D9D', initial: 'L', icon: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/ltc.svg' },
-  { asset: 'ADAUSDT', name: 'Cardano', symbol: 'ADA/USDT', category: 'crypto', color: '#0033AD', initial: 'A', icon: 'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/ada.svg' }
+  {asset:'BTCUSDT',name:'Bitcoin',symbol:'BTC/USDT',category:'crypto',color:'#F7931A',initial:'B',icon:'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/btc.svg',payout:85,tv:'BINANCE:BTCUSDT'},
+  {asset:'ETHUSDT',name:'Ethereum',symbol:'ETH/USDT',category:'crypto',color:'#627EEA',initial:'E',icon:'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/eth.svg',payout:80,tv:'BINANCE:ETHUSDT'},
+  {asset:'SOLUSDT',name:'Solana',symbol:'SOL/USDT',category:'crypto',color:'#14F195',initial:'S',icon:'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/sol.svg',payout:85,tv:'BINANCE:SOLUSDT'},
+  {asset:'BNBUSDT',name:'BNB',symbol:'BNB/USDT',category:'crypto',color:'#F3BA2F',initial:'B',icon:'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/bnb.svg',payout:92,tv:'BINANCE:BNBUSDT'},
+  {asset:'LTCUSDT',name:'Litecoin',symbol:'LTC/USDT',category:'crypto',color:'#345D9D',initial:'L',icon:'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/ltc.svg',payout:85,tv:'BINANCE:LTCUSDT'},
+  {asset:'ADAUSDT',name:'Cardano',symbol:'ADA/USDT',category:'crypto',color:'#0033AD',initial:'A',icon:'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/ada.svg',payout:83,tv:'BINANCE:ADAUSDT'},
+  {asset:'XRPUSDT',name:'XRP',symbol:'XRP/USDT',category:'crypto',color:'#00AAE4',initial:'X',icon:'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/xrp.svg',payout:98,tv:'BINANCE:XRPUSDT'},
+  {asset:'AVAXUSDT',name:'AVAX',symbol:'AVAX/USDT',category:'crypto',color:'#E84142',initial:'A',icon:'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/avax.svg',payout:80,tv:'BINANCE:AVAXUSDT'},
+  {asset:'DOGEUSDT',name:'Doge',symbol:'DOGE/USDT',category:'crypto',color:'#C3A634',initial:'D',icon:'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/doge.svg',payout:80,tv:'BINANCE:DOGEUSDT'},
+  {asset:'SUIUSDT',name:'SUI',symbol:'SUI/USDT',category:'crypto',color:'#4DA2FF',initial:'S',icon:'',payout:80,tv:'BINANCE:SUIUSDT'},
+  {asset:'LINKUSDT',name:'LINK',symbol:'LINK/USDT',category:'crypto',color:'#2A5ADA',initial:'L',icon:'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/link.svg',payout:80,tv:'BINANCE:LINKUSDT'},
+  {asset:'XLMUSDT',name:'Stellar',symbol:'XLM/USDT',category:'crypto',color:'#14B6E7',initial:'S',icon:'https://cdn.jsdelivr.net/npm/cryptocurrency-icons@0.18.1/svg/color/xlm.svg',payout:80,tv:'BINANCE:XLMUSDT'},
+  {asset:'EURUSD',name:'EUR/USD',symbol:'EUR/USD',category:'forex',color:'#003399',initial:'EU',icon:'',payout:86,tv:'FX:EURUSD'},
+  {asset:'EURGBP',name:'EUR/GBP',symbol:'EUR/GBP',category:'forex',color:'#003399',initial:'EG',icon:'',payout:87,tv:'FX:EURGBP'},
+  {asset:'AUDJPY',name:'AUD/JPY',symbol:'AUD/JPY',category:'forex',color:'#002B7F',initial:'AJ',icon:'',payout:87,tv:'FX:AUDJPY'},
+  {asset:'GBPUSD',name:'GBP/USD',symbol:'GBP/USD',category:'forex',color:'#C8102E',initial:'GU',icon:'',payout:92,tv:'FX:GBPUSD'},
+  {asset:'AUDCAD',name:'AUD/CAD',symbol:'AUD/CAD',category:'forex',color:'#002B7F',initial:'AC',icon:'',payout:92,tv:'FX:AUDCAD'},
+  {asset:'USDCAD',name:'USD/CAD',symbol:'USD/CAD',category:'forex',color:'#B31942',initial:'UC',icon:'',payout:92,tv:'FX:USDCAD'},
+  {asset:'NZDUSD',name:'NZD/USD',symbol:'NZD/USD',category:'forex',color:'#00247D',initial:'NU',icon:'',payout:96,tv:'FX:NZDUSD'},
+  {asset:'USDJPY',name:'USD/JPY',symbol:'USD/JPY',category:'forex',color:'#B31942',initial:'UJ',icon:'',payout:92,tv:'FX:USDJPY'},
+  {asset:'CADJPY',name:'CAD/JPY',symbol:'CAD/JPY',category:'forex',color:'#FF0000',initial:'CJ',icon:'',payout:92,tv:'FX:CADJPY'},
+  {asset:'CHFJPY',name:'CHF/JPY',symbol:'CHF/JPY',category:'forex',color:'#D52B1E',initial:'SJ',icon:'',payout:92,tv:'FX:CHFJPY'},
+  {asset:'EURNZD',name:'EUR/NZD',symbol:'EUR/NZD',category:'forex',color:'#003399',initial:'EN',icon:'',payout:80,tv:'FX:EURNZD'},
+  {asset:'AUDCHF',name:'AUD/CHF',symbol:'AUD/CHF',category:'forex',color:'#002B7F',initial:'AS',icon:'',payout:80,tv:'FX:AUDCHF'},
+  {asset:'EURAUD',name:'EUR/AUD',symbol:'EUR/AUD',category:'forex',color:'#003399',initial:'EA',icon:'',payout:80,tv:'FX:EURAUD'},
+  {asset:'GBPCHF',name:'GBP/CHF',symbol:'GBP/CHF',category:'forex',color:'#C8102E',initial:'GS',icon:'',payout:80,tv:'FX:GBPCHF'},
+  {asset:'GBPAUD',name:'GBP/AUD',symbol:'GBP/AUD',category:'forex',color:'#C8102E',initial:'GA',icon:'',payout:80,tv:'FX:GBPAUD'},
+  {asset:'GBPJPY',name:'GBP/JPY',symbol:'GBP/JPY',category:'forex',color:'#C8102E',initial:'GJ',icon:'',payout:80,tv:'FX:GBPJPY'},
+  {asset:'USDCHF',name:'USD/CHF',symbol:'USD/CHF',category:'forex',color:'#B31942',initial:'US',icon:'',payout:80,tv:'FX:USDCHF'},
+  {asset:'NZDJPY',name:'NZD/JPY',symbol:'NZD/JPY',category:'forex',color:'#00247D',initial:'NJ',icon:'',payout:80,tv:'FX:NZDJPY'},
+  {asset:'EURCHF',name:'EUR/CHF',symbol:'EUR/CHF',category:'forex',color:'#003399',initial:'ES',icon:'',payout:80,tv:'FX:EURCHF'},
+  {asset:'CADCHF',name:'CAD/CHF',symbol:'CAD/CHF',category:'forex',color:'#FF0000',initial:'CS',icon:'',payout:80,tv:'FX:CADCHF'},
+  {asset:'EURCAD',name:'EUR/CAD',symbol:'EUR/CAD',category:'forex',color:'#003399',initial:'EC',icon:'',payout:80,tv:'FX:EURCAD'},
+  {asset:'AUDUSD',name:'AUD/USD',symbol:'AUD/USD',category:'forex',color:'#002B7F',initial:'AU',icon:'',payout:80,tv:'FX:AUDUSD'},
+  {asset:'AUDNZD',name:'AUD/NZD',symbol:'AUD/NZD',category:'forex',color:'#002B7F',initial:'AN',icon:'',payout:80,tv:'FX:AUDNZD'},
+  {asset:'NZDCHF',name:'NZD/CHF',symbol:'NZD/CHF',category:'forex',color:'#00247D',initial:'NS',icon:'',payout:80,tv:'FX:NZDCHF'},
+  {asset:'GBPCAD',name:'GBP/CAD',symbol:'GBP/CAD',category:'forex',color:'#C8102E',initial:'GC',icon:'',payout:80,tv:'FX:GBPCAD'},
+  {asset:'GBPNZD',name:'GBP/NZD',symbol:'GBP/NZD',category:'forex',color:'#C8102E',initial:'GN',icon:'',payout:80,tv:'FX:GBPNZD'},
+  {asset:'NZDCAD',name:'NZD/CAD',symbol:'NZD/CAD',category:'forex',color:'#00247D',initial:'NC',icon:'',payout:80,tv:'FX:NZDCAD'}
 ];
 
 let livePrices = {};
@@ -1021,7 +1055,7 @@ function renderTabsRow() {
       ${assetIconHtml(t.catalog, 24)}
       <div class="info">
         <div class="name">${t.catalog.name}</div>
-        <div class="sub">Crypto</div>
+        <div class="sub">${a.category === 'forex' ? 'Forex' : 'Crypto'}</div>
       </div>
       <span class="close-x" data-close="${t.id}">&times;</span>
     </div>
@@ -1052,7 +1086,7 @@ function renderChartArea() {
     new TradingView.widget({
       container_id: 'chart_' + activeTab.id,
       autosize: true,
-      symbol: `BINANCE:${activeTab.asset}`,
+      symbol: activeTab.catalog.tv || `BINANCE:${activeTab.asset}`,
       interval: '1',
       timezone: 'America/Sao_Paulo',
       theme: 'dark',
@@ -1141,8 +1175,9 @@ function renderPanelForActiveTab() {
 function updateProfitAmount() {
   const t = getActiveTab();
   if (!t) return;
-  setText('profitAmount', '+' + formatMoney(t.stakeValue * 0.85));
-  setText('m2Profit', '+' + formatMoney(t.stakeValue * 0.85));
+  var pct = t.catalog.payout ? t.catalog.payout / 100 : 0.85;
+  setText('profitAmount', '+' + formatMoney(t.stakeValue * pct));
+  setText('m2Profit', '+' + formatMoney(t.stakeValue * pct));
 }
 
 function updateLiveCountdown() {
@@ -1325,7 +1360,7 @@ async function openTrade(direction) {
         direction,
         stake: t.stakeValue,
         durationSeconds: syncedDuration,
-        payoutPct: 0.85,
+        payoutPct: (getActiveTab().catalog.payout || 85) / 100,
         accountType: activeAccount
       })
     });
@@ -1807,11 +1842,11 @@ function renderAssetsTable(category, search) {
           <div class="asset-row-name">
             <div>
               <div class="label">${a.name}</div>
-              <div class="sub">Crypto</div>
+              <div class="sub">${a.category === 'forex' ? 'Forex' : 'Crypto'}</div>
             </div>
           </div>
         </td>
-        <td style="text-align:right;color:#51a85d;font-weight:600;font-size:14px;">85%</td>
+        <td style="text-align:right;color:#51a85d;font-weight:600;font-size:14px;">${a.payout}%</td>
         <td style="width:36px;text-align:center;color:#555;font-size:18px;">☆</td>
       </tr>
     `;
