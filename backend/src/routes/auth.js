@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { sendWelcomeEmail, sendPasswordResetEmail } from '../services/emailService.js';
 import { randomUUID } from 'crypto';
 import bcrypt from 'bcryptjs';
 import { queryOne, run } from '../db/index.js';
@@ -76,6 +77,30 @@ router.post('/affiliate/login', async (req, res) => {
   } catch (err) {
     console.error('[auth/affiliate/login]', err);
     res.status(500).json({ error: 'Erro interno ao entrar' });
+  }
+});
+
+// Esqueci minha senha - gera senha temporária e envia por email
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Informe o email' });
+    
+    const user = await queryOne('SELECT * FROM users WHERE email = $1', [email]);
+    if (!user) return res.status(404).json({ error: 'Email não encontrado' });
+    
+    // Gerar senha temporária
+    const tempPass = 'temp' + Math.random().toString().slice(2, 9);
+    const hash = await bcrypt.hash(tempPass, 10);
+    await run('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, user.id]);
+    
+    // Enviar email
+    await sendPasswordResetEmail(email, tempPass);
+    
+    res.json({ ok: true, message: 'Senha temporária enviada para seu email' });
+  } catch (err) {
+    console.error('[forgot-password]', err);
+    res.status(500).json({ error: 'Erro ao processar' });
   }
 });
 
