@@ -57,6 +57,28 @@ router.get('/affiliates', async (req, res) => {
   res.json(affiliates);
 });
 
+// Excluir usuário
+router.delete('/users/:id', async (req, res) => {
+  try {
+    await run('DELETE FROM kyc_documents WHERE user_id = $1', [req.params.id]);
+    await run('DELETE FROM trades WHERE user_id = $1', [req.params.id]);
+    await run('DELETE FROM withdrawals WHERE user_id = $1', [req.params.id]);
+    await run('DELETE FROM charges WHERE user_id = $1', [req.params.id]);
+    await run('DELETE FROM users WHERE id = $1', [req.params.id]);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Editar email do usuário
+router.patch('/users/:id/email', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email obrigatório' });
+    await run('UPDATE users SET email = $1 WHERE id = $2', [email, req.params.id]);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 export default router;
 
 // Editar saldo do usuário
