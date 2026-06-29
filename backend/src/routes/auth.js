@@ -94,8 +94,8 @@ router.post('/forgot-password', async (req, res) => {
     const hash = await bcrypt.hash(tempPass, 10);
     await run('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, user.id]);
     
-    // Enviar email
-    await sendPasswordResetEmail(email, tempPass);
+    // Enviar email (não bloqueia)
+    sendPasswordResetEmail(email, tempPass).catch(() => {});
     
     res.json({ ok: true, message: 'Senha temporária enviada para seu email' });
   } catch (err) {
