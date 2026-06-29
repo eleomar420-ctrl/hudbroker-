@@ -1765,11 +1765,8 @@ function renderHistory() {
           <div class="time">${time}</div>
           <div class="date">${date}</div>
         </div>
-        <div class="history-item-icon" style="background:${bgColor}">
-          ${iconHtml}
-        </div>
         <div class="history-item-info">
-          <div class="history-item-asset">${asset}</div>
+          <div style="display:flex;align-items:center;gap:6px;"><div class="history-item-icon" style="background:${bgColor}">${iconHtml}</div><div class="history-item-asset">${asset}</div></div>
           <div class="history-item-price">${t.entry_price ? Number(t.entry_price).toLocaleString('en-US') : '--'}</div>
           <span class="history-item-badge ${badgeClass}">${badgeText}</span>
         </div>
