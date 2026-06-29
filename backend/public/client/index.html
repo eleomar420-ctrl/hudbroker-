@@ -318,16 +318,24 @@ html, body { height: 100%; overflow: hidden; }
 .category-item:hover { background: var(--bg-elevated); }
 .category-item.active { background: var(--bg-elevated); color: var(--brand); }
 .assets-list-area { flex: 1; padding: 16px 24px; overflow-y: auto; }
-.assets-search-input { width: 100%; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; margin-bottom: 16px; }
-.assets-table { width: 100%; border-collapse: collapse; }
-.assets-table th { text-align: left; font-size: 12px; color: var(--text-faint); font-weight: 500; padding: 8px 12px; border-bottom: 1px solid var(--border); }
-.assets-table td { padding: 12px; border-bottom: 1px solid var(--border); }
-.asset-row { cursor: pointer; }
-.asset-row:hover { background: var(--bg-elevated); }
-.asset-row-name { display: flex; align-items: center; gap: 10px; }
-.asset-row-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; }
-.asset-row-name .label { font-weight: 600; font-size: 14px; }
-.asset-row-name .sub { font-size: 11px; color: var(--text-faint); }
+.assets-search-input { width: 100%; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 14px; margin-bottom: 16px; color: #fff; }
+.assets-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.asset-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.2s; position: relative; }
+.asset-card:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-2px); background: rgba(255,255,255,0.05); }
+.asset-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.asset-card-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0; overflow: hidden; }
+.asset-card-icon img { width: 100%; height: 100%; object-fit: cover; }
+.asset-card-name { font-size: 14px; font-weight: 700; color: #fff; text-transform: uppercase; }
+.asset-card-star { position: absolute; top: 14px; right: 14px; color: #444; font-size: 16px; cursor: pointer; }
+.asset-card-star:hover { color: #e8a23d; }
+.asset-card-label { font-size: 11px; color: #666; margin-bottom: 2px; }
+.asset-card-payout { font-size: 22px; font-weight: 700; color: #51a85d; margin-bottom: 10px; }
+.asset-card-row { display: flex; justify-content: space-between; font-size: 11px; color: #666; margin-bottom: 4px; }
+.asset-card-row span:last-child { color: #aaa; }
+.asset-card-vol { display: flex; gap: 4px; margin-top: 6px; }
+.asset-card-vol span { font-size: 12px; color: #444; }
+/* Hide old table on desktop */
+.assets-table { display: none; }
 
 /* ===== Responsivo: mobile (telas até 768px) ===== */
 
@@ -859,6 +867,8 @@ html, body { height: 100%; overflow: hidden; }
       <div class="category-item active" data-category="all"><i class="ti ti-grid-dots" aria-hidden="true"></i> Todos</div>
       <div class="category-item" data-category="crypto"><i class="ti ti-currency-bitcoin" aria-hidden="true"></i> Cripto</div>
       <div class="category-item" data-category="forex"><i class="ti ti-arrows-exchange" aria-hidden="true"></i> Forex</div>
+      <div class="category-item" data-category="acoes"><i class="ti ti-building-bank" aria-hidden="true"></i> Ações</div>
+      <div class="category-item" data-category="commodities"><i class="ti ti-diamond" aria-hidden="true"></i> Commodities</div>
     </div>
     <div class="assets-list-area">
       <input type="text" class="assets-search-input" id="assetsSearchInput" placeholder="Pesquisar um ativo...">
@@ -1829,33 +1839,34 @@ function renderAssetsTable(category, search) {
     const matchesSearch = !term || a.name.toLowerCase().includes(term) || a.symbol.toLowerCase().includes(term);
     return matchesCategory && matchesSearch && !hidden.includes(a.asset);
   });
+  // Desktop: grid cards
+  let gridEl = document.getElementById('assetsGrid');
+  if (!gridEl) {
+    const area = document.querySelector('.assets-list-area');
+    gridEl = document.createElement('div');
+    gridEl.id = 'assetsGrid';
+    gridEl.className = 'assets-grid';
+    area.appendChild(gridEl);
+  }
+  const priceData = livePrices;
+  gridEl.innerHTML = filtered.map(a => {
+    const pd = priceData[a.asset];
+    const price = pd ? pd.price.toLocaleString('en-US', {maximumFractionDigits: 4}) : '--';
+    const iconHtml = a.icon ? '<img src="'+a.icon+'" alt="'+a.name+'" style="width:32px;height:32px;border-radius:50%;background:'+a.color+';" onerror="this.outerHTML=\'<div style=&quot;width:32px;height:32px;border-radius:50%;background:'+a.color+';display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;&quot;>'+a.initial+'</div>\'">': '<div style="width:32px;height:32px;border-radius:50%;background:'+a.color+';display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;">'+a.initial+'</div>';
+    return '<div class="asset-card" data-asset="'+a.asset+'"><div class="asset-card-header"><div class="asset-card-icon">'+iconHtml+'</div><div class="asset-card-name">'+a.name+'</div></div><span class="asset-card-star">☆</span><div class="asset-card-label">Lucro</div><div class="asset-card-payout">'+a.payout+'%</div><div class="asset-card-row"><span>Último preço</span><span>Variação</span></div><div class="asset-card-row"><span style="color:#ccc;font-weight:500;">'+price+'</span><span>%</span></div><div class="asset-card-label" style="margin-top:6px;">Volatilidade</div><div class="asset-card-vol"><span>☺</span><span>☺</span><span>☺</span></div></div>';
+  }).join('');
+  gridEl.querySelectorAll('.asset-card').forEach(card => {
+    card.onclick = () => { createTab(card.dataset.asset); closeAssetsScreen(); };
+  });
+  // Mobile: keep table working
   const tbody = document.getElementById('assetsTableBody');
   tbody.innerHTML = filtered.map(a => {
-    const priceData = livePrices[a.asset];
-    const price = priceData ? priceData.price.toLocaleString('en-US', { maximumFractionDigits: 4 }) : '--';
-    return `
-      <tr class="asset-row" data-asset="${a.asset}">
-        <td style="width:50px;">
-          ${assetIconHtml(a, 36)}
-        </td>
-        <td>
-          <div class="asset-row-name">
-            <div>
-              <div class="label">${a.name}</div>
-              <div class="sub">${a.category === 'forex' ? 'Forex' : 'Crypto'}</div>
-            </div>
-          </div>
-        </td>
-        <td style="text-align:right;color:#51a85d;font-weight:600;font-size:14px;">${a.payout}%</td>
-        <td style="width:36px;text-align:center;color:#555;font-size:18px;">☆</td>
-      </tr>
-    `;
+    const pd2 = priceData[a.asset];
+    const price2 = pd2 ? pd2.price.toLocaleString('en-US', {maximumFractionDigits: 4}) : '--';
+    return '<tr class="asset-row" data-asset="'+a.asset+'"><td style="width:50px;">'+assetIconHtml(a, 36)+'</td><td><div class="asset-row-name"><div><div class="label">'+a.name+'</div></div></div></td><td style="text-align:right;color:#51a85d;font-weight:600;font-size:14px;">'+a.payout+'%</td><td style="width:36px;text-align:center;color:#555;font-size:18px;">☆</td></tr>';
   }).join('');
   tbody.querySelectorAll('.asset-row').forEach(row => {
-    row.onclick = () => {
-      createTab(row.dataset.asset);
-      closeAssetsScreen();
-    };
+    row.onclick = () => { createTab(row.dataset.asset); closeAssetsScreen(); };
   });
 }
 
