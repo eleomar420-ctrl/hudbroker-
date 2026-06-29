@@ -326,7 +326,9 @@ html, body { height: 100%; overflow: hidden; }
 .asset-card-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0; overflow: hidden; }
 .asset-card-icon img { width: 100%; height: 100%; object-fit: cover; }
 .asset-card-name { font-size: 14px; font-weight: 700; color: #fff; text-transform: uppercase; }
-.asset-card-star { position: absolute; top: 14px; right: 14px; color: #444; font-size: 16px; cursor: pointer; }
+.asset-card-star { position: absolute; top: 14px; right: 14px; cursor: pointer; background: none; border: none; font-size: 16px; }
+.asset-card-star.fav { color: #e8a23d; }
+.asset-card-star:not(.fav) { color: #444; }
 .asset-card-star:hover { color: #e8a23d; }
 .asset-card-label { font-size: 11px; color: #666; margin-bottom: 2px; }
 .asset-card-payout { font-size: 22px; font-weight: 700; color: #51a85d; margin-bottom: 10px; }
@@ -334,6 +336,11 @@ html, body { height: 100%; overflow: hidden; }
 .asset-card-row span:last-child { color: #aaa; }
 .asset-card-vol { display: flex; gap: 4px; margin-top: 6px; }
 .asset-card-vol span { font-size: 12px; color: #444; }
+/* Mobile list style */
+.asset-list-star { font-size: 20px; cursor: pointer; transition: color 0.15s; background: none; border: none; padding: 4px; }
+.asset-list-star.fav { color: #e8a23d; }
+.asset-list-star:not(.fav) { color: #444; }
+.asset-list-star:hover { color: #e8a23d; }
 /* Hide old table on desktop */
 .assets-table { display: none; }
 
@@ -1916,42 +1923,59 @@ document.getElementById('assetsSearchInput').oninput = (e) => {
 };
 
 function renderAssetsTable(category, search) {
-  const term = (search || '').toLowerCase();
-  const hidden = getHiddenAssets();
-  const filtered = ASSET_CATALOG.filter(a => {
-    const matchesCategory = category === 'all' || a.category === category;
-    const matchesSearch = !term || a.name.toLowerCase().includes(term) || a.symbol.toLowerCase().includes(term);
-    return matchesCategory && matchesSearch && !hidden.includes(a.asset);
+  var term = (search || '').toLowerCase();
+  var hidden = getHiddenAssets();
+  var favs = getFavorites();
+  var filtered = ASSET_CATALOG.filter(function(a) {
+    var matchCat = category === 'all' || a.category === category || (category === 'favoritos' && favs.includes(a.asset));
+    var matchSearch = !term || a.name.toLowerCase().includes(term) || a.symbol.toLowerCase().includes(term);
+    return matchCat && matchSearch && !hidden.includes(a.asset);
   });
-  // Desktop: grid cards
-  let gridEl = document.getElementById('assetsGrid');
+
+  // Desktop: card grid
+  var gridEl = document.getElementById('assetsGrid');
   if (!gridEl) {
-    const area = document.querySelector('.assets-list-area');
+    var area = document.querySelector('.assets-list-area');
     gridEl = document.createElement('div');
     gridEl.id = 'assetsGrid';
     gridEl.className = 'assets-grid';
     area.appendChild(gridEl);
   }
-  const priceData = livePrices;
-  gridEl.innerHTML = filtered.map(a => {
-    const pd = priceData[a.asset];
-    const price = pd ? pd.price.toLocaleString('en-US', {maximumFractionDigits: 4}) : '--';
-    const iconHtml = a.icon ? '<img src="'+a.icon+'" style="width:32px;height:32px;border-radius:50%;background:'+a.color+';">' : '<div style="width:32px;height:32px;border-radius:50%;background:'+a.color+';display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;">'+a.initial+'</div>';
-    return '<div class="asset-card" data-asset="'+a.asset+'"><div class="asset-card-header"><div class="asset-card-icon">'+iconHtml+'</div><div class="asset-card-name">'+a.name+'</div></div><span class="asset-card-star">☆</span><div class="asset-card-label">Lucro</div><div class="asset-card-payout">'+a.payout+'%</div><div class="asset-card-row"><span>Último preço</span><span>Variação</span></div><div class="asset-card-row"><span style="color:#ccc;font-weight:500;">'+price+'</span><span>%</span></div><div class="asset-card-label" style="margin-top:6px;">Volatilidade</div><div class="asset-card-vol"><span>☺</span><span>☺</span><span>☺</span></div></div>';
+  var priceData = livePrices;
+  gridEl.innerHTML = filtered.map(function(a) {
+    var pd = priceData[a.asset];
+    var price = pd ? pd.price.toLocaleString('en-US', {maximumFractionDigits: 4}) : '--';
+    var isFav = favs.includes(a.asset);
+    var iconHtml = a.icon ? '<img src="'+a.icon+'" style="width:32px;height:32px;border-radius:50%;background:'+a.color+';">' : '<div style="width:32px;height:32px;border-radius:50%;background:'+a.color+';display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;">'+a.initial+'</div>';
+    return '<div class="asset-card" data-asset="'+a.asset+'"><div class="asset-card-header"><div class="asset-card-icon">'+iconHtml+'</div><div class="asset-card-name">'+a.name+'</div></div><button class="asset-card-star '+(isFav?'fav':'')+'" data-fav="'+a.asset+'" onclick="event.stopPropagation();toggleFav(''+a.asset+'')">'+(isFav?'★':'☆')+'</button><div class="asset-card-label">Lucro</div><div class="asset-card-payout">'+a.payout+'%</div><div class="asset-card-row"><span>Último preço</span><span>Variação</span></div><div class="asset-card-row"><span style="color:#ccc;font-weight:500;">'+price+'</span><span>%</span></div><div class="asset-card-label" style="margin-top:6px;">Volatilidade</div><div class="asset-card-vol"><span>😊</span><span>😊</span><span>😊</span></div></div>';
   }).join('');
-  gridEl.querySelectorAll('.asset-card').forEach(card => {
-    card.onclick = () => { createTab(card.dataset.asset); closeAssetsScreen(); };
+  gridEl.querySelectorAll('.asset-card').forEach(function(card) {
+    card.onclick = function() { createTab(card.dataset.asset); closeAssetsScreen(); };
   });
-  // Mobile: keep table working
-  const tbody = document.getElementById('assetsTableBody');
-  tbody.innerHTML = filtered.map(a => {
-    const pd2 = priceData[a.asset];
-    const price2 = pd2 ? pd2.price.toLocaleString('en-US', {maximumFractionDigits: 4}) : '--';
-    return '<tr class="asset-row" data-asset="'+a.asset+'"><td style="width:50px;">'+assetIconHtml(a, 36)+'</td><td><div class="asset-row-name"><div><div class="label">'+a.name+'</div></div></div></td><td style="text-align:right;color:#51a85d;font-weight:600;font-size:14px;">'+a.payout+'%</td><td style="width:36px;text-align:center;color:#555;font-size:18px;">☆</td></tr>';
+
+  // Mobile: simple list
+  var tbody = document.getElementById('assetsTableBody');
+  tbody.innerHTML = filtered.map(function(a) {
+    var isFav2 = favs.includes(a.asset);
+    return '<tr class="asset-row" data-asset="'+a.asset+'"><td style="width:50px;">'+assetIconHtml(a, 36)+'</td><td><div class="asset-row-name"><div><div class="label">'+a.name+'</div></div></div></td><td style="text-align:right;color:#51a85d;font-weight:600;font-size:14px;">'+a.payout+'%</td><td style="width:36px;text-align:center;"><button class="asset-list-star '+(isFav2?'fav':'')+'" data-fav="'+a.asset+'" onclick="event.stopPropagation();toggleFav(''+a.asset+'')" style="font-size:18px;">'+(isFav2?'★':'☆')+'</button></td></tr>';
   }).join('');
-  tbody.querySelectorAll('.asset-row').forEach(row => {
-    row.onclick = () => { createTab(row.dataset.asset); closeAssetsScreen(); };
+  tbody.querySelectorAll('.asset-row').forEach(function(row) {
+    row.onclick = function() { createTab(row.dataset.asset); closeAssetsScreen(); };
   });
+}
+
+
+function getFavorites() {
+  try { return JSON.parse(localStorage.getItem('hb_favorites') || '[]'); } catch(e) { return []; }
+}
+function toggleFav(asset) {
+  var favs = getFavorites();
+  var idx = favs.indexOf(asset);
+  if (idx >= 0) favs.splice(idx, 1);
+  else favs.push(asset);
+  localStorage.setItem('hb_favorites', JSON.stringify(favs));
+  var activeCat = document.querySelector('.category-item.active');
+  renderAssetsTable(activeCat ? activeCat.dataset.category : 'all', document.getElementById('assetsSearchInput').value);
 }
 
 createTab('BTCUSDT');
