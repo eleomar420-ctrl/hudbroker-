@@ -267,11 +267,11 @@ html, body { height: 100%; overflow: hidden; }
 }
 .history-body { flex: 1; overflow-y: auto; padding: 0; }
 .history-item {
-  display: flex; align-items: center; gap: 6px; padding: 8px 10px;
+  display: flex; align-items: flex-start; gap: 12px; padding: 8px 10px;
   border-bottom: 1px solid var(--border);
 }
 .history-item-time {
-  text-align: center; flex-shrink: 0; width: 42px;
+  text-align: center; flex-shrink: 0; width: 50px; padding-top: 2px;
 }
 .history-item-time .time { font-family: var(--font-mono); font-size: 10px; font-weight: 600; color: var(--text); }
 .history-item-time .date { font-family: var(--font-mono); font-size: 9px; color: var(--text-faint); }
@@ -1766,7 +1766,7 @@ function renderHistory() {
           <div class="date">${date}</div>
         </div>
         <div class="history-item-info">
-          <div style="display:flex;align-items:center;gap:6px;"><div class="history-item-icon" style="background:${bgColor}">${iconHtml}</div><div class="history-item-asset">${asset}</div></div>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;"><div class="history-item-icon" style="background:${bgColor}">${iconHtml}</div><div class="history-item-asset">${asset}</div></div>
           <div class="history-item-price">${t.entry_price ? Number(t.entry_price).toLocaleString('en-US') : '--'}</div>
           <span class="history-item-badge ${badgeClass}">${badgeText}</span>
         </div>
