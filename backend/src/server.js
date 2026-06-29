@@ -26,6 +26,14 @@ async function bootstrap() {
   app.use(cors());
   app.use(express.json({ limit: '2mb' }));
 
+  // Redirecionar HTTP para HTTPS em produção
+  app.use((req, res, next) => {
+    if (req.headers['x-forwarded-proto'] === 'http') {
+      return res.redirect(301, 'https://' + req.hostname + req.url);
+    }
+    next();
+  });
+
   app.use(express.static(path.join(__dirname, '../public'), { extensions: ['html'] }));
 
   // URLs limpas (sem .html)
