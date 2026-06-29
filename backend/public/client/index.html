@@ -860,11 +860,12 @@ html, body { height: 100%; overflow: hidden; }
   </div>
   <div class="assets-screen-body">
     <div class="assets-categories">
-      <div class="category-item active" data-category="all"><i class="ti ti-grid-dots" aria-hidden="true"></i> Todos</div>
-      <div class="category-item" data-category="crypto"><i class="ti ti-currency-bitcoin" aria-hidden="true"></i> Cripto</div>
-      <div class="category-item" data-category="forex"><i class="ti ti-arrows-exchange" aria-hidden="true"></i> Forex</div>
-      <div class="category-item" data-category="acoes"><i class="ti ti-building-bank" aria-hidden="true"></i> Ações</div>
-      <div class="category-item" data-category="commodities"><i class="ti ti-diamond" aria-hidden="true"></i> Commodities</div>
+      <div class="category-item" data-category="favoritos"><span class="material-icons-outlined">star</span> Favoritos</div>
+      <div class="category-item active" data-category="all"><span class="material-icons-outlined">apps</span> Todos</div>
+      <div class="category-item" data-category="crypto"><span class="material-icons-outlined">currency_bitcoin</span> Cripto</div>
+      <div class="category-item" data-category="forex"><span class="material-icons-outlined">attach_money</span> Forex</div>
+      <div class="category-item" data-category="acoes"><span class="material-icons-outlined">account_balance</span> Ações</div>
+      <div class="category-item" data-category="commodities"><span class="material-icons-outlined">grain</span> Commodities</div>
     </div>
     <div class="assets-list-area">
       <input type="text" class="assets-search-input" id="assetsSearchInput" placeholder="Pesquisar um ativo...">
@@ -1181,9 +1182,14 @@ function renderPanelForActiveTab() {
 function updateProfitAmount() {
   const t = getActiveTab();
   if (!t) return;
-  var pct = t.catalog.payout ? t.catalog.payout / 100 : 0.85;
+  var payoutVal = t.catalog.payout || 85;
+  var pct = payoutVal / 100;
+  setText('profitPct', String(payoutVal));
   setText('profitAmount', '+' + formatMoney(t.stakeValue * pct));
   setText('m2Profit', '+' + formatMoney(t.stakeValue * pct));
+  // Mobile buy/sell buttons
+  document.querySelectorAll('.m-pct').forEach(function(el){ el.textContent = payoutVal + '%'; });
+  document.querySelectorAll('.m2-buy .m-pct, .m2-sell .m-pct').forEach(function(el){ el.textContent = payoutVal + '%'; });
 }
 
 function updateLiveCountdown() {
