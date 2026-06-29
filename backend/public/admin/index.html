@@ -141,6 +141,7 @@ tr{cursor:pointer;transition:background 0.1s;}tr:hover{background:rgba(255,255,2
       <div class="ud-box"><div class="ud-box-title">Financeiro</div><div class="ud-row"><span class="ud-row-label">Saldo Real</span><span class="ud-row-val" style="color:#08c58a;" id="rBal">R$ 0</span></div><div class="ud-row"><span class="ud-row-label">Saldo Demo</span><span class="ud-row-val" id="rDemo">R$ 0</span></div><div class="ud-row"><span class="ud-row-label">Depósitos</span><span class="ud-row-val" style="color:#08c58a;" id="rDepT">R$ 0</span></div><div class="ud-row"><span class="ud-row-label">Saques</span><span class="ud-row-val" style="color:#fc4b4a;" id="rSaqT">R$ 0</span></div></div>
     </div></div>
     <div class="ud-panel" id="p-editar"><div style="max-width:400px;">
+      <div class="ed-field"><label>Email</label><input type="email" id="eEmail"></div>
       <div class="ed-field"><label>Saldo Real (R$)</label><input type="number" id="eBalance" step="0.01"></div>
       <div class="ed-field"><label>Saldo Demo (R$)</label><input type="number" id="eDemoBalance" step="0.01"></div>
       <div class="ed-field"><label>Status</label><select id="eStatus"><option value="active">Ativo</option><option value="blocked">Bloqueado</option></select></div>
@@ -231,6 +232,7 @@ async function openDetail(id){
     document.getElementById('rStatus').textContent=u.status||'active';
     document.getElementById('rBal').textContent=fmt(u.balance);
     document.getElementById('rDemo').textContent=fmt(u.demo_balance);
+    document.getElementById('eEmail').value=u.email||'';
     document.getElementById('eBalance').value=u.balance||0;
     document.getElementById('eDemoBalance').value=u.demo_balance||0;
     document.getElementById('eStatus').value=u.status||'active';
@@ -255,6 +257,7 @@ function closeDetail(){document.getElementById('userDetail').classList.remove('o
 
 async function saveUserEdit(){
   try{
+    await apiFetch('/admin/users/'+curUser.id+'/email',{method:'PATCH',body:JSON.stringify({email:document.getElementById('eEmail').value})});
     await apiFetch('/admin/users/'+curUser.id+'/balance',{method:'PATCH',body:JSON.stringify({balance:Number(document.getElementById('eBalance').value),demo_balance:Number(document.getElementById('eDemoBalance').value)})});
     await apiFetch('/admin/users/'+curUser.id+'/status',{method:'PATCH',body:JSON.stringify({status:document.getElementById('eStatus').value})});
     await apiFetch('/admin/users/'+curUser.id+'/kyc',{method:'PATCH',body:JSON.stringify({kyc_status:document.getElementById('eKyc').value})});
@@ -265,7 +268,14 @@ async function saveUserEdit(){
   }catch(e){showToast(e.message || 'Erro ao salvar');}
 }
 
-async function deleteUser(){showToast('Função em breve');}
+async function deleteUser(){
+  try{
+    await apiFetch('/admin/users/'+curUser.id,{method:'DELETE'});
+    showToast('Usuário excluído');
+    closeDetail();
+    loadUsers();
+  }catch(e){showToast('Erro ao excluir');}
+}
 
 async function loadUserDeposits(){
   if(!curUser)return;
