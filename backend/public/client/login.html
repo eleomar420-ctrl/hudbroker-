@@ -76,11 +76,45 @@ body { background:#0c0f1a; color:#fff; font-family:'Inter',sans-serif; min-heigh
       <input type="password" class="form-input" id="loginPassword" placeholder="Senha" required>
     </div>
     <button type="submit" class="btn-login" id="btnLogin">&#10004; Acessar</button>
-    <button type="button" class="btn-forgot" onclick="alert('Para redefinir sua senha, entre em contato com o suporte: support@hudbroker.com')">Esqueci minha senha</button>
+    <button type="button" class="btn-forgot" onclick="showForgotModal()">Esqueci minha senha</button>
+    <div id="forgotModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:center;justify-content:center;">
+      <div style="background:#10142a;border:1px solid #1c2040;border-radius:10px;padding:28px;width:360px;max-width:90vw;">
+        <div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:6px;">Esqueci minha senha</div>
+        <div style="font-size:13px;color:#888;margin-bottom:16px;">Digite seu email e enviaremos uma senha temporária.</div>
+        <input type="email" id="forgotEmail" placeholder="Seu email" style="width:100%;background:#0a0e17;border:1px solid #1c2040;color:#fff;border-radius:6px;padding:11px;font-size:14px;margin-bottom:12px;">
+        <button onclick="sendForgot()" id="forgotBtn" style="width:100%;padding:12px;background:#e8a23d;color:#000;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;">Enviar</button>
+        <div id="forgotMsg" style="font-size:12px;margin-top:10px;display:none;"></div>
+        <button onclick="document.getElementById('forgotModal').style.display='none'" style="width:100%;padding:10px;background:none;border:1px solid #1c2040;color:#888;border-radius:6px;font-size:13px;cursor:pointer;margin-top:8px;">Cancelar</button>
+      </div>
+    </div>
   </form>
 </div>
 
-<script src="/js/api.js"></script>
+<script src="/js/api.js">
+function showForgotModal() {
+  document.getElementById('forgotModal').style.display = 'flex';
+  document.getElementById('forgotEmail').value = '';
+  document.getElementById('forgotMsg').style.display = 'none';
+}
+async function sendForgot() {
+  var email = document.getElementById('forgotEmail').value;
+  if (!email) { return; }
+  var btn = document.getElementById('forgotBtn');
+  var msg = document.getElementById('forgotMsg');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  try {
+    var res = await fetch('/api/auth/forgot-password', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email})});
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    msg.style.display = 'block'; msg.style.color = '#08c58a';
+    msg.textContent = 'Senha temporária enviada para seu email!';
+    setTimeout(function(){ document.getElementById('forgotModal').style.display='none'; }, 3000);
+  } catch(e) {
+    msg.style.display = 'block'; msg.style.color = '#fc4b4a';
+    msg.textContent = e.message || 'Erro ao enviar';
+  } finally { btn.disabled = false; btn.textContent = 'Enviar'; }
+}
+</script>
 <script>
 (async function() {
   var params = new URLSearchParams(location.search);
@@ -115,6 +149,30 @@ document.getElementById('loginForm').onsubmit = async function(e) {
     btn.innerHTML = '&#10004; Acessar';
   }
 };
+
+function showForgotModal() {
+  document.getElementById('forgotModal').style.display = 'flex';
+  document.getElementById('forgotEmail').value = '';
+  document.getElementById('forgotMsg').style.display = 'none';
+}
+async function sendForgot() {
+  var email = document.getElementById('forgotEmail').value;
+  if (!email) { return; }
+  var btn = document.getElementById('forgotBtn');
+  var msg = document.getElementById('forgotMsg');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  try {
+    var res = await fetch('/api/auth/forgot-password', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email})});
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    msg.style.display = 'block'; msg.style.color = '#08c58a';
+    msg.textContent = 'Senha temporária enviada para seu email!';
+    setTimeout(function(){ document.getElementById('forgotModal').style.display='none'; }, 3000);
+  } catch(e) {
+    msg.style.display = 'block'; msg.style.color = '#fc4b4a';
+    msg.textContent = e.message || 'Erro ao enviar';
+  } finally { btn.disabled = false; btn.textContent = 'Enviar'; }
+}
 </script>
 </body>
 </html>
