@@ -34,6 +34,9 @@ async function bootstrap() {
     next();
   });
 
+  // Redirecionar landing page para login
+  app.get('/', (req, res) => res.redirect('/login'));
+
   app.use(express.static(path.join(__dirname, '../public'), { extensions: ['html'] }));
 
   // URLs limpas (sem .html)
