@@ -239,7 +239,7 @@ html, body { height: 100%; overflow: hidden; }
 .menu-item-deposit { color: #51a85d; }
 .menu-item-logout { color: var(--down); }
 
-.assets-screen { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 95; flex-direction: column; }
+.assets-screen { display: none; position: fixed; top: 56px; left: 72px; right: 0; bottom: 0; background: var(--bg); z-index: 95; flex-direction: column; }
 .assets-screen.open { display: flex; }
 .assets-screen-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .assets-screen-header h1 { font-family: var(--font-display); font-size: 20px; }
@@ -476,7 +476,7 @@ html, body { height: 100%; overflow: hidden; }
   .side-menu { width: 72px; max-width: 72px; }
   .trade-shell { margin-left: 0; background:#111728; }
   .history-panel { left: 0; width: 100vw; }
-  .assets-screen { background: #0a0e17; }
+  .assets-screen { background: #0a0e17; top: 0; left: 0; }
   .assets-screen-header { padding: 14px 16px; }
   .assets-screen-header h1 { font-size: 16px; font-weight: 600; }
   .assets-close-btn { display: none; }
@@ -1065,7 +1065,7 @@ function renderTabsRow() {
       ${assetIconHtml(t.catalog, 24)}
       <div class="info">
         <div class="name">${t.catalog.name}</div>
-        <div class="sub">${a.category === 'forex' ? 'Forex' : 'Crypto'}</div>
+        <div class="sub">${t.catalog.category === 'forex' ? 'Forex' : 'Crypto'}</div>
       </div>
       <span class="close-x" data-close="${t.id}">&times;</span>
     </div>
@@ -1852,7 +1852,7 @@ function renderAssetsTable(category, search) {
   gridEl.innerHTML = filtered.map(a => {
     const pd = priceData[a.asset];
     const price = pd ? pd.price.toLocaleString('en-US', {maximumFractionDigits: 4}) : '--';
-    const iconHtml = a.icon ? '<img src="'+a.icon+'" alt="'+a.name+'" style="width:32px;height:32px;border-radius:50%;background:'+a.color+';" onerror="this.outerHTML=\'<div style=&quot;width:32px;height:32px;border-radius:50%;background:'+a.color+';display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;&quot;>'+a.initial+'</div>\'">': '<div style="width:32px;height:32px;border-radius:50%;background:'+a.color+';display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;">'+a.initial+'</div>';
+    const iconHtml = a.icon ? '<img src="'+a.icon+'" style="width:32px;height:32px;border-radius:50%;background:'+a.color+';">' : '<div style="width:32px;height:32px;border-radius:50%;background:'+a.color+';display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;">'+a.initial+'</div>';
     return '<div class="asset-card" data-asset="'+a.asset+'"><div class="asset-card-header"><div class="asset-card-icon">'+iconHtml+'</div><div class="asset-card-name">'+a.name+'</div></div><span class="asset-card-star">☆</span><div class="asset-card-label">Lucro</div><div class="asset-card-payout">'+a.payout+'%</div><div class="asset-card-row"><span>Último preço</span><span>Variação</span></div><div class="asset-card-row"><span style="color:#ccc;font-weight:500;">'+price+'</span><span>%</span></div><div class="asset-card-label" style="margin-top:6px;">Volatilidade</div><div class="asset-card-vol"><span>☺</span><span>☺</span><span>☺</span></div></div>';
   }).join('');
   gridEl.querySelectorAll('.asset-card').forEach(card => {
