@@ -462,7 +462,7 @@ html, body { height: 100%; overflow: hidden; }
   }
 
   .trade-body { flex-direction: column; overflow-y: auto; }
-  .chart-area { min-height: 200px; flex: 1 1 auto; position:relative; z-index:1; }
+  .chart-area { min-height: 0; flex: 1; position:relative; z-index:1; overflow:hidden; }
   .trade-panel { display: none; }
   .mobile-panel { display: flex; }
 
@@ -474,7 +474,7 @@ html, body { height: 100%; overflow: hidden; }
   .side-menu-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); width: auto; pointer-events: auto; }
   .side-menu-overlay.open { display: block; }
   .side-menu { width: 72px; max-width: 72px; }
-  .trade-shell { margin-left: 0; background:#111728; }
+  .trade-shell { margin-left: 0; background:#111728; height:100vh; height:100dvh; display:flex; flex-direction:column; }
   .history-panel { left: 0; width: 100vw; }
   .assets-screen { background: #0a0e17; top: 0; left: 0; width: 100%; max-width: none; border-left: none; box-shadow: none; }
   .assets-screen-header { padding: 14px 16px; }
@@ -565,7 +565,7 @@ html, body { height: 100%; overflow: hidden; }
   /* === MOBILE V2 LAYOUT === */
   .mobile-panel { display:none !important; }
   .desktop-footer { display:none !important; }
-  .m2-panel { display:block; background:#111728; position:relative; z-index:20; margin-bottom:0; flex-shrink:0; }
+  .m2-panel { display:block; background:#111728; position:relative; z-index:20; margin-bottom:0; flex-shrink:0; padding-bottom:56px; }
   .m2-buysell { display:flex; gap:6px; padding:6px 8px; position:relative; z-index:21; }
   .m2-buy, .m2-sell { flex:1; display:flex; align-items:center; justify-content:space-between; padding:16px; border:none; border-radius:8px; font-size:17px; font-weight:500; cursor:pointer; color:#fff; touch-action:manipulation; font-family:'Inter',sans-serif; }
   .m2-buy { background:#2d9f4a; }
@@ -586,7 +586,7 @@ html, body { height: 100%; overflow: hidden; }
   .m2-nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border:none; color:#fff; font-size:9px; font-weight:500; cursor:pointer; padding:4px 0; font-family:'Inter',sans-serif; letter-spacing:0.5px; }
   .m2-nav-btn .material-icons-outlined { font-size:20px; }
   .m2-nav-btn.active { color:#51a85d; }
-  .trade-body { padding-bottom:56px; display:flex; flex-direction:column; flex:1; overflow-y:auto; }
+  .trade-body { padding-bottom:0; display:flex; flex-direction:column; flex:1; overflow:hidden; min-height:0; }
 
 }
 
