@@ -262,7 +262,7 @@ async function saveUserEdit(){
     if(newPass&&newPass.length>=6){await apiFetch('/admin/users/'+curUser.id+'/password',{method:'PATCH',body:JSON.stringify({password:newPass})});}
     document.getElementById('ePassword').value='';
     showToast('Usuário atualizado');openDetail(curUser.id);
-  }catch(e){showToast('Erro');}
+  }catch(e){showToast(e.message || 'Erro ao salvar');}
 }
 
 async function deleteUser(){showToast('Função em breve');}
