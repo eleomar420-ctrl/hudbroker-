@@ -468,13 +468,28 @@ html, body { height: 100%; overflow: hidden; }
   .side-menu { width: 72px; max-width: 72px; }
   .trade-shell { margin-left: 0; background:#111728; }
   .history-panel { left: 0; width: 100vw; }
+  .assets-screen { background: #0a0e17; }
+  .assets-screen-header { padding: 14px 16px; }
+  .assets-screen-header h1 { font-size: 16px; font-weight: 600; }
+  .assets-close-btn { display: none; }
+  .assets-back-btn { display: flex; }
+  .assets-search-btn { display: flex; }
   .assets-screen-body { flex-direction: column; }
-  .assets-categories { width: 100%; display: flex; overflow-x: auto; padding: 8px 0; border-right: none; border-bottom: 1px solid var(--border); }
-  .category-item { white-space: nowrap; }
-  .assets-list-area { padding: 12px 16px; }
-  .assets-table th, .assets-table td { padding: 8px 6px; font-size: 12px; }
-  .asset-row-icon { width: 26px; height: 26px; font-size: 11px; }
-  .asset-row-name .label { font-size: 13px; }
+  .assets-categories { width: 100%; display: flex; overflow-x: auto; padding: 10px 16px; border-right: none; border-bottom: none; gap: 8px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .assets-categories::-webkit-scrollbar { display: none; }
+  .category-item { white-space: nowrap; padding: 8px 18px; border-radius: 20px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); font-size: 13px; font-weight: 500; gap: 0; }
+  .category-item i { display: none; }
+  .category-item.active { background: #fff; color: #000; border-color: #fff; }
+  .assets-list-area { padding: 0; }
+  .assets-search-input { margin: 0 16px 8px; width: calc(100% - 32px); display: none; }
+  .assets-search-input.open { display: block; }
+  .assets-table { width: 100%; }
+  .assets-table thead { display: none; }
+  .assets-table td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .asset-row { display: flex; align-items: center; }
+  .asset-row-icon { width: 36px; height: 36px; font-size: 14px; }
+  .asset-row-name .label { font-size: 15px; font-weight: 500; }
+  .asset-row-name .sub { display: none; }
   .modal-box { width: 90vw; max-width: 380px; }
 
   .mobile-panel { display: flex; flex-direction: column; padding: 10px 1px; background: #000000; border-top: 1px solid var(--border); gap: 8px; }
@@ -834,7 +849,9 @@ html, body { height: 100%; overflow: hidden; }
 
 <div class="assets-screen" id="assetsScreen">
   <div class="assets-screen-header">
-    <h1>Ativos</h1>
+    <button class="assets-back-btn" onclick="closeAssetsScreen()" style="display:none;background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:4px 8px;"><i class="ti ti-arrow-left"></i></button>
+    <h1>Escolha um ativo</h1>
+    <button class="assets-search-btn" onclick="toggleAssetSearch()" style="display:none;background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:4px 8px;margin-left:auto;"><i class="ti ti-search"></i></button>
     <button class="assets-close-btn" id="assetsCloseBtn" aria-label="Fechar"><i class="ti ti-x" aria-hidden="true"></i></button>
   </div>
   <div class="assets-screen-body">
@@ -1575,6 +1592,12 @@ function openAssetsScreen() {
 function closeAssetsScreen() {
   document.getElementById('assetsScreen').classList.remove('open');
 }
+function toggleAssetSearch(){
+  var el = document.getElementById('assetsSearchInput');
+  el.classList.toggle('open');
+  if(el.classList.contains('open')) el.focus();
+  else { el.value = ''; var cat = document.querySelector('.category-item.active'); renderAssetsTable(cat ? cat.dataset.category : 'all', ''); }
+}
 document.getElementById('assetAddSquare').onclick = openAssetsScreen;
 document.getElementById('assetsCloseBtn').onclick = closeAssetsScreen;
 
@@ -1777,17 +1800,19 @@ function renderAssetsTable(category, search) {
     const price = priceData ? priceData.price.toLocaleString('en-US', { maximumFractionDigits: 4 }) : '--';
     return `
       <tr class="asset-row" data-asset="${a.asset}">
+        <td style="width:50px;">
+          ${assetIconHtml(a, 36)}
+        </td>
         <td>
           <div class="asset-row-name">
-            ${assetIconHtml(a, 32)}
             <div>
               <div class="label">${a.name}</div>
               <div class="sub">Crypto</div>
             </div>
           </div>
         </td>
-        <td>${price}</td>
-        <td style="color:#51a85d; font-weight:600;">85%</td>
+        <td style="text-align:right;color:#51a85d;font-weight:600;font-size:14px;">85%</td>
+        <td style="width:36px;text-align:center;color:#555;font-size:18px;">☆</td>
       </tr>
     `;
   }).join('');
