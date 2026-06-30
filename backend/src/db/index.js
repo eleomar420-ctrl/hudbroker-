@@ -69,6 +69,9 @@ export async function initDb() {
     ALTER TABLE users ADD COLUMN IF NOT EXISTS demo_balance DOUBLE PRECISION NOT NULL DEFAULT 10000;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;
     ALTER TABLE trades ADD COLUMN IF NOT EXISTS account_type TEXT NOT NULL DEFAULT 'demo';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT false;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS email_code TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS email_code_expires TIMESTAMPTZ;
   `);
 
   // Tabelas de suporte (caso não existam ainda)
