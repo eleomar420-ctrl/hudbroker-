@@ -138,7 +138,11 @@ input[type=date]{-webkit-appearance:none;appearance:none;}
 
   <!-- TABS -->
   <div class="v-tabs">
-    <button class="v-tab active" onclick="showStep(1,this)">
+    <button class="v-tab active" onclick="showStep(0,this)">
+      <span class="v-tab-icon material-icons-outlined">email</span>
+      <span class="v-tab-label">Verificar E-mail</span>
+    </button>
+    <button class="v-tab" onclick="showStep(1,this)">
       <span class="v-tab-icon material-icons-outlined">person_outline</span>
       <span class="v-tab-label">Seus Dados</span>
     </button>
@@ -148,8 +152,8 @@ input[type=date]{-webkit-appearance:none;appearance:none;}
     </button>
   </div>
 
-  <!-- STEP 1: Email -->
-  <div class="v-panel" id="step0" style="display:none!important;">
+  <!-- STEP 0: Email -->
+  <div class="v-panel active" id="step0">
     <div class="email-center">
       <div class="email-icon">@</div>
       <div class="email-text" id="emailConfirmText">Confirmação de E-mail</div>
@@ -165,12 +169,12 @@ input[type=date]{-webkit-appearance:none;appearance:none;}
           <input class="code-input" maxlength="1" id="c5" oninput="verifyCode()">
         </div>
       </div>
-      <button class="email-skip" onclick="showStep(1,document.querySelectorAll('.v-tab')[1])">Pular esta etapa</button>
+      <button class="email-skip" onclick="showStep(1,document.querySelectorAll('.v-tab')[1])">Verificar depois</button>
     </div>
   </div>
 
-  <!-- STEP 2: Data -->
-  <div class="v-panel active" id="step1">
+  <!-- STEP 1: Data -->
+  <div class="v-panel" id="step1">
     <div class="data-note"><span class="material-icons-outlined" style="font-size:16px;">info</span>Preencha seus dados pessoais abaixo. Uma vez preenchido, estes dados NÃO poderão ser alterados.</div>
     <div class="data-grid">
       <div class="data-field"><label>Nome</label><input type="text" id="vName" placeholder="Seu nome"></div>
@@ -266,11 +270,20 @@ function showStep(n, el) {
   if(el) el.classList.add('active');
 }
 
-function sendEmailCode() {
-  document.getElementById('btnSendCode').textContent = 'Código enviado!';
-  document.getElementById('btnSendCode').disabled = true;
-  document.getElementById('codeArea').style.display = 'block';
-  showToast('Código enviado para seu e-mail');
+async function sendEmailCode() {
+  var btn = document.getElementById('btnSendCode');
+  btn.textContent = 'Enviando...';
+  btn.disabled = true;
+  try {
+    var resp = await apiFetch('/trading/send-email-code', { method: 'POST' });
+    document.getElementById('codeArea').style.display = 'block';
+    btn.textContent = 'Codigo enviado!';
+    showToast('Codigo enviado para seu e-mail! Verifique sua caixa de entrada.');
+  } catch(err) {
+    btn.textContent = 'Tentar novamente';
+    btn.disabled = false;
+    showToast(err.message || 'Erro ao enviar codigo', 'error');
+  }
 }
 
 function codeNext(i) {
@@ -280,13 +293,20 @@ function codeNext(i) {
   }
 }
 
-function verifyCode() {
+async function verifyCode() {
   var code = '';
   for (var i=0; i<6; i++) code += document.getElementById('c'+i).value;
   if (code.length === 6) {
-    showToast('E-mail confirmado!');
-    document.querySelectorAll('.v-tab')[0].classList.add('done');
-    setTimeout(function(){ showStep(1, document.querySelectorAll('.v-tab')[1]); }, 800);
+    try {
+      await apiFetch('/trading/verify-email-code', { method: 'POST', body: JSON.stringify({ code: code }) });
+      showToast('E-mail verificado com sucesso!');
+      document.querySelectorAll('.v-tab')[0].classList.add('done');
+      setTimeout(function(){ showStep(1, document.querySelectorAll('.v-tab')[1]); }, 800);
+    } catch(err) {
+      showToast(err.message || 'Codigo incorreto', 'error');
+      for (var j=0; j<6; j++) document.getElementById('c'+j).value = '';
+      document.getElementById('c0').focus();
+    }
   }
 }
 
