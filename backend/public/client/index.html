@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>HudBroker — Trading</title>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/png" href="/img/icon-color.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Raleway:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -880,7 +882,7 @@ html, body { height: 100%; overflow: hidden; }
 
 <div class="side-menu-overlay" id="sideMenuOverlay">
   <div class="side-menu" id="sideMenu">
-    <div class="sidebar-logo"><span class="dot"></span>Hud<span class="tag">B</span></div>
+    <div class="sidebar-logo"><img src="/img/icon-white.png" alt="HB" style="height:28px;"></div>
     <div class="sidebar-items">
     <button class="menu-item" data-action="history"><span class="material-icons-outlined">history</span><span>Histórico</span></button>
     <button class="menu-item" data-action="account"><span class="material-icons-outlined">account_circle</span><span>Minha Conta</span></button>
@@ -1507,7 +1509,7 @@ document.getElementById('depositBtn').onclick = () => {
 
 // === MODAL DE DEPÓSITO PIX ===
 let depPollInterval = null;
-let userCpfSaved = null;
+let userCpfSaved = localStorage.getItem('hb_cpf') || null;
 
 function openDepositModal() {
   document.getElementById('depStep1').style.display = 'block';
@@ -1568,6 +1570,7 @@ async function generateDepositPix() {
       return;
     }
     userCpfSaved = cpfInput.replace(/\D/g, '');
+    localStorage.setItem('hb_cpf', userCpfSaved);
   }
   const rawAmount = document.getElementById('depAmount').value.replace(',', '.');
   const amount = parseFloat(rawAmount);
