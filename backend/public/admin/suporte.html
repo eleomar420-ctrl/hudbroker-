@@ -115,6 +115,9 @@ body{background:#0b0e18;color:#e0e0e0;font-family:'Inter',sans-serif;display:fle
         </div>
       </div>
       <div class="chat-actions">
+        <button class="chat-action-btn" style="background:rgba(232,162,61,0.1);color:#e8a23d;" onclick="showTransferModal()">
+          <span class="material-icons-outlined" style="font-size:14px;vertical-align:middle;">swap_horiz</span> Encaminhar
+        </button>
         <button class="chat-action-btn btn-close-conv" onclick="closeConversation()">
           <span class="material-icons-outlined" style="font-size:14px;vertical-align:middle;">close</span> Encerrar
         </button>
@@ -313,6 +316,37 @@ async function closeConversation() {
     loadConversations();
   } catch (err) {
     console.error('Erro ao fechar:', err);
+  }
+}
+
+// ─── Transferir para setor ───
+function showTransferModal() {
+  if (!activeConvId) return;
+  var modal = document.createElement('div');
+  modal.id = 'transferModal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:999;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = '<div style="background:#10142a;border:1px solid #1c2040;border-radius:12px;padding:24px;width:320px;"><h3 style="font-family:Space Grotesk,sans-serif;font-size:16px;margin-bottom:16px;color:#e0e0e0;">Encaminhar para setor</h3><div style="display:flex;flex-direction:column;gap:8px;" id="sectorBtns"><button class="sector-btn" onclick="transferTo(\'financeiro\')">Financeiro (Depositos/Saques)</button><button class="sector-btn" onclick="transferTo(\'verificacao\')">Verificacao (KYC/Documentos)</button><button class="sector-btn" onclick="transferTo(\'tecnico\')">Suporte Tecnico</button><button class="sector-btn" onclick="transferTo(\'comercial\')">Comercial</button></div><button onclick="document.getElementById(\'transferModal\').remove()" style="margin-top:14px;width:100%;padding:8px;border-radius:6px;border:1px solid #1c2040;background:none;color:#888;cursor:pointer;font-size:12px;">Cancelar</button></div>';
+  // Add style for sector buttons
+  var sStyle = document.createElement('style');
+  sStyle.textContent = '.sector-btn{padding:12px;border-radius:8px;border:1px solid #1c2040;background:#0b0e18;color:#e0e0e0;cursor:pointer;font-size:13px;font-family:Inter,sans-serif;text-align:left;transition:all 0.15s;}.sector-btn:hover{border-color:#e8a23d;color:#e8a23d;}';
+  modal.appendChild(sStyle);
+  document.body.appendChild(modal);
+}
+
+async function transferTo(sector) {
+  if (!activeConvId) return;
+  try {
+    await fetch('/api/support/conversations/' + activeConvId + '/transfer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sector: sector })
+    });
+    appendMsg('system', 'Conversa transferida para o setor: ' + sector);
+    loadConversations();
+    var modal = document.getElementById('transferModal');
+    if (modal) modal.remove();
+  } catch (err) {
+    console.error('Erro ao transferir:', err);
   }
 }
 
