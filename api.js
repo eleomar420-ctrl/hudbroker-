@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>HudBroker — Cadastro</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#0c0f1a; color:#fff; font-family:'Inter',sans-serif; min-height:100vh; }
+
+.topbar { display:flex; align-items:center; justify-content:space-between; padding:16px 32px; background:rgba(0,0,0,0.4); }
+.topbar-brand { font-family:'Space Grotesk',sans-serif; font-size:24px; font-weight:700; color:#fff; text-decoration:none; }
+.topbar-brand span { color:#e8a23d; }
+.topbar-nav { display:flex; align-items:center; gap:20px; }
+.topbar-link { color:#ccc; text-decoration:none; font-size:14px; }
+.topbar-link:hover { color:#fff; }
+.topbar-btn-enter { color:#fff; text-decoration:none; font-size:14px; font-weight:500; }
+.topbar-btn-create { background:#e8a23d; color:#000; padding:8px 20px; border-radius:4px; text-decoration:none; font-size:14px; font-weight:600; }
+
+.register-shell { max-width:500px; margin:40px auto; padding:0 20px; }
+
+.login-row { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; background:rgba(255,255,255,0.03); border:1px solid #2a2a3a; border-radius:6px; margin-bottom:24px; }
+.login-row-text { font-size:14px; color:#ccc; }
+.login-row-btn { padding:8px 16px; border:1px solid #fff; background:none; color:#fff; border-radius:4px; font-size:13px; font-weight:500; cursor:pointer; text-decoration:none; }
+.login-row-btn:hover { background:rgba(255,255,255,0.08); }
+
+.divider-text { text-align:center; font-size:14px; font-weight:600; color:#fff; letter-spacing:2px; margin-bottom:20px; position:relative; }
+.divider-text::before, .divider-text::after { content:''; position:absolute; top:50%; width:30%; height:1px; background:#2a2a3a; }
+.divider-text::before { left:0; }
+.divider-text::after { right:0; }
+
+.form-group { margin-bottom:12px; }
+.form-input { width:100%; background:#1a1e2e; border:1px solid #2a2e3e; color:#fff; border-radius:4px; padding:13px 14px; font-size:14px; font-family:'Inter',sans-serif; outline:none; }
+.form-input:focus { border-color:#e8a23d; }
+.form-input::placeholder { color:#666; }
+
+.country-select { display:flex; align-items:center; gap:10px; width:100%; background:#1a1e2e; border:1px solid #2a2e3e; border-radius:4px; padding:12px 14px; cursor:default; }
+.country-flag { font-size:20px; }
+.country-name { flex:1; font-size:14px; color:#fff; }
+.country-arrow { color:#666; font-size:12px; }
+
+.phone-row { display:flex; gap:0; }
+.phone-flag { display:flex; align-items:center; gap:6px; background:#1a1e2e; border:1px solid #2a2e3e; border-radius:4px 0 0 4px; padding:12px 10px; flex-shrink:0; }
+.phone-flag .flag { font-size:18px; }
+.phone-code { color:#fff; font-size:14px; font-weight:500; }
+.phone-input { flex:1; background:#1a1e2e; border:1px solid #2a2e3e; border-left:none; border-radius:0 4px 4px 0; color:#fff; padding:13px 14px; font-size:14px; font-family:'Inter',sans-serif; outline:none; }
+.phone-input:focus { border-color:#e8a23d; }
+.phone-input::placeholder { color:#666; }
+
+.bonus-link { display:flex; align-items:center; gap:6px; font-size:13px; color:#888; margin:14px 0; cursor:pointer; }
+.bonus-link:hover { color:#e8a23d; }
+
+.terms-row { display:flex; align-items:flex-start; gap:10px; margin:16px 0 20px; }
+.terms-check { width:18px; height:18px; flex-shrink:0; margin-top:2px; accent-color:#e8a23d; cursor:pointer; }
+.terms-text { font-size:13px; color:#999; line-height:1.5; }
+.terms-text a { color:#e8a23d; text-decoration:none; }
+.terms-text a:hover { text-decoration:underline; }
+
+.btn-create { width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:14px; background:#e8a23d; color:#000; border:none; border-radius:4px; font-size:15px; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif; }
+.btn-create:hover { background:#d4922f; }
+.btn-create:disabled { opacity:0.5; cursor:default; }
+
+.toast { position:fixed; top:20px; left:50%; transform:translateX(-50%); padding:10px 20px; border-radius:8px; font-size:13px; z-index:999; background:#1a1a2e; color:#fff; border:1px solid #333; }
+.toast.error { border-color:#e53935; color:#e53935; }
+
+@media(max-width:480px) {
+  .topbar { padding:12px 16px; }
+  .topbar-brand { font-size:20px; }
+  .register-shell { margin:20px auto; }
+  .topbar-nav { gap:12px; }
+  .topbar-link { display:none; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a href="/login" class="topbar-brand">Hud<span>Broker</span></a>
+  <div class="topbar-nav">
+    <a href="/login" class="topbar-btn-enter">Entrar</a>
+    <a href="/register" class="topbar-btn-create">Criar Conta</a>
+  </div>
+</div>
+
+<div class="register-shell">
+  <div class="login-row">
+    <span class="login-row-text">Ja possui uma conta?</span>
+    <a href="/login" class="login-row-btn">Acesse sua conta</a>
+  </div>
+
+  <div class="divider-text">OU REGISTRE-SE</div>
+
+  <form id="registerForm">
+    <div class="form-group">
+      <div class="country-select">
+        <span class="country-flag">&#127463;&#127479;</span>
+        <span class="country-name">Brazil</span>
+        <span class="country-arrow">&#9660;</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <input type="text" class="form-input" id="regName" placeholder="Nome" required>
+    </div>
+
+    <div class="form-group">
+      <input type="text" class="form-input" id="regLastName" placeholder="Sobrenome" required>
+    </div>
+
+    <div class="form-group">
+      <input type="email" class="form-input" id="regEmail" placeholder="E-mail" required>
+    </div>
+
+    <div class="form-group">
+      <div class="phone-row">
+        <div class="phone-flag">
+          <span class="flag">&#127463;&#127479;</span>
+          <span class="phone-code">+55</span>
+        </div>
+        <input type="tel" class="phone-input" id="regPhone" placeholder="Telefone" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="country-select">
+        <span class="country-flag">&#127463;&#127479;</span>
+        <span class="country-name">Real Brasileiro</span>
+        <span class="country-arrow">&#9660;</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <input type="text" class="form-input" id="regLogin" placeholder="Login" required>
+    </div>
+
+    <div class="form-group">
+      <input type="password" class="form-input" id="regPassword" placeholder="Senha" required minlength="6">
+    </div>
+
+    <div class="bonus-link" onclick="document.getElementById('bonusField').style.display=document.getElementById('bonusField').style.display==='none'?'block':'none'">
+      &#127873; Tenho um codigo bonus
+    </div>
+    <div class="form-group" id="bonusField" style="display:none;">
+      <input type="text" class="form-input" id="regBonus" placeholder="Digite o codigo bonus">
+    </div>
+
+    <div class="terms-row">
+      <input type="checkbox" class="terms-check" id="regTerms" required>
+      <span class="terms-text">Confirmo que tenho 18 anos ou mais, e concordo com os <a href="#">Termos de Uso</a>.</span>
+    </div>
+
+    <button type="submit" class="btn-create" id="btnRegister">&#10004; Criar Conta</button>
+  </form>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+(async function() {
+  var params = new URLSearchParams(location.search);
+  var ref = params.get('ref');
+  if (ref && !localStorage.getItem('hb_click_id')) {
+    try {
+      var result = await apiFetch('/affiliates/track', { method: 'POST', body: JSON.stringify({ refCode: ref }) });
+      localStorage.setItem('hb_click_id', result.clickId);
+    } catch(e) {}
+  }
+})();
+
+document.getElementById('registerForm').onsubmit = async function(e) {
+  e.preventDefault();
+  var btn = document.getElementById('btnRegister');
+  var name = document.getElementById('regName').value.trim();
+  var lastName = document.getElementById('regLastName').value.trim();
+  var email = document.getElementById('regEmail').value.trim();
+  var phone = document.getElementById('regPhone').value.trim();
+  var login = document.getElementById('regLogin').value.trim();
+  var password = document.getElementById('regPassword').value;
+  var terms = document.getElementById('regTerms').checked;
+
+  if (!terms) { showToast('Aceite os termos de uso', 'error'); return; }
+  if (password.length < 6) { showToast('Senha precisa ter no minimo 6 caracteres', 'error'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = 'Criando conta...';
+
+  try {
+    var data = await apiFetch('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: name,
+        lastName: lastName,
+        email: email,
+        phone: '+55' + phone.replace(/\D/g, ''),
+        password: password,
+        country: 'BR',
+        currency: 'BRL',
+        clickId: localStorage.getItem('hb_click_id') || undefined
+      })
+    });
+    setToken(data.token);
+    window.location.href = '/trade';
+  } catch(err) {
+    showToast(err.message || 'Erro ao criar conta', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '&#10004; Criar Conta';
+  }
+};
+</script>
+</body>
+</html>

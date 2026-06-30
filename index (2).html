@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HudBroker — Operações</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/shared.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><span class="dot"></span>Hud<span class="tag">Broker</span><span style="color:var(--text-faint); font-size: 13px; margin-left: 6px;">/ admin</span></div>
+  <div class="topbar-right"><button class="btn" id="logoutBtn">Sair</button></div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <a href="/admin/index.html">Visão geral</a>
+    <a href="/admin/users.html">Usuários</a>
+    <a href="/admin/trades.html" class="active">Operações</a>
+    <a href="/admin/affiliates.html">Afiliados</a>
+  </div>
+
+  <div class="main">
+    <div class="card">
+      <div class="card-title">Todas as operações</div>
+      <table>
+        <thead>
+          <tr><th>Cliente</th><th>Ativo</th><th>Direção</th><th>Valor</th><th>Status</th><th>Resultado</th></tr>
+        </thead>
+        <tbody id="tradesBody"><tr><td colspan="6" class="empty-state">Carregando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+requireAuth('/admin/login.html');
+
+async function load() {
+  const trades = await apiFetch('/admin/trades');
+  const tbody = document.getElementById('tradesBody');
+  if (trades.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Nenhuma operação registrada</td></tr>';
+    return;
+  }
+  tbody.innerHTML = trades.map(t => `
+    <tr>
+      <td>${t.user_name}<br><span style="color:var(--text-faint); font-size:11px;">${t.user_email}</span></td>
+      <td>${t.asset}</td>
+      <td><span class="badge ${t.direction === 'up' ? 'badge-up' : 'badge-down'}">${t.direction === 'up' ? '↑' : '↓'}</span></td>
+      <td>${formatMoney(t.stake)}</td>
+      <td><span class="badge ${t.status === 'open' ? 'badge-pending' : t.status === 'won' ? 'badge-up' : 'badge-down'}">${t.status}</span></td>
+      <td>${t.result_amount != null ? formatMoney(t.result_amount) : '--'}</td>
+    </tr>
+  `).join('');
+}
+
+document.getElementById('logoutBtn').onclick = () => logout('/admin/login.html');
+load();
+</script>
+</body>
+</html>

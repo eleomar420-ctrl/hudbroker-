@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HudBroker · Suporte</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#0b0e18;color:#e0e0e0;font-family:'Inter',sans-serif;display:flex;height:100vh;overflow:hidden;}
+
+/* Sidebar */
+.side{width:280px;background:#10142a;border-right:1px solid #1c2040;display:flex;flex-direction:column;flex-shrink:0;}
+.side-header{padding:16px;border-bottom:1px solid #1c2040;display:flex;align-items:center;gap:10px;}
+.side-header h1{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;}
+.side-header h1 span{color:#e8a23d;}
+.side-back{color:#8b92a3;text-decoration:none;font-size:12px;display:flex;align-items:center;gap:4px;padding:10px 16px;border-bottom:1px solid #1c2040;}
+.side-back:hover{color:#e8a23d;}
+
+.side-tabs{display:flex;border-bottom:1px solid #1c2040;}
+.side-tab{flex:1;padding:10px;text-align:center;font-size:11px;font-weight:600;color:#555;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;}
+.side-tab:hover{color:#bbb;}
+.side-tab.act{color:#e8a23d;border-bottom-color:#e8a23d;}
+
+.side-list{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#1c2040 transparent;}
+.conv-item{padding:14px 16px;border-bottom:1px solid rgba(28,32,64,0.4);cursor:pointer;transition:background 0.1s;}
+.conv-item:hover{background:rgba(255,255,255,0.015);}
+.conv-item.act{background:rgba(232,162,61,0.06);border-right:2px solid #e8a23d;}
+.conv-email{font-size:13px;font-weight:600;color:#e0e0e0;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.conv-preview{font-size:11px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px;}
+.conv-meta{display:flex;align-items:center;gap:8px;margin-top:6px;}
+.conv-time{font-size:10px;color:#555;}
+.conv-badge{padding:2px 8px;border-radius:3px;font-size:9px;font-weight:700;text-transform:uppercase;}
+.b-waiting{background:rgba(232,162,61,0.1);color:#e8a23d;}
+.b-active{background:rgba(8,197,138,0.1);color:#08c58a;}
+.b-bot{background:rgba(100,100,255,0.1);color:#8888ff;}
+.b-closed{background:rgba(100,100,100,0.1);color:#888;}
+.conv-count{font-size:10px;color:#555;}
+.side-empty{padding:40px 20px;text-align:center;color:#555;font-size:13px;}
+
+/* Main Chat Area */
+.main{flex:1;display:flex;flex-direction:column;background:#0b0e18;}
+.main-empty{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#555;}
+.main-empty .material-icons-outlined{font-size:48px;color:#333;}
+
+.chat-header{padding:14px 20px;border-bottom:1px solid #1c2040;display:flex;align-items:center;justify-content:space-between;background:#10142a;}
+.chat-header-left{display:flex;align-items:center;gap:12px;}
+.chat-avatar{width:36px;height:36px;border-radius:50%;background:#1c2040;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#e8a23d;}
+.chat-header-info h3{font-size:14px;font-weight:600;}
+.chat-header-info p{font-size:11px;color:#08B774;}
+.chat-actions{display:flex;gap:8px;}
+.chat-action-btn{padding:6px 14px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:'Inter',sans-serif;}
+.btn-close-conv{background:rgba(252,75,74,0.1);color:#fc4b4a;}
+.btn-close-conv:hover{background:rgba(252,75,74,0.2);}
+
+.chat-messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin;scrollbar-color:#1c2040 transparent;}
+
+.msg{max-width:70%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.55;word-wrap:break-word;}
+.msg-client{align-self:flex-start;background:#1c2040;color:#e0e0e0;border-bottom-left-radius:4px;}
+.msg-agent{align-self:flex-end;background:#e8a23d;color:#000;border-bottom-right-radius:4px;}
+.msg-bot{align-self:flex-start;background:#161a30;color:#8888ff;border-bottom-left-radius:4px;border-left:2px solid #6666cc;}
+.msg-system{align-self:center;color:#555;font-size:11px;background:none;}
+.msg-label{font-size:10px;margin-bottom:3px;font-weight:600;}
+.msg-label.client-label{color:#e8a23d;}
+.msg-label.bot-label{color:#6666cc;}
+.msg-time{font-size:9px;color:#555;margin-top:4px;}
+
+.chat-footer{padding:14px 20px;border-top:1px solid #1c2040;display:flex;gap:10px;align-items:center;background:#10142a;}
+.chat-input{flex:1;padding:12px 16px;border-radius:10px;border:1px solid #1c2040;background:#0b0e18;color:#e0e0e0;font-size:13px;font-family:'Inter',sans-serif;outline:none;resize:none;max-height:100px;}
+.chat-input:focus{border-color:#e8a23d;}
+.chat-input::placeholder{color:#555;}
+.chat-send-btn{width:42px;height:42px;border-radius:10px;border:none;background:linear-gradient(135deg,#e8a23d,#d4891e);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.chat-send-btn:hover{opacity:0.85;}
+.chat-send-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.chat-send-btn svg{width:20px;height:20px;fill:#000;}
+
+/* Notification sound indicator */
+.notif-dot{width:8px;height:8px;border-radius:50%;background:#fc4b4a;display:none;}
+.notif-dot.show{display:inline-block;animation:blink 1s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+</style>
+</head>
+<body>
+
+<div class="side">
+  <div class="side-header">
+    <h1>Hud<span>Broker</span></h1>
+  </div>
+  <a href="/admin" class="side-back"><span class="material-icons-outlined" style="font-size:16px;">arrow_back</span> Voltar ao Admin</a>
+  <div class="side-tabs">
+    <div class="side-tab act" data-filter="all" onclick="filterConvs('all',this)">Todos</div>
+    <div class="side-tab" data-filter="waiting" onclick="filterConvs('waiting',this)">Aguardando</div>
+    <div class="side-tab" data-filter="active" onclick="filterConvs('active',this)">Ativos</div>
+    <div class="side-tab" data-filter="closed" onclick="filterConvs('closed',this)">Fechados</div>
+  </div>
+  <div class="side-list" id="convList">
+    <div class="side-empty">Carregando conversas...</div>
+  </div>
+</div>
+
+<div class="main" id="mainArea">
+  <div class="main-empty" id="emptyState">
+    <span class="material-icons-outlined">support_agent</span>
+    <p>Selecione uma conversa para começar</p>
+  </div>
+
+  <div id="chatArea" style="display:none;flex:1;flex-direction:column;">
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <div class="chat-avatar" id="chatAvatar">?</div>
+        <div class="chat-header-info">
+          <h3 id="chatEmail">-</h3>
+          <p id="chatConvStatus">-</p>
+        </div>
+      </div>
+      <div class="chat-actions">
+        <button class="chat-action-btn" style="background:rgba(232,162,61,0.1);color:#e8a23d;" onclick="showTransferModal()">
+          <span class="material-icons-outlined" style="font-size:14px;vertical-align:middle;">swap_horiz</span> Encaminhar
+        </button>
+        <button class="chat-action-btn btn-close-conv" onclick="closeConversation()">
+          <span class="material-icons-outlined" style="font-size:14px;vertical-align:middle;">close</span> Encerrar
+        </button>
+      </div>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-footer">
+      <textarea class="chat-input" id="agentInput" placeholder="Digite sua resposta..." rows="1"></textarea>
+      <button class="chat-send-btn" id="agentSend">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+let conversations = [];
+let activeConvId = null;
+let currentFilter = 'all';
+let agentName = 'Atendente';
+let lastMsgCount = 0;
+let convPollTimer = null;
+
+// ─── Polling para mensagens da conversa ativa ───
+function startConvPolling() {
+  if (convPollTimer) return;
+  convPollTimer = setInterval(async () => {
+    if (!activeConvId) return;
+    try {
+      const resp = await fetch('/api/support/conversations/' + activeConvId + '/messages');
+      const data = await resp.json();
+      if (data.messages && data.messages.length > lastMsgCount) {
+        const newMsgs = data.messages.slice(lastMsgCount);
+        newMsgs.forEach(m => {
+          if (m.sender === 'client') {
+            appendMsg('client', m.content, m.created_at);
+          }
+        });
+        lastMsgCount = data.messages.length;
+      }
+      // Atualizar status
+      if (data.conversation) {
+        const statusText = data.conversation.status === 'waiting' ? 'Aguardando atendente' :
+          data.conversation.status === 'active' ? 'Em atendimento' :
+          data.conversation.status === 'bot' ? 'Com o bot' : 'Encerrado';
+        document.getElementById('chatConvStatus').textContent = statusText;
+      }
+    } catch (err) {}
+  }, 3000);
+}
+
+// ─── Carregar conversas ───
+async function loadConversations() {
+  try {
+    const resp = await fetch('/api/support/conversations');
+    conversations = await resp.json();
+    renderConvList();
+  } catch (err) {
+    console.error('Erro ao carregar conversas:', err);
+  }
+}
+
+function renderConvList() {
+  const list = document.getElementById('convList');
+  let filtered = conversations;
+  if (currentFilter !== 'all') filtered = conversations.filter(c => c.status === currentFilter);
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="side-empty">Nenhuma conversa ' + (currentFilter === 'all' ? '' : 'neste filtro') + '</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(c => {
+    const initial = (c.client_email || '?')[0].toUpperCase();
+    const badgeClass = c.status === 'waiting' ? 'b-waiting' : c.status === 'active' ? 'b-active' : c.status === 'bot' ? 'b-bot' : 'b-closed';
+    const badgeLabel = c.status === 'waiting' ? 'Aguardando' : c.status === 'active' ? 'Ativo' : c.status === 'bot' ? 'Bot' : 'Fechado';
+    const time = new Date(c.updated_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const active = c.id === activeConvId ? ' act' : '';
+    return `
+      <div class="conv-item${active}" onclick="openConversation('${c.id}')">
+        <div class="conv-email">${c.client_email}</div>
+        <div class="conv-preview">${c.last_message || 'Sem mensagens'}</div>
+        <div class="conv-meta">
+          <span class="conv-badge ${badgeClass}">${badgeLabel}</span>
+          <span class="conv-time">${time}</span>
+          <span class="conv-count">${c.msg_count || 0} msgs</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function filterConvs(filter, el) {
+  currentFilter = filter;
+  document.querySelectorAll('.side-tab').forEach(t => t.classList.remove('act'));
+  el.classList.add('act');
+  renderConvList();
+}
+
+// ─── Abrir conversa ───
+async function openConversation(id) {
+  activeConvId = id;
+  renderConvList();
+
+  document.getElementById('emptyState').style.display = 'none';
+  const chatArea = document.getElementById('chatArea');
+  chatArea.style.display = 'flex';
+
+  try {
+    const resp = await fetch(`/api/support/conversations/${id}/messages`);
+    const data = await resp.json();
+    const conv = data.conversation;
+    const messages = data.messages;
+
+    document.getElementById('chatEmail').textContent = conv.client_email;
+    document.getElementById('chatAvatar').textContent = (conv.client_email || '?')[0].toUpperCase();
+
+    const statusText = conv.status === 'waiting' ? '⏳ Aguardando atendente' :
+      conv.status === 'active' ? '🟢 Em atendimento' :
+      conv.status === 'bot' ? '🤖 Com o bot' : '⚫ Encerrado';
+    document.getElementById('chatConvStatus').textContent = statusText;
+
+    const chatMsgs = document.getElementById('chatMessages');
+    chatMsgs.innerHTML = '';
+
+    messages.forEach(m => {
+      appendMsg(m.sender, m.content, m.created_at);
+    });
+
+    chatMsgs.scrollTop = chatMsgs.scrollHeight;
+
+    // Iniciar polling para esta conversa
+    lastMsgCount = messages.length;
+    startConvPolling();
+
+    document.getElementById('agentInput').focus();
+  } catch (err) {
+    console.error('Erro ao abrir conversa:', err);
+  }
+}
+
+function appendMsg(sender, content, timestamp) {
+  const chatMsgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  const cls = sender === 'client' ? 'msg-client' : sender === 'agent' ? 'msg-agent' : sender === 'bot' ? 'msg-bot' : 'msg-system';
+  div.className = 'msg ' + cls;
+
+  let label = '';
+  if (sender === 'client') label = '<div class="msg-label client-label">Cliente</div>';
+  else if (sender === 'bot') label = '<div class="msg-label bot-label">Hud IA</div>';
+
+  const time = timestamp ? new Date(timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '';
+  div.innerHTML = `${label}${content}${time ? '<div class="msg-time">' + time + '</div>' : ''}`;
+  chatMsgs.appendChild(div);
+  chatMsgs.scrollTop = chatMsgs.scrollHeight;
+}
+
+// ─── Enviar resposta ───
+async function sendAgentReply() {
+  const input = document.getElementById('agentInput');
+  const content = input.value.trim();
+  if (!content || !activeConvId) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  appendMsg('agent', content);
+
+  try {
+    await fetch(`/api/support/conversations/${activeConvId}/reply`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content, agentName })
+    });
+    loadConversations();
+  } catch (err) {
+    console.error('Erro ao enviar:', err);
+  }
+}
+
+document.getElementById('agentSend').addEventListener('click', sendAgentReply);
+document.getElementById('agentInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAgentReply(); }
+});
+document.getElementById('agentInput').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+});
+
+// ─── Fechar conversa ───
+async function closeConversation() {
+  if (!activeConvId) return;
+  if (!confirm('Encerrar esta conversa?')) return;
+  try {
+    await fetch(`/api/support/conversations/${activeConvId}/close`, { method: 'POST' });
+    appendMsg('system', 'Atendimento encerrado.');
+    loadConversations();
+  } catch (err) {
+    console.error('Erro ao fechar:', err);
+  }
+}
+
+// ─── Transferir para setor ───
+function showTransferModal() {
+  if (!activeConvId) return;
+  var modal = document.createElement('div');
+  modal.id = 'transferModal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:999;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = '<div style="background:#10142a;border:1px solid #1c2040;border-radius:12px;padding:24px;width:320px;"><h3 style="font-family:Space Grotesk,sans-serif;font-size:16px;margin-bottom:16px;color:#e0e0e0;">Encaminhar para setor</h3><div style="display:flex;flex-direction:column;gap:8px;" id="sectorBtns"><button class="sector-btn" onclick="transferTo(\'financeiro\')">Financeiro (Depositos/Saques)</button><button class="sector-btn" onclick="transferTo(\'verificacao\')">Verificacao (KYC/Documentos)</button><button class="sector-btn" onclick="transferTo(\'tecnico\')">Suporte Tecnico</button><button class="sector-btn" onclick="transferTo(\'comercial\')">Comercial</button></div><button onclick="document.getElementById(\'transferModal\').remove()" style="margin-top:14px;width:100%;padding:8px;border-radius:6px;border:1px solid #1c2040;background:none;color:#888;cursor:pointer;font-size:12px;">Cancelar</button></div>';
+  // Add style for sector buttons
+  var sStyle = document.createElement('style');
+  sStyle.textContent = '.sector-btn{padding:12px;border-radius:8px;border:1px solid #1c2040;background:#0b0e18;color:#e0e0e0;cursor:pointer;font-size:13px;font-family:Inter,sans-serif;text-align:left;transition:all 0.15s;}.sector-btn:hover{border-color:#e8a23d;color:#e8a23d;}';
+  modal.appendChild(sStyle);
+  document.body.appendChild(modal);
+}
+
+async function transferTo(sector) {
+  if (!activeConvId) return;
+  try {
+    await fetch('/api/support/conversations/' + activeConvId + '/transfer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sector: sector })
+    });
+    appendMsg('system', 'Conversa transferida para o setor: ' + sector);
+    loadConversations();
+    var modal = document.getElementById('transferModal');
+    if (modal) modal.remove();
+  } catch (err) {
+    console.error('Erro ao transferir:', err);
+  }
+}
+
+// ─── Init ───
+// Polling para lista de conversas
+loadConversations();
+setInterval(loadConversations, 5000);
+</script>
+</body>
+</html>

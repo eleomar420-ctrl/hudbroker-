@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HudBroker — Afiliados</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/shared.css">
+</head>
+<body>
+<div class="topbar">
+  <div class="brand"><span class="dot"></span>Hud<span class="tag">Broker</span><span style="color:var(--text-faint); font-size: 13px; margin-left: 6px;">/ admin</span></div>
+  <div class="topbar-right"><button class="btn" id="logoutBtn">Sair</button></div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <a href="/admin/index.html">Visão geral</a>
+    <a href="/admin/users.html">Usuários</a>
+    <a href="/admin/trades.html">Operações</a>
+    <a href="/admin/affiliates.html" class="active">Afiliados</a>
+  </div>
+
+  <div class="main">
+    <div class="card">
+      <div class="card-title">Afiliados cadastrados</div>
+      <table>
+        <thead>
+          <tr><th>Nome</th><th>Email</th><th>Código</th><th>Modelo</th><th>Saldo a pagar</th></tr>
+        </thead>
+        <tbody id="affBody"><tr><td colspan="5" class="empty-state">Carregando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+requireAuth('/admin/login.html');
+
+async function load() {
+  const affs = await apiFetch('/admin/affiliates');
+  const tbody = document.getElementById('affBody');
+  if (affs.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhum afiliado cadastrado</td></tr>';
+    return;
+  }
+  tbody.innerHTML = affs.map(a => `
+    <tr>
+      <td>${a.name}</td>
+      <td>${a.email}</td>
+      <td>${a.ref_code}</td>
+      <td>${a.commission_model}</td>
+      <td>${formatMoney(a.balance)}</td>
+    </tr>
+  `).join('');
+}
+
+document.getElementById('logoutBtn').onclick = () => logout('/admin/login.html');
+load();
+</script>
+</body>
+</html>
