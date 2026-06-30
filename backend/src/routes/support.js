@@ -4,82 +4,142 @@ import crypto from 'crypto';
 
 const router = Router();
 
-// ─── Base de conhecimento (FAQ) ───
 const FAQ = [
-  { keywords: ['depositar','depósito','deposito','adicionar saldo','colocar dinheiro'], q: 'Como faço para depositar?', a: 'Para depositar, acesse sua conta e clique no botão "Depositar". Aceitamos depósitos via PIX — o valor mínimo é de R$ 30,00. O crédito é instantâneo após a confirmação do pagamento.' },
-  { keywords: ['sacar','saque','retirar','retirada','tirar dinheiro'], q: 'Como faço para sacar?', a: 'Acesse o menu e clique em "Sacar". Informe o valor e sua chave PIX. O saque mínimo é de R$ 50,00. O prazo de processamento é de até 24 horas úteis, mas na maioria dos casos é concluído em minutos.' },
-  { keywords: ['pix','chave pix','pagamento pix'], q: 'Quais tipos de chave PIX são aceitos?', a: 'Aceitamos todas as chaves PIX: CPF, e-mail, telefone e chave aleatória. Certifique-se de que a chave informada está correta para evitar atrasos no saque.' },
-  { keywords: ['operar','trade','trading','operação','abrir operação','como operar','comprar','vender'], q: 'Como faço para operar na plataforma?', a: 'Após fazer login e ter saldo, acesse a tela de trading. Escolha o ativo (ex: EUR/USD), defina o valor da operação, selecione o tempo de expiração e clique em "Comprar" (se acredita que vai subir) ou "Vender" (se acredita que vai cair). Ao final do tempo, se sua previsão estiver correta, você recebe o lucro.' },
-  { keywords: ['lucro','ganho','rendimento','payout','quanto ganho','porcentagem'], q: 'Qual é a porcentagem de lucro por operação?', a: 'A porcentagem de lucro (payout) varia de acordo com o ativo e o horário do mercado, podendo chegar até 95%. O valor exato é exibido na tela de operação antes de você confirmar.' },
-  { keywords: ['verificar','verificação','documento','identidade','kyc','selfie','comprovar'], q: 'Preciso verificar minha conta?', a: 'Sim, para realizar saques é necessário verificar sua identidade. Acesse "Minha Conta" > "Verificação" e envie uma foto do seu documento (RG ou CNH) e uma selfie. A análise leva até 48 horas.' },
-  { keywords: ['conta','cadastro','registrar','criar conta','abrir conta'], q: 'Como crio minha conta?', a: 'Clique em "Criar Conta" na página inicial, preencha seu nome, e-mail e senha. Você receberá um e-mail de confirmação. Após confirmar, sua conta estará pronta para uso.' },
-  { keywords: ['senha','esqueci','redefinir','trocar senha','recuperar'], q: 'Esqueci minha senha, o que faço?', a: 'Na tela de login, clique em "Esqueci minha senha". Informe o e-mail cadastrado e enviaremos um link para redefinição. Verifique também a caixa de spam.' },
-  { keywords: ['mínimo','valor mínimo','mínimo depósito','mínimo saque','mínimo operação'], q: 'Quais são os valores mínimos?', a: 'Depósito mínimo: R$ 30,00. Saque mínimo: R$ 50,00. Operação mínima: R$ 5,00. Esses valores garantem uma boa experiência na plataforma.' },
-  { keywords: ['seguro','segurança','confiável','golpe','fraude','regulamentação'], q: 'A HudBroker é segura?', a: 'Sim! A HudBroker utiliza criptografia de ponta a ponta, autenticação segura com JWT e conexões HTTPS. Seus dados e fundos estão protegidos. Além disso, todos os depósitos e saques são processados via PIX, garantindo rastreabilidade.' },
-  { keywords: ['horário','funcionamento','mercado aberto','quando operar','horario'], q: 'Qual o horário de funcionamento?', a: 'A plataforma está disponível 24 horas por dia, 7 dias por semana. Alguns ativos podem ter horários específicos de maior liquidez, mas você pode operar a qualquer momento.' },
-  { keywords: ['tempo','expiração','duração','tempo da operação'], q: 'Quais tempos de expiração estão disponíveis?', a: 'Oferecemos operações de 30 segundos, 1 minuto, 5 minutos, 15 minutos e 30 minutos. Escolha o tempo que melhor se adapta à sua estratégia.' },
-  { keywords: ['ativo','ativos','par','moeda','crypto','criptomoeda','bitcoin','eur','usd'], q: 'Quais ativos posso operar?', a: 'Disponibilizamos pares de moedas (EUR/USD, GBP/USD, etc.), criptomoedas (BTC/USD, ETH/USD) e outros ativos. A lista completa está disponível na tela de trading.' },
-  { keywords: ['demora','pendente','processando','não caiu','cadê','atrasado'], q: 'Meu depósito/saque está demorando, o que faço?', a: 'Depósitos via PIX são normalmente instantâneos. Se não foi creditado em até 10 minutos, entre em contato conosco informando o comprovante. Para saques, o prazo é de até 24 horas úteis. Se ultrapassar esse prazo, fale conosco com seu e-mail e ID de usuário.' }
+  {
+    keywords: ['depositar','deposito','depositar dinheiro','adicionar saldo','colocar dinheiro','como depositar'],
+    q: 'Como faco para depositar?',
+    a: 'Para depositar, clique no botao "Depositar" na plataforma. O deposito e feito exclusivamente via PIX. O valor minimo e de R$ 75,00. Apos o pagamento, o saldo e creditado automaticamente em poucos segundos.'
+  },
+  {
+    keywords: ['sacar','saque','retirar','retirada','tirar dinheiro','como sacar','resgatar'],
+    q: 'Como faco para sacar?',
+    a: 'Acesse o menu lateral e clique em "Sacar". Informe o valor desejado (minimo R$ 150,00) e sua chave PIX. Saques sao processados em ate 24 horas uteis, mas a maioria e concluida em poucos minutos. E necessario ter a conta verificada para solicitar saques.'
+  },
+  {
+    keywords: ['pix','chave pix','pagamento pix','tipo de pix','qual pix'],
+    q: 'Quais tipos de chave PIX sao aceitos?',
+    a: 'Aceitamos todas as chaves PIX: CPF, e-mail, telefone e chave aleatoria. Verifique se a chave esta correta antes de solicitar o saque para evitar atrasos.'
+  },
+  {
+    keywords: ['operar','trade','trading','como operar','comprar','vender','operacao','abrir operacao'],
+    q: 'Como opero na plataforma?',
+    a: 'Apos depositar, escolha o ativo na tela de trading (ex: BTC/USDT), defina o valor da operacao, selecione o tempo de expiracao e clique em "Comprar" (se acredita que vai subir) ou "Vender" (se acredita que vai cair). Se sua previsao estiver correta ao final do tempo, voce recebe o lucro sobre o valor operado.'
+  },
+  {
+    keywords: ['lucro','ganho','rendimento','payout','quanto ganho','porcentagem','retorno'],
+    q: 'Qual e a porcentagem de lucro?',
+    a: 'O payout (porcentagem de lucro) padrao e de 85%, podendo variar conforme o ativo e o horario. O valor exato e sempre exibido na tela antes de voce confirmar a operacao.'
+  },
+  {
+    keywords: ['verificar','verificacao','documento','identidade','kyc','selfie','comprovar','verificar conta'],
+    q: 'Preciso verificar minha conta?',
+    a: 'Sim, a verificacao e necessaria para realizar saques. Acesse "Minha Conta" > "Verificar Conta" e envie uma foto do seu documento (RG ou CNH) e uma selfie. A analise leva ate 48 horas.'
+  },
+  {
+    keywords: ['conta','cadastro','registrar','criar conta','abrir conta','como criar'],
+    q: 'Como crio minha conta?',
+    a: 'Na pagina inicial, clique em "Criar Conta". Preencha seu nome, e-mail e crie uma senha. Apos o cadastro, voce ja pode acessar a plataforma e fazer seu primeiro deposito.'
+  },
+  {
+    keywords: ['senha','esqueci','redefinir','trocar senha','recuperar','nao lembro'],
+    q: 'Esqueci minha senha, o que faco?',
+    a: 'Na tela de login, clique em "Esqueci minha senha". Informe o e-mail cadastrado e enviaremos um link para redefinicao. Verifique tambem sua caixa de spam caso nao encontre o e-mail.'
+  },
+  {
+    keywords: ['minimo','valor minimo','quanto preciso','minimo deposito','minimo saque','minimo operacao'],
+    q: 'Quais sao os valores minimos?',
+    a: 'Deposito minimo: R$ 75,00 (via PIX). Saque minimo: R$ 150,00 (via PIX). Operacao minima: o valor minimo por operacao depende do ativo escolhido.'
+  },
+  {
+    keywords: ['seguro','seguranca','confiavel','golpe','fraude'],
+    q: 'A HudBroker e segura?',
+    a: 'Sim! Utilizamos criptografia em todas as conexoes (HTTPS), autenticacao segura e todos os depositos e saques sao via PIX, garantindo total rastreabilidade. Seus dados sao protegidos e nunca compartilhados com terceiros.'
+  },
+  {
+    keywords: ['horario','funcionamento','quando operar','24 horas','aberto'],
+    q: 'Qual o horario de funcionamento?',
+    a: 'A plataforma esta disponivel 24 horas por dia, 7 dias por semana. Os ativos de criptomoedas funcionam sem interrupcao.'
+  },
+  {
+    keywords: ['tempo','expiracao','duracao','tempo da operacao','quanto tempo'],
+    q: 'Quais tempos de expiracao estao disponiveis?',
+    a: 'Oferecemos operacoes com tempos de 30 segundos, 1 minuto, 5 minutos, 15 minutos e 30 minutos. Escolha o tempo que melhor se adapta a sua estrategia.'
+  },
+  {
+    keywords: ['ativo','ativos','moeda','crypto','criptomoeda','bitcoin','ethereum','quais ativos','par'],
+    q: 'Quais ativos posso operar?',
+    a: 'Operamos com criptomoedas: BTC/USDT, ETH/USDT, SOL/USDT, BNB/USDT, LTC/USDT, ADA/USDT, XRP/USDT, AVAX/USDT, DOGE/USDT, SUI/USDT, LINK/USDT e XLM/USDT. Todos com cotacao em tempo real via Binance.'
+  },
+  {
+    keywords: ['demora','pendente','processando','nao caiu','cade','atrasado','deposito nao caiu','saque pendente'],
+    q: 'Meu deposito ou saque esta demorando, o que faco?',
+    a: 'Depositos via PIX sao creditados automaticamente em ate 2 minutos. Se nao apareceu, verifique se o pagamento foi confirmado no seu banco. Para saques, o prazo e de ate 24 horas uteis. Se ultrapassar esse prazo, entre em contato informando seu e-mail e ID de usuario.'
+  },
+  {
+    keywords: ['saldo','balance','meu saldo','quanto tenho','ver saldo'],
+    q: 'Onde vejo meu saldo?',
+    a: 'Seu saldo aparece no topo da plataforma de trading. Voce tem dois saldos: conta real (depositos e lucros) e conta demo (R$ 10.000 virtuais para praticar sem risco).'
+  },
+  {
+    keywords: ['demo','conta demo','treinar','praticar','simulador','conta virtual'],
+    q: 'Como funciona a conta demo?',
+    a: 'A conta demo vem com R$ 10.000,00 virtuais para voce praticar sem risco. E identica a conta real, mas sem dinheiro de verdade. Ideal para aprender a operar antes de depositar.'
+  },
+  {
+    keywords: ['taxa','taxas','cobranca','comissao','custo'],
+    q: 'Existem taxas na plataforma?',
+    a: 'Nao cobramos taxas para depositos. Para saques, pode haver uma pequena taxa de processamento. O valor e informado antes de voce confirmar a solicitacao.'
+  }
 ];
 
 function searchFaq(message) {
-  const msg = message.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  let bestMatch = null, bestScore = 0;
-  for (const item of FAQ) {
-    let score = 0;
-    for (const kw of item.keywords) {
-      if (msg.includes(kw.normalize('NFD').replace(/[\u0300-\u036f]/g, ''))) score++;
+  var msg = message.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  var bestMatch = null, bestScore = 0;
+  for (var i = 0; i < FAQ.length; i++) {
+    var score = 0;
+    for (var j = 0; j < FAQ[i].keywords.length; j++) {
+      if (msg.includes(FAQ[i].keywords[j].normalize('NFD').replace(/[\u0300-\u036f]/g, ''))) score++;
     }
-    if (score > bestScore) { bestScore = score; bestMatch = item; }
+    if (score > bestScore) { bestScore = score; bestMatch = FAQ[i]; }
   }
   return bestScore > 0 ? bestMatch : null;
 }
 
-const SYSTEM_PROMPT = `Você é a assistente virtual da HudBroker, uma corretora de operações binárias.
-Seu nome é Hud IA. Seja simpática, profissional e objetiva.
+const SYSTEM_PROMPT = `Voce e a assistente virtual da HudBroker, uma plataforma de trading de criptomoedas com operacoes binarias.
+Seu nome e Hud IA. Seja simpatica, profissional e objetiva.
+
 REGRAS:
-- Responda APENAS sobre assuntos relacionados à HudBroker e trading.
-- Se a pergunta não for sobre a corretora, diga educadamente que só pode ajudar com assuntos da HudBroker.
-- Português brasileiro informal mas profissional. Respostas curtas (máximo 3 parágrafos).
-- Não invente informações. Se não souber, oriente a entrar em contato com support@hudbroker.com.
-- NUNCA forneça dados pessoais de outros clientes.
-INFORMAÇÕES:
-- Depósito mínimo: R$ 30 via PIX (instantâneo)
-- Saque mínimo: R$ 50 via PIX (até 24h úteis)
-- Operação mínima: R$ 5
-- Payout: até 95%
-- Ativos: EUR/USD, GBP/USD, BTC/USD, ETH/USD e mais
-- Tempos: 30s, 1min, 5min, 15min, 30min
+- Responda APENAS sobre assuntos da HudBroker e da plataforma de trading.
+- Se a pergunta nao for sobre a corretora, diga educadamente que so pode ajudar com assuntos da HudBroker.
+- Portugues brasileiro informal mas profissional. Respostas curtas (maximo 2-3 paragrafos).
+- Nao invente informacoes. Se nao souber, oriente o cliente a clicar em "Falar com humano" no chat.
+- NUNCA forneca dados pessoais de outros clientes.
+- NUNCA fale sobre programa de afiliados, comissoes ou indicacoes.
+
+INFORMACOES REAIS DA PLATAFORMA:
+- Deposito minimo: R$ 75,00 exclusivamente via PIX (credito instantaneo)
+- Saque minimo: R$ 150,00 via PIX (prazo ate 24h uteis)
+- Verificacao KYC obrigatoria para saques (documento + selfie, analise em ate 48h)
+- Payout padrao: 85% de lucro por operacao
+- Tempos de expiracao: 30s, 1min, 5min, 15min, 30min
+- Ativos disponiveis: BTC/USDT, ETH/USDT, SOL/USDT, BNB/USDT, LTC/USDT, ADA/USDT, XRP/USDT, AVAX/USDT, DOGE/USDT, SUI/USDT, LINK/USDT, XLM/USDT
+- Cotacoes em tempo real via Binance WebSocket
+- Conta demo com R$ 10.000 virtuais para praticar
 - Plataforma 24/7
-- KYC necessário para saques
-- Email: support@hudbroker.com`;
+- Suporte via chat na plataforma`;
 
-// ─── Mapa de WebSockets conectados ───
-// Populado pelo server.js ao criar o WSS de suporte
-export const supportClients = new Map();  // conversationId -> { client: ws, agent: ws }
-
-export function broadcastToConversation(convId, data) {
-  const entry = supportClients.get(convId);
-  if (!entry) return;
-  const payload = JSON.stringify(data);
-  if (entry.client?.readyState === 1) entry.client.send(payload);
-  if (entry.agent?.readyState === 1) entry.agent.send(payload);
-}
-
-// Notificar todos os agentes conectados (no lobby)
+// WebSocket maps (mantidos para compatibilidade, mas polling e o principal)
+export const supportClients = new Map();
 export const agentSockets = new Set();
-export function notifyAgents(data) {
-  const payload = JSON.stringify(data);
-  agentSockets.forEach(ws => { if (ws.readyState === 1) ws.send(payload); });
-}
+export function broadcastToConversation() {}
+export function notifyAgents() {}
 
-// ─── POST /api/support/start ─── Iniciar conversa
+// ─── POST /api/support/start ───
 router.post('/start', async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email) return res.status(400).json({ error: 'Email obrigatório' });
+    if (!email) return res.status(400).json({ error: 'Email obrigatorio' });
 
-    // Verificar se já existe conversa aberta pra esse email
     const existing = await queryOne(
       `SELECT * FROM support_conversations WHERE client_email = $1 AND status IN ('bot','waiting','active') ORDER BY created_at DESC LIMIT 1`,
       [email]
@@ -93,10 +153,7 @@ router.post('/start', async (req, res) => {
     }
 
     const id = 'conv_' + crypto.randomBytes(8).toString('hex');
-    await run(
-      `INSERT INTO support_conversations (id, client_email, status) VALUES ($1, $2, 'bot')`,
-      [id, email]
-    );
+    await run(`INSERT INTO support_conversations (id, client_email, status) VALUES ($1, $2, 'bot')`, [id, email]);
     const conv = await queryOne(`SELECT * FROM support_conversations WHERE id = $1`, [id]);
     return res.json({ conversation: conv, messages: [] });
   } catch (err) {
@@ -105,34 +162,23 @@ router.post('/start', async (req, res) => {
   }
 });
 
-// ─── POST /api/support/chat ─── Mensagem do cliente (IA ou FAQ)
+// ─── POST /api/support/chat ───
 router.post('/chat', async (req, res) => {
   try {
     const { email, message, conversationId, history = [] } = req.body;
-    if (!message) return res.status(400).json({ error: 'Mensagem obrigatória' });
+    if (!message) return res.status(400).json({ error: 'Mensagem obrigatoria' });
 
-    // Salvar mensagem do cliente
     if (conversationId) {
       const msgId = 'msg_' + crypto.randomBytes(8).toString('hex');
-      await run(
-        `INSERT INTO support_messages (id, conversation_id, sender, content) VALUES ($1, $2, 'client', $3)`,
-        [msgId, conversationId, message]
-      );
+      await run(`INSERT INTO support_messages (id, conversation_id, sender, content) VALUES ($1, $2, 'client', $3)`, [msgId, conversationId, message]);
       await run(`UPDATE support_conversations SET updated_at = now() WHERE id = $1`, [conversationId]);
 
-      // Checar se conversa está com humano
       const conv = await queryOne(`SELECT status FROM support_conversations WHERE id = $1`, [conversationId]);
       if (conv && (conv.status === 'active' || conv.status === 'waiting')) {
-        // Notificar agente via WebSocket
-        broadcastToConversation(conversationId, {
-          type: 'message', sender: 'client', content: message, conversationId
-        });
-        notifyAgents({ type: 'new_message', conversationId, content: message });
         return res.json({ reply: null, source: 'human', status: conv.status });
       }
     }
 
-    // FAQ primeiro
     const faqMatch = searchFaq(message);
     if (faqMatch && history.length <= 2) {
       const reply = faqMatch.a;
@@ -143,12 +189,9 @@ router.post('/chat', async (req, res) => {
       return res.json({ reply, source: 'faq', faqQuestion: faqMatch.q });
     }
 
-    // Claude API
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
-      const reply = faqMatch
-        ? faqMatch.a
-        : 'No momento, nosso atendimento inteligente está em manutenção. Por favor, envie sua dúvida para support@hudbroker.com ou clique em "Falar com humano" abaixo.';
+      const reply = faqMatch ? faqMatch.a : 'No momento nao consegui encontrar uma resposta para sua duvida. Clique em "Falar com humano" para ser atendido por nossa equipe.';
       if (conversationId) {
         const rId = 'msg_' + crypto.randomBytes(8).toString('hex');
         await run(`INSERT INTO support_messages (id, conversation_id, sender, content) VALUES ($1, $2, 'bot', $3)`, [rId, conversationId, reply]);
@@ -181,36 +224,29 @@ router.post('/chat', async (req, res) => {
 
   } catch (err) {
     console.error('[support/chat]', err.message);
-    return res.json({ reply: 'Desculpe, tive um problema técnico. Tente novamente ou clique em "Falar com humano".', source: 'error' });
+    return res.json({ reply: 'Desculpe, tive um problema tecnico. Clique em "Falar com humano" para ser atendido.', source: 'error' });
   }
 });
 
-// ─── POST /api/support/request-human ─── Solicitar atendente humano
+// ─── POST /api/support/request-human ───
 router.post('/request-human', async (req, res) => {
   try {
     const { conversationId } = req.body;
-    if (!conversationId) return res.status(400).json({ error: 'conversationId obrigatório' });
+    if (!conversationId) return res.status(400).json({ error: 'conversationId obrigatorio' });
 
     await run(`UPDATE support_conversations SET status = 'waiting', updated_at = now() WHERE id = $1`, [conversationId]);
-
     const msgId = 'msg_' + crypto.randomBytes(8).toString('hex');
-    await run(
-      `INSERT INTO support_messages (id, conversation_id, sender, content) VALUES ($1, $2, 'system', $3)`,
-      [msgId, conversationId, 'Cliente solicitou atendimento humano. Aguardando atendente...']
-    );
+    await run(`INSERT INTO support_messages (id, conversation_id, sender, content) VALUES ($1, $2, 'system', $3)`,
+      [msgId, conversationId, 'Voce sera atendido por um de nossos atendentes em breve. Aguarde...']);
 
-    // Notificar agentes
-    const conv = await queryOne(`SELECT * FROM support_conversations WHERE id = $1`, [conversationId]);
-    notifyAgents({ type: 'new_waiting', conversation: conv });
-
-    return res.json({ ok: true, message: 'Solicitação enviada! Um atendente vai te atender em breve.' });
+    return res.json({ ok: true, message: 'Solicitacao enviada! Um atendente vai te atender em breve.' });
   } catch (err) {
     console.error('[support/request-human]', err);
     return res.status(500).json({ error: 'Erro ao solicitar atendente' });
   }
 });
 
-// ─── GET /api/support/conversations ─── Listar conversas (para agentes)
+// ─── GET /api/support/conversations ───
 router.get('/conversations', async (req, res) => {
   try {
     const conversations = await query(
@@ -222,7 +258,6 @@ router.get('/conversations', async (req, res) => {
     );
     return res.json(conversations);
   } catch (err) {
-    console.error('[support/conversations]', err);
     return res.status(500).json({ error: 'Erro ao listar conversas' });
   }
 });
@@ -230,10 +265,7 @@ router.get('/conversations', async (req, res) => {
 // ─── GET /api/support/conversations/:id/messages ───
 router.get('/conversations/:id/messages', async (req, res) => {
   try {
-    const messages = await query(
-      `SELECT * FROM support_messages WHERE conversation_id = $1 ORDER BY created_at ASC`,
-      [req.params.id]
-    );
+    const messages = await query(`SELECT * FROM support_messages WHERE conversation_id = $1 ORDER BY created_at ASC`, [req.params.id]);
     const conv = await queryOne(`SELECT * FROM support_conversations WHERE id = $1`, [req.params.id]);
     return res.json({ conversation: conv, messages });
   } catch (err) {
@@ -241,14 +273,13 @@ router.get('/conversations/:id/messages', async (req, res) => {
   }
 });
 
-// ─── POST /api/support/conversations/:id/reply ─── Agente envia mensagem
+// ─── POST /api/support/conversations/:id/reply ───
 router.post('/conversations/:id/reply', async (req, res) => {
   try {
     const { content, agentName = 'Atendente' } = req.body;
     const convId = req.params.id;
-    if (!content) return res.status(400).json({ error: 'Conteúdo obrigatório' });
+    if (!content) return res.status(400).json({ error: 'Conteudo obrigatorio' });
 
-    // Marcar como ativo se estava aguardando
     const conv = await queryOne(`SELECT status FROM support_conversations WHERE id = $1`, [convId]);
     if (conv && conv.status === 'waiting') {
       await run(`UPDATE support_conversations SET status = 'active', assigned_agent = $1, updated_at = now() WHERE id = $2`, [agentName, convId]);
@@ -257,40 +288,44 @@ router.post('/conversations/:id/reply', async (req, res) => {
     }
 
     const msgId = 'msg_' + crypto.randomBytes(8).toString('hex');
-    await run(
-      `INSERT INTO support_messages (id, conversation_id, sender, content) VALUES ($1, $2, 'agent', $3)`,
-      [msgId, convId, content]
-    );
-
-    // Enviar via WebSocket para o cliente
-    broadcastToConversation(convId, {
-      type: 'message', sender: 'agent', content, agentName, conversationId: convId
-    });
+    await run(`INSERT INTO support_messages (id, conversation_id, sender, content) VALUES ($1, $2, 'agent', $3)`, [msgId, convId, content]);
 
     return res.json({ ok: true });
   } catch (err) {
-    console.error('[support/reply]', err);
     return res.status(500).json({ error: 'Erro ao enviar mensagem' });
   }
 });
 
-// ─── POST /api/support/conversations/:id/close ─── Fechar conversa
+// ─── POST /api/support/conversations/:id/close ───
 router.post('/conversations/:id/close', async (req, res) => {
   try {
     await run(`UPDATE support_conversations SET status = 'closed', updated_at = now() WHERE id = $1`, [req.params.id]);
     const msgId = 'msg_' + crypto.randomBytes(8).toString('hex');
-    await run(
-      `INSERT INTO support_messages (id, conversation_id, sender, content) VALUES ($1, $2, 'system', $3)`,
-      [msgId, req.params.id, 'Atendimento encerrado. Obrigado pelo contato!']
-    );
-    broadcastToConversation(req.params.id, { type: 'closed', conversationId: req.params.id });
+    await run(`INSERT INTO support_messages (id, conversation_id, sender, content) VALUES ($1, $2, 'system', $3)`,
+      [msgId, req.params.id, 'Atendimento encerrado. Se precisar de mais ajuda, e so abrir o suporte novamente!']);
     return res.json({ ok: true });
   } catch (err) {
     return res.status(500).json({ error: 'Erro ao fechar conversa' });
   }
 });
 
-// ─── GET /api/support/faq ───
+// ─── POST /api/support/conversations/:id/transfer ───
+router.post('/conversations/:id/transfer', async (req, res) => {
+  try {
+    const { sector = 'financeiro' } = req.body;
+    const convId = req.params.id;
+
+    await run(`UPDATE support_conversations SET assigned_agent = $1, updated_at = now() WHERE id = $2`, ['Setor: ' + sector, convId]);
+    const msgId = 'msg_' + crypto.randomBytes(8).toString('hex');
+    await run(`INSERT INTO support_messages (id, conversation_id, sender, content) VALUES ($1, $2, 'system', $3)`,
+      [msgId, convId, 'Voce foi transferido para o setor ' + sector + '. Um especialista vai te atender em breve.']);
+
+    return res.json({ ok: true });
+  } catch (err) {
+    return res.status(500).json({ error: 'Erro ao transferir' });
+  }
+});
+
 router.get('/faq', (req, res) => res.json(FAQ.map(f => ({ q: f.q, a: f.a }))));
 
 export default router;
