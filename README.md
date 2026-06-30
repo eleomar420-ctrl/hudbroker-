@@ -1,252 +1,118 @@
-import { Router } from 'express';
-import bcrypt from 'bcryptjs';
-import { query, queryOne, run } from '../db/index.js';
-import { authRequired, requireRole } from '../middleware/auth.js';
+# HudBroker
 
-const router = Router();
-router.use(authRequired, requireRole('admin'));
+Plataforma de operações binárias sobre criptomoedas (preço real via Binance, 24/7), com painel de cliente, admin, backoffice e sistema de afiliados.
 
-router.get('/overview', async (req, res) => {
-  const totalUsers = Number((await queryOne("SELECT COUNT(*) as c FROM users WHERE role = $1", ['client'])).c);
-  const totalTrades = Number((await queryOne('SELECT COUNT(*) as c FROM trades')).c);
-  const openTrades = Number((await queryOne("SELECT COUNT(*) as c FROM trades WHERE status = 'open'")).c);
-  const totalDeposits = Number((await queryOne(
-    "SELECT COALESCE(SUM(amount), 0) as t FROM transactions WHERE type = 'deposit'"
-  )).t);
-  const houseResult = Number((await queryOne(
-    "SELECT COALESCE(SUM(-result_amount), 0) as t FROM trades WHERE status IN ('won', 'lost')"
-  )).t);
+**Modo atual: demo/sandbox.** Saldo inicial virtual de $10.000, sem gateway de pagamento real conectado. Os preços e a lógica de execução são reais — só o dinheiro é simulado.
 
-  res.json({ totalUsers, totalTrades, openTrades, totalDeposits, houseResult });
-});
+Banco de dados: **PostgreSQL** (pronto para produção, dados persistem entre reinicializações).
 
-router.get('/users', async (req, res) => {
-  const users = await query(`
-    SELECT id, name, email, balance, kyc_status, status, affiliate_id, created_at
-    FROM users WHERE role = 'client' ORDER BY created_at DESC
-  `);
-  res.json(users);
-});
+## O que está incluído
 
-router.patch('/users/:id/status', async (req, res) => {
-  const { status } = req.body;
-  await query('UPDATE users SET status = $1 WHERE id = $2', [status, req.params.id]);
-  res.json({ ok: true });
-});
+- **App do cliente** — gráfico TradingView ao vivo, abertura de operações sobre preço real de cripto (Binance), histórico
+- **Painel admin** — visão geral financeira, gestão de usuários (KYC, suspensão), listagem de operações e afiliados
+- **Backoffice** — aprovação/rejeição de solicitações de saque
+- **Painel de afiliados** — link de divulgação, tracking de cliques, comissão CPA + revenue share, solicitação de saque
 
-router.patch('/users/:id/kyc', async (req, res) => {
-  const { kyc_status } = req.body;
-  await query('UPDATE users SET kyc_status = $1 WHERE id = $2', [kyc_status, req.params.id]);
-  res.json({ ok: true });
-});
+## Rodando localmente
 
-router.get('/trades', async (req, res) => {
-  const trades = await query(`
-    SELECT t.*, u.name as user_name, u.email as user_email
-    FROM trades t JOIN users u ON u.id = t.user_id
-    ORDER BY t.opened_at DESC LIMIT 200
-  `);
-  res.json(trades);
-});
+Requisitos: Node.js 22+, um banco PostgreSQL (local ou na nuvem).
 
-router.get('/affiliates', async (req, res) => {
-  const affiliates = await query(`
-    SELECT id, name, email, ref_code, commission_model, cpa_amount, revshare_pct, balance, status, created_at
-    FROM affiliates ORDER BY created_at DESC
-  `);
-  res.json(affiliates);
-});
+```bash
+cd backend
+npm install
+cp .env.example .env
+# edite .env com sua DATABASE_URL
+npm start
+```
 
-// Excluir usuário
-router.delete('/users/:id', async (req, res) => {
-  try {
-    await run('DELETE FROM kyc_documents WHERE user_id = $1', [req.params.id]);
-    await run('DELETE FROM trades WHERE user_id = $1', [req.params.id]);
-    await run('DELETE FROM withdrawals WHERE user_id = $1', [req.params.id]);
-    await run('DELETE FROM charges WHERE user_id = $1', [req.params.id]);
-    await run('DELETE FROM users WHERE id = $1', [req.params.id]);
-    res.json({ ok: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
+| Painel | URL | Login |
+|---|---|---|
+| Cliente | `/client/login.html` | crie sua própria conta |
+| Admin | `/admin/login.html` | `admin@hudbroker.com` / `admin123` |
+| Backoffice | `/backoffice/index.html` | mesma sessão do admin |
+| Afiliados | `/affiliates/index.html` | `afiliado@hudbroker.com` / `afiliado123` |
 
-// Editar email do usuário
-router.patch('/users/:id/email', async (req, res) => {
-  try {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ error: 'Email obrigatório' });
-    await run('UPDATE users SET email = $1 WHERE id = $2', [email, req.params.id]);
-    res.json({ ok: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
+> Troque essas senhas demo antes de expor o sistema publicamente.
 
-export default router;
+---
 
-// Editar saldo do usuário
-router.patch('/users/:id/balance', async (req, res) => {
-  try {
-    const { balance, demo_balance } = req.body;
-    const updates = [];
-    const values = [];
-    let idx = 1;
-    if (balance !== undefined) { updates.push(`balance = $${idx++}`); values.push(Number(balance)); }
-    if (demo_balance !== undefined) { updates.push(`demo_balance = $${idx++}`); values.push(Number(demo_balance)); }
-    if (!updates.length) return res.status(400).json({ error: 'Nada para atualizar' });
-    values.push(req.params.id);
-    await run(`UPDATE users SET ${updates.join(', ')} WHERE id = $${idx}`, values);
-    res.json({ ok: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
+## Deploy em produção com domínio próprio (via Railway)
 
-// Detalhes de um usuário
-router.get('/users/:id', async (req, res) => {
-  try {
-    const user = await queryOne('SELECT * FROM users WHERE id = $1', [req.params.id]);
-    if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
-    delete user.password_hash;
-    res.json(user);
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
+Este é o caminho recomendado para quem não tem experiência com servidores/SSH — a Railway cuida da infraestrutura, você só conecta o domínio.
 
-// Listar depósitos (pix_charges)
-router.get('/deposits', async (req, res) => {
-  try {
-    const deposits = await query(
-      `SELECT p.*, u.name, u.email FROM pix_charges p LEFT JOIN users u ON p.user_id = u.id ORDER BY p.created_at DESC LIMIT 100`
-    );
-    res.json(deposits);
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
+### Passo 1 — Subir o código para o GitHub
 
-// Listar saques
-router.get('/withdrawals', async (req, res) => {
-  try {
-    const rows = await query(
-      `SELECT w.*, u.name, u.email FROM withdrawals w LEFT JOIN users u ON w.user_id = u.id ORDER BY w.created_at DESC LIMIT 100`
-    );
-    res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
+A Railway faz deploy a partir de um repositório GitHub.
 
-// Aprovar saque
-router.patch('/withdrawals/:id/approve', async (req, res) => {
-  try {
-    await run("UPDATE withdrawals SET status = 'approved', updated_at = now() WHERE id = $1", [req.params.id]);
-    res.json({ ok: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
+1. Crie uma conta em [github.com](https://github.com) se ainda não tiver
+2. Crie um novo repositório (pode ser privado)
+3. Suba a pasta `hudbroker` inteira para esse repositório
 
-// Rejeitar saque
-router.patch('/withdrawals/:id/reject', async (req, res) => {
-  try {
-    const w = await queryOne('SELECT * FROM withdrawals WHERE id = $1', [req.params.id]);
-    if (w && w.status === 'pending') {
-      await run('UPDATE users SET balance = balance + $1 WHERE id = $2', [w.amount, w.user_id]);
-      await run("UPDATE withdrawals SET status = 'rejected', updated_at = now() WHERE id = $1", [req.params.id]);
-    }
-    res.json({ ok: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
+### Passo 2 — Criar o projeto na Railway
 
-// Overview completo
-router.get('/stats', async (req, res) => {
-  try {
-    const totalUsers = await queryOne('SELECT COUNT(*) as count FROM users WHERE role = $1', ['client']);
-    const totalDeposits = await queryOne("SELECT COUNT(*) as count, COALESCE(SUM(amount),0) as total FROM pix_charges WHERE status = 'paid'");
-    const totalTrades = await queryOne('SELECT COUNT(*) as count FROM trades');
-    const todayTrades = await queryOne("SELECT COUNT(*) as count FROM trades WHERE opened_at >= CURRENT_DATE");
-    const totalBalance = await queryOne('SELECT COALESCE(SUM(balance),0) as total FROM users');
-    res.json({
-      users: Number(totalUsers.count),
-      deposits: { count: Number(totalDeposits.count), total: Number(totalDeposits.total) },
-      trades: { total: Number(totalTrades.count), today: Number(todayTrades.count) },
-      totalBalance: Number(totalBalance.total)
-    });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
+1. Crie uma conta em [railway.com](https://railway.com) (pode entrar com GitHub)
+2. Clique em **New Project** → **Deploy from GitHub repo**
+3. Selecione o repositório que você criou
+4. Nas configurações do serviço, defina o **Root Directory** como `backend` (importante: o projeto tem `backend/` e `frontend/` na mesma pasta raiz)
 
-// Depositos de um usuario
-router.get('/users/:id/deposits', async (req, res) => {
-  try {
-    const deps = await query(
-      'SELECT * FROM pix_charges WHERE user_id = $1 ORDER BY created_at DESC',
-      [req.params.id]
-    );
-    res.json(deps);
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
+### Passo 3 — Adicionar o banco PostgreSQL
 
-// Saques de um usuario
-router.get('/users/:id/withdrawals', async (req, res) => {
-  try {
-    const rows = await query(
-      'SELECT * FROM withdrawals WHERE user_id = $1 ORDER BY created_at DESC',
-      [req.params.id]
-    );
-    res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
+1. Dentro do mesmo projeto na Railway, clique em **New** → **Database** → **Add PostgreSQL**
+2. A Railway cria o banco e injeta automaticamente a variável `DATABASE_URL` no seu serviço — você não precisa copiar nada manualmente
 
-// Trades de um usuario
-router.get('/users/:id/trades', async (req, res) => {
-  try {
-    const rows = await query(
-      'SELECT * FROM trades WHERE user_id = $1 ORDER BY opened_at DESC LIMIT 100',
-      [req.params.id]
-    );
-    res.json(rows);
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
+### Passo 4 — Configurar variáveis de ambiente
 
-// Total depositos de um usuario
-router.get('/users/:id/totals', async (req, res) => {
-  try {
-    const deps = await queryOne("SELECT COALESCE(SUM(amount),0) as total FROM pix_charges WHERE user_id = $1 AND status = 'paid'", [req.params.id]);
-    const saqs = await queryOne("SELECT COALESCE(SUM(amount),0) as total FROM withdrawals WHERE user_id = $1 AND status = 'approved'", [req.params.id]);
-    const ops = await queryOne("SELECT COUNT(*) as count FROM trades WHERE user_id = $1", [req.params.id]);
-    res.json({
-      deposits: Number(deps.total),
-      withdrawals: Number(saqs.total),
-      trades: Number(ops.count)
-    });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
+No serviço do backend, vá em **Variables** e adicione:
 
-// Listar documentos KYC de um usuario
-router.get('/users/:id/kyc-documents', async (req, res) => {
-  try {
-    const docs = await query(
-      'SELECT * FROM kyc_documents WHERE user_id = $1 ORDER BY created_at DESC',
-      [req.params.id]
-    );
-    res.json(docs);
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
+```
+JWT_SECRET=<gere uma string aleatória longa, ex: openssl rand -hex 32>
+```
 
-// Aprovar/Rejeitar documento KYC
-router.patch('/kyc-documents/:id', async (req, res) => {
-  try {
-    const { status } = req.body;
-    await run('UPDATE kyc_documents SET status = $1 WHERE id = $2', [status, req.params.id]);
-    res.json({ ok: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
+A `DATABASE_URL` já estará lá automaticamente (vinda do passo 3). Não defina `PORT` — a Railway cuida disso.
 
-// Aprovar/Rejeitar conta (KYC status)
-router.patch('/users/:id/kyc-approve', async (req, res) => {
-  try {
-    const { status } = req.body;
-    await run('UPDATE users SET kyc_status = $1 WHERE id = $2', [status, req.params.id]);
-    res.json({ ok: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
+### Passo 5 — Conectar seu domínio
 
-// Alterar senha do usuario
-router.patch('/users/:id/password', async (req, res) => {
-  try {
-    const { password } = req.body;
-    if (!password || password.length < 6) return res.status(400).json({ error: 'Senha precisa ter no mínimo 6 caracteres' });
-    const hash = await bcrypt.hash(password, 10);
-    await run('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, req.params.id]);
-    res.json({ ok: true });
-  } catch (err) { res.status(500).json({ error: err.message }); }
-});
+1. No serviço do backend, vá em **Settings** → **Networking** → **Custom Domain**
+2. Digite seu domínio (ex: `hudbroker.com`)
+3. A Railway vai te mostrar um registro DNS para criar — geralmente um **CNAME** apontando para algo como `xxxx.up.railway.app`
+4. Vá até o painel do seu provedor de domínio (Registro.br, GoDaddy, Namecheap, etc.) e crie esse registro DNS exatamente como mostrado
+5. Aguarde a propagação (de minutos a algumas horas) — a Railway emite o certificado HTTPS automaticamente, sem você precisar fazer nada
+
+Depois disso, seu domínio já estará servindo a plataforma com HTTPS configurado.
+
+### Verificando que funcionou
+
+Acesse `https://seudominio.com/api/health` — se aparecer `{"ok":true,"name":"HudBroker API"}`, está tudo certo.
+
+---
+
+## Arquitetura
+
+```
+backend/src/
+  db/             schema PostgreSQL + conexão (pool de conexões via pg)
+  services/
+    priceFeed.js       conecta WebSocket da Binance (BTC, ETH, SOL, BNB)
+    tradeEngine.js      abre/resolve operações sobre preço real
+    commissionEngine.js  tracking de afiliado + cálculo de comissão
+  routes/         endpoints da API (auth, trading, admin, backoffice, afiliados)
+  server.js       junta tudo + WebSocket de preços para o frontend
+
+frontend/public/
+  client/         interface de trading
+  admin/          painel administrativo
+  backoffice/     aprovação de saques
+  affiliates/     painel de afiliados
+```
+
+## O que NÃO está incluído (de propósito)
+
+- **Gateway de pagamento real.** O endpoint `/api/trading/deposit` apenas credita saldo virtual. Para aceitar dinheiro real, você precisa: (1) estrutura jurídica/regulatória adequada na sua jurisdição, (2) integração com um processador de pagamento que aceite esse tipo de negócio.
+- **Ativos "OTC" sintéticos.** Todos os preços vêm de mercado real (Binance). Não há gerador de preço artificial.
+- **Forex/ações.** A estrutura está pronta para receber outro feed (ex: Twelve Data, Polygon.io), mas só cripto está conectado nesta versão, já que é o único mercado 24/7 nativo.
+
+## Próximos passos sugeridos
+
+1. Trocar as senhas demo (`admin123`, `afiliado123`) imediatamente após o primeiro deploy
+2. Adicionar rate limiting nas rotas de auth
+3. Avaliar jurisdição e licenciamento antes de conectar dinheiro real
