@@ -110,6 +110,28 @@ CREATE TABLE IF NOT EXISTS pix_charges (
 CREATE INDEX IF NOT EXISTS idx_pix_txid ON pix_charges(txid);
 CREATE INDEX IF NOT EXISTS idx_pix_user ON pix_charges(user_id);
 
+-- ───── Suporte / Chat ao vivo ─────
+CREATE TABLE IF NOT EXISTS support_conversations (
+  id TEXT PRIMARY KEY,
+  client_email TEXT NOT NULL,
+  client_name TEXT,
+  status TEXT NOT NULL DEFAULT 'bot',
+  assigned_agent TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS support_messages (
+  id TEXT PRIMARY KEY,
+  conversation_id TEXT NOT NULL REFERENCES support_conversations(id),
+  sender TEXT NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_support_conv_status ON support_conversations(status);
+CREATE INDEX IF NOT EXISTS idx_support_msg_conv ON support_messages(conversation_id);
+
 CREATE TABLE IF NOT EXISTS withdrawals (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL,
