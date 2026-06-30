@@ -84,6 +84,7 @@ tr{cursor:pointer;transition:background 0.1s;}tr:hover{background:rgba(255,255,2
     <button class="side-btn" onclick="showTab('deposits',this)"><span class="material-icons-outlined">account_balance</span>Depósitos</button>
     <button class="side-btn" onclick="showTab('withdrawals',this)"><span class="material-icons-outlined">payments</span>Saques</button>
     <button class="side-btn" onclick="showTab('trades',this)"><span class="material-icons-outlined">candlestick_chart</span>Operações</button>
+    <button class="side-btn" onclick="showTab('kyc',this)"><span class="material-icons-outlined">verified_user</span>KYC / Verificação</button>
     <button class="side-btn" onclick="showTab('config',this)"><span class="material-icons-outlined">settings</span>Configurações</button>
     <a href="/admin/suporte" class="side-btn" style="text-decoration:none;"><span class="material-icons-outlined">support_agent</span>Suporte ao vivo</a>
   </div>
@@ -103,6 +104,33 @@ tr{cursor:pointer;transition:background 0.1s;}tr:hover{background:rgba(255,255,2
 <div class="tab" id="t-deposits"><div class="pg-title">Depósitos</div><div class="tbl-wrap"><div class="tbl-head"><div class="tbl-title">Todos os Depósitos</div></div><table><thead><tr><th>Usuário</th><th>Valor</th><th>Status</th><th>Data</th><th>ID</th></tr></thead><tbody id="depBody"></tbody></table></div></div>
 <div class="tab" id="t-withdrawals"><div class="pg-title">Saques</div><div class="tbl-wrap"><div class="tbl-head"><div class="tbl-title">Solicitações de Saque</div></div><table><thead><tr><th>Usuário</th><th>Valor</th><th>Chave PIX</th><th>Status</th><th>Data</th><th>Ações</th></tr></thead><tbody id="wBody"></tbody></table></div></div>
 <div class="tab" id="t-trades"><div class="pg-title">Operações</div><div class="tbl-wrap"><div class="tbl-head"><div class="tbl-title">Todas as Operações</div></div><table><thead><tr><th>Usuário</th><th>Ativo</th><th>Direção</th><th>Valor</th><th>Resultado</th><th>Status</th><th>Data</th></tr></thead><tbody id="trBody"></tbody></table></div></div>
+<div class="tab" id="t-kyc">
+  <div class="pg-title">KYC / Verificação de Documentos</div>
+  <div class="tbl-wrap">
+    <div class="tbl-head">
+      <div class="tbl-title">Verificações Pendentes</div>
+    </div>
+    <table>
+      <thead><tr><th>Nome</th><th>Email</th><th>CPF/Doc</th><th>Documentos</th><th>Pendentes</th><th>Status</th><th>Ações</th></tr></thead>
+      <tbody id="kycBody"></tbody>
+    </table>
+  </div>
+</div>
+<!-- KYC Document Modal -->
+<div id="kycModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:999;overflow-y:auto;">
+  <div style="max-width:600px;margin:40px auto;background:#10142a;border:1px solid #1c2040;border-radius:12px;padding:24px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h3 style="font-family:'Space Grotesk',sans-serif;font-size:16px;color:#e0e0e0;" id="kycModalTitle">Documentos KYC</h3>
+      <button onclick="closeKycModal()" style="background:none;border:none;color:#888;cursor:pointer;font-size:20px;">&times;</button>
+    </div>
+    <div id="kycModalInfo" style="margin-bottom:16px;padding:12px;background:#0b0e18;border-radius:8px;font-size:12px;color:#888;"></div>
+    <div id="kycDocsList"></div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button id="kycApproveAll" onclick="kycApproveUser('approved')" style="flex:1;padding:12px;border-radius:8px;border:none;background:#08c58a;color:#fff;font-weight:600;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;">Aprovar Conta</button>
+      <button id="kycRejectAll" onclick="kycApproveUser('rejected')" style="flex:1;padding:12px;border-radius:8px;border:none;background:#fc4b4a;color:#fff;font-weight:600;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;">Rejeitar Conta</button>
+    </div>
+  </div>
+</div>
 <div class="tab" id="t-config">
   <div class="pg-title">Configurações</div>
   <div style="max-width:400px;background:#10142a;border:1px solid #1c2040;border-radius:10px;padding:24px;">
@@ -185,6 +213,7 @@ function showTab(n,el){
   if(n==='deposits')loadDeps();
   if(n==='withdrawals')loadW();
   if(n==='trades')loadTr();
+  if(n==='kyc')loadKycPending();
 }
 
 function showUdTab(n,el){
@@ -326,6 +355,61 @@ async function approveDoc(id){try{await apiFetch('/admin/kyc-documents/'+id,{met
 async function rejectDoc(id){try{await apiFetch('/admin/kyc-documents/'+id,{method:'PATCH',body:JSON.stringify({status:'rejected'})});loadUserKyc();showToast('Documento rejeitado');}catch(e){}}
 async function approveKyc(){if(!curUser)return;try{await apiFetch('/admin/users/'+curUser.id+'/kyc-approve',{method:'PATCH',body:JSON.stringify({status:'approved'})});curUser.kyc_status='approved';loadUserKyc();showToast('Conta aprovada');}catch(e){}}
 async function rejectKyc(){if(!curUser)return;try{await apiFetch('/admin/users/'+curUser.id+'/kyc-approve',{method:'PATCH',body:JSON.stringify({status:'rejected'})});curUser.kyc_status='rejected';loadUserKyc();showToast('Conta rejeitada');}catch(e){}}
+
+var kycCurrentUserId = null;
+async function loadKycPending(){
+  try{
+    var users = await apiFetch('/admin/kyc-pending');
+    var body = document.getElementById('kycBody');
+    if(!users||users.length===0){body.innerHTML='<tr><td colspan="7" style="text-align:center;color:#555;padding:40px;">Nenhuma verificacao pendente</td></tr>';return;}
+    body.innerHTML = users.map(function(u){
+      var statusCls = u.kyc_status==='pending_review'?'b-pending':'b-pending';
+      return '<tr><td>'+(u.name||'--')+'</td><td>'+u.email+'</td><td style="font-size:11px;color:#888;">'+(u.document||'--')+'</td><td>'+u.doc_count+'</td><td><span class="badge b-pending">'+u.pending_count+'</span></td><td><span class="badge b-pending">'+u.kyc_status+'</span></td><td><button onclick="openKycModal(\''+u.id+'\',\''+u.email+'\')" style="padding:6px 14px;border-radius:4px;border:none;background:rgba(232,162,61,0.1);color:#e8a23d;cursor:pointer;font-size:11px;font-weight:600;font-family:Inter,sans-serif;">Analisar</button></td></tr>';
+    }).join('');
+  }catch(e){console.error('Erro KYC:',e);}
+}
+
+async function openKycModal(userId, email){
+  kycCurrentUserId = userId;
+  document.getElementById('kycModal').style.display = 'block';
+  document.getElementById('kycModalTitle').textContent = 'Documentos de ' + email;
+  document.getElementById('kycModalInfo').innerHTML = 'Carregando...';
+  document.getElementById('kycDocsList').innerHTML = '';
+  try{
+    var docs = await apiFetch('/admin/users/'+userId+'/kyc-documents');
+    document.getElementById('kycModalInfo').innerHTML = '<strong>'+docs.length+'</strong> documento(s) enviado(s)';
+    if(docs.length===0){document.getElementById('kycDocsList').innerHTML='<p style="color:#666;text-align:center;padding:20px;">Nenhum documento encontrado</p>';return;}
+    document.getElementById('kycDocsList').innerHTML = docs.map(function(d){
+      var stCls = d.status==='approved'?'color:#08c58a':d.status==='rejected'?'color:#fc4b4a':'color:#e8a23d';
+      var isImg = d.file_name && (d.file_name.match(/\.(jpg|jpeg|png|gif|webp)$/i));
+      var preview = '';
+      if(d.file_data && isImg){
+        preview = '<div style="margin:8px 0;"><img src="'+d.file_data+'" style="max-width:100%;max-height:300px;border-radius:6px;border:1px solid #1c2040;"></div>';
+      } else if(d.file_data){
+        preview = '<div style="margin:8px 0;"><a href="'+d.file_data+'" target="_blank" style="color:#e8a23d;font-size:12px;">Abrir documento</a></div>';
+      }
+      var actions = d.status==='pending'?'<div style="display:flex;gap:6px;margin-top:8px;"><button onclick="kycDocAction(\''+d.id+'\',\'approved\')" style="padding:6px 16px;border-radius:4px;border:none;background:#08c58a;color:#fff;cursor:pointer;font-size:11px;font-weight:600;">Aprovar</button><button onclick="kycDocAction(\''+d.id+'\',\'rejected\')" style="padding:6px 16px;border-radius:4px;border:none;background:#fc4b4a;color:#fff;cursor:pointer;font-size:11px;font-weight:600;">Rejeitar</button></div>':'';
+      return '<div style="padding:14px;background:#0b0e18;border:1px solid #1c2040;border-radius:8px;margin-bottom:10px;"><div style="display:flex;justify-content:space-between;align-items:center;"><div><strong style="color:#e0e0e0;font-size:13px;">'+({rg:'RG',cnh:'CNH',selfie:'Selfie com Documento',passport:'Passaporte'}[d.doc_type]||d.doc_type)+'</strong><span style="font-size:10px;color:#555;margin-left:8px;">'+(d.file_name||'')+'</span></div><span style="font-size:11px;font-weight:600;'+stCls+'">'+d.status.toUpperCase()+'</span></div>'+preview+actions+'<div style="font-size:10px;color:#444;margin-top:6px;">Enviado em: '+new Date(d.created_at).toLocaleString('pt-BR')+'</div></div>';
+    }).join('');
+  }catch(e){document.getElementById('kycModalInfo').innerHTML='Erro ao carregar documentos';}
+}
+
+async function kycDocAction(docId, status){
+  try{await apiFetch('/admin/kyc-documents/'+docId,{method:'PATCH',body:JSON.stringify({status:status})});showToast('Documento '+(status==='approved'?'aprovado':'rejeitado'));openKycModal(kycCurrentUserId,document.getElementById('kycModalTitle').textContent.replace('Documentos de ',''));}catch(e){}
+}
+
+async function kycApproveUser(status){
+  if(!kycCurrentUserId)return;
+  if(!confirm(status==='approved'?'Aprovar esta conta?':'Rejeitar esta conta?'))return;
+  try{
+    await apiFetch('/admin/users/'+kycCurrentUserId+'/kyc-approve',{method:'PATCH',body:JSON.stringify({status:status})});
+    showToast('Conta '+(status==='approved'?'aprovada':'rejeitada'));
+    closeKycModal();
+    loadKycPending();
+  }catch(e){}
+}
+
+function closeKycModal(){document.getElementById('kycModal').style.display='none';kycCurrentUserId=null;}
 
 async function loadDeps(){try{var d=await apiFetch('/admin/deposits');document.getElementById('depBody').innerHTML=d.map(function(x){return '<tr><td>'+(x.name||x.email||'--')+'</td><td>'+fmt(x.amount)+'</td><td><span class="badge '+(x.status==='paid'?'b-paid':'b-pending')+'">'+x.status+'</span></td><td>'+fd(x.created_at)+'</td><td style="font-size:9px;color:#444;">'+(x.txid||'--')+'</td></tr>';}).join('');}catch(e){}}
 async function loadW(){try{var w=await apiFetch('/admin/withdrawals');document.getElementById('wBody').innerHTML=w.map(function(x){var acts=x.status==='pending'?'<button class="btn-s btn-grn" onclick="event.stopPropagation();appW(\''+x.id+'\')">Aprovar</button> <button class="btn-s btn-red" onclick="event.stopPropagation();rejW(\''+x.id+'\')">Rejeitar</button>':'--';return '<tr><td>'+(x.name||x.email||'--')+'</td><td>'+fmt(x.amount)+'</td><td>'+(x.pix_key||'--')+'</td><td><span class="badge '+(x.status==='approved'?'b-paid':x.status==='rejected'?'b-blocked':'b-pending')+'">'+x.status+'</span></td><td>'+fd(x.created_at)+'</td><td>'+acts+'</td></tr>';}).join('');}catch(e){}}
