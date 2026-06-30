@@ -134,28 +134,36 @@ body{background:#0b0e18;color:#e0e0e0;font-family:'Inter',sans-serif;display:fle
 let conversations = [];
 let activeConvId = null;
 let currentFilter = 'all';
-let ws = null;
 let agentName = 'Atendente';
+let lastMsgCount = 0;
+let convPollTimer = null;
 
-// ─── WebSocket ───
-function connectWs() {
-  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  ws = new WebSocket(`${proto}://${location.host}/ws/support`);
-  ws.onopen = () => {
-    ws.send(JSON.stringify({ type: 'register', role: 'agent' }));
-  };
-  ws.onmessage = (e) => {
+// ─── Polling para mensagens da conversa ativa ───
+function startConvPolling() {
+  if (convPollTimer) return;
+  convPollTimer = setInterval(async () => {
+    if (!activeConvId) return;
     try {
-      const data = JSON.parse(e.data);
-      if (data.type === 'new_waiting' || data.type === 'new_message') {
-        loadConversations();
-        if (data.conversationId === activeConvId && data.type === 'new_message') {
-          appendMsg('client', data.content);
-        }
+      const resp = await fetch('/api/support/conversations/' + activeConvId + '/messages');
+      const data = await resp.json();
+      if (data.messages && data.messages.length > lastMsgCount) {
+        const newMsgs = data.messages.slice(lastMsgCount);
+        newMsgs.forEach(m => {
+          if (m.sender === 'client') {
+            appendMsg('client', m.content, m.created_at);
+          }
+        });
+        lastMsgCount = data.messages.length;
+      }
+      // Atualizar status
+      if (data.conversation) {
+        const statusText = data.conversation.status === 'waiting' ? 'Aguardando atendente' :
+          data.conversation.status === 'active' ? 'Em atendimento' :
+          data.conversation.status === 'bot' ? 'Com o bot' : 'Encerrado';
+        document.getElementById('chatConvStatus').textContent = statusText;
       }
     } catch (err) {}
-  };
-  ws.onclose = () => { setTimeout(connectWs, 3000); };
+  }, 3000);
 }
 
 // ─── Carregar conversas ───
@@ -238,10 +246,9 @@ async function openConversation(id) {
 
     chatMsgs.scrollTop = chatMsgs.scrollHeight;
 
-    // Registrar WS para esta conversa
-    if (ws && ws.readyState === 1) {
-      ws.send(JSON.stringify({ type: 'register', role: 'agent', conversationId: id }));
-    }
+    // Iniciar polling para esta conversa
+    lastMsgCount = messages.length;
+    startConvPolling();
 
     document.getElementById('agentInput').focus();
   } catch (err) {
@@ -310,9 +317,9 @@ async function closeConversation() {
 }
 
 // ─── Init ───
-connectWs();
+// Polling para lista de conversas
 loadConversations();
-setInterval(loadConversations, 10000);
+setInterval(loadConversations, 5000);
 </script>
 </body>
 </html>
