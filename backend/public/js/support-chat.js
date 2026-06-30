@@ -71,7 +71,6 @@ style.textContent='\
 ';
 document.head.appendChild(style);
 
-// Criar painel
 var panel=document.createElement('div');
 panel.className='support-panel';
 panel.id='supportPanel';
@@ -100,21 +99,16 @@ panel.innerHTML='\
   </div>\
 </div>';
 
-// Inserir ao lado do history panel
 var histPanel=document.getElementById('historyPanel');
-if(histPanel&&histPanel.parentNode){
-  histPanel.parentNode.insertBefore(panel,histPanel.nextSibling);
-}else{
-  document.body.appendChild(panel);
-}
+if(histPanel&&histPanel.parentNode){histPanel.parentNode.insertBefore(panel,histPanel.nextSibling);}
+else{document.body.appendChild(panel);}
 
-// Refs
 var emailBox=document.getElementById('supEmailBox');
 var chatArea=document.getElementById('supChatArea');
 var emailInput=document.getElementById('supEmailInput');
 var emailErr=document.getElementById('supEmailErr');
 var emailBtn=document.getElementById('supEmailBtn');
-var messages=document.getElementById('supMessages');
+var messagesEl=document.getElementById('supMessages');
 var quickFaqs=document.getElementById('supQuick');
 var chatInput=document.getElementById('supInput');
 var sendBtn=document.getElementById('supSend');
@@ -129,38 +123,48 @@ var conversationId=null;
 var chatHistory=[];
 var isLoading=false;
 var mode='bot';
-var ws=null;
+var pollTimer=null;
+var lastMsgCount=0;
 
-// Abrir/Fechar
-window.openSupportChat=function(){
-  panel.classList.add('open');
-  if(!userEmail)emailInput.focus();
-  else chatInput.focus();
-};
-window.closeSupportChat=function(){
-  panel.classList.remove('open');
-};
+window.openSupportChat=function(){panel.classList.add('open');if(!userEmail)emailInput.focus();else chatInput.focus();};
+window.closeSupportChat=function(){panel.classList.remove('open');};
 backBtn.addEventListener('click',function(){panel.classList.remove('open');});
 
 function validateEmail(e){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);}
 
-// WebSocket
-function connectWs(){
-  if(ws)return;
-  try{
-    var proto=location.protocol==='https:'?'wss':'ws';
-    ws=new WebSocket(proto+'://'+location.host+'/ws/support');
-    ws.onopen=function(){ws.send(JSON.stringify({type:'register',role:'client',conversationId:conversationId}));};
-    ws.onmessage=function(e){
-      try{
-        var data=JSON.parse(e.data);
-        if(data.type==='message'&&data.sender==='agent'){hideTyping();addMsg('agent',data.content,data.agentName||'Atendente');if(mode!=='active')setMode('active');}
-        if(data.type==='closed'){addMsg('system','Atendimento encerrado. Obrigado!');setMode('closed');}
-      }catch(err){}
-    };
-    ws.onclose=function(){ws=null;setTimeout(function(){if(conversationId&&mode!=='closed')connectWs();},5000);};
-    ws.onerror=function(){};
-  }catch(err){}
+// ─── Polling em vez de WebSocket ───
+function startPolling(){
+  if(pollTimer)return;
+  pollTimer=setInterval(function(){
+    if(!conversationId||mode==='closed')return;
+    fetch('/api/support/conversations/'+conversationId+'/messages')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(!data.messages)return;
+      var conv=data.conversation;
+
+      // Atualizar modo se mudou
+      if(conv.status!==mode){
+        setMode(conv.status);
+      }
+
+      // Se tem mensagens novas
+      if(data.messages.length>lastMsgCount){
+        var newMsgs=data.messages.slice(lastMsgCount);
+        newMsgs.forEach(function(m){
+          // So adicionar mensagens de agent/system/bot (as do client ja foram adicionadas localmente)
+          if(m.sender!=='client'){
+            addMsg(m.sender,m.content,m.sender==='agent'?'Atendente':null);
+          }
+        });
+        lastMsgCount=data.messages.length;
+      }
+    }).catch(function(){});
+  },3000);
+}
+
+function stopPolling(){
+  if(pollTimer){clearInterval(pollTimer);pollTimer=null;}
 }
 
 function setMode(m){
@@ -168,10 +172,9 @@ function setMode(m){
   if(m==='bot'){titleEl.textContent='Suporte';statusEl.textContent='Online';humanBtn.className='sup-human-btn';humanBtn.textContent='Falar com humano';humanBar.style.display='block';}
   else if(m==='waiting'){titleEl.textContent='Aguardando...';statusEl.textContent='Na fila';humanBtn.className='sup-human-btn waiting';humanBtn.textContent='Aguardando atendente...';quickFaqs.innerHTML='';}
   else if(m==='active'){titleEl.textContent='Atendente';statusEl.textContent='Ao vivo';humanBar.style.display='none';quickFaqs.innerHTML='';}
-  else if(m==='closed'){titleEl.textContent='Encerrado';statusEl.textContent='Finalizado';humanBar.style.display='none';quickFaqs.innerHTML='';}
+  else if(m==='closed'){titleEl.textContent='Encerrado';statusEl.textContent='Finalizado';humanBar.style.display='none';quickFaqs.innerHTML='';stopPolling();}
 }
 
-// Iniciar chat
 emailBtn.addEventListener('click',startChat);
 emailInput.addEventListener('keydown',function(e){if(e.key==='Enter')startChat();});
 
@@ -188,12 +191,21 @@ function startChat(){
     conversationId=data.conversation.id;
     setMode(data.conversation.status);
     if(data.messages&&data.messages.length>0){
-      data.messages.forEach(function(m){addMsg(m.sender,m.content);if(m.sender==='client')chatHistory.push({role:'user',content:m.content});else chatHistory.push({role:'assistant',content:m.content});});
+      data.messages.forEach(function(m){
+        addMsg(m.sender,m.content,m.sender==='agent'?'Atendente':null);
+      });
+      lastMsgCount=data.messages.length;
+      // Reconstruir chatHistory para contexto da IA
+      data.messages.forEach(function(m){
+        if(m.sender==='client')chatHistory.push({role:'user',content:m.content});
+        else if(m.sender==='bot')chatHistory.push({role:'assistant',content:m.content});
+      });
     }else{
       addMsg('bot','Ola! Sou a Hud IA, sua assistente.\n\nComo posso te ajudar hoje?');
+      lastMsgCount=0;
     }
     if(mode==='bot')renderQuick();
-    connectWs();
+    startPolling();
   }).catch(function(){addMsg('bot','Ola! Como posso te ajudar?');renderQuick();});
   chatInput.focus();
 }
@@ -217,14 +229,14 @@ function addMsg(type,text,agentName){
     lbl.textContent=agentName;div.appendChild(lbl);
     var s=document.createElement('span');s.textContent=text;div.appendChild(s);
   }else{div.textContent=text;}
-  messages.appendChild(div);messages.scrollTop=messages.scrollHeight;
+  messagesEl.appendChild(div);messagesEl.scrollTop=messagesEl.scrollHeight;
 }
 
 function showTyping(){
   if(document.getElementById('supTyping'))return;
   var div=document.createElement('div');div.className='sup-msg-typing';div.id='supTyping';
   div.innerHTML='<span></span><span></span><span></span>';
-  messages.appendChild(div);messages.scrollTop=messages.scrollHeight;
+  messagesEl.appendChild(div);messagesEl.scrollTop=messagesEl.scrollHeight;
 }
 function hideTyping(){var t=document.getElementById('supTyping');if(t)t.remove();}
 
@@ -234,14 +246,26 @@ function sendMsg(text){
   addMsg('user',msg);chatHistory.push({role:'user',content:msg});
   chatInput.value='';chatInput.style.height='auto';
   isLoading=true;sendBtn.disabled=true;
+
+  // Atualizar contagem local pra nao duplicar no polling
+  lastMsgCount++;
+
   if(mode==='active'||mode==='waiting'){
     fetch('/api/support/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:userEmail,message:msg,conversationId:conversationId,history:chatHistory})}).catch(function(){});
     isLoading=false;sendBtn.disabled=false;chatInput.focus();return;
   }
+
   showTyping();
   fetch('/api/support/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:userEmail,message:msg,conversationId:conversationId,history:chatHistory})})
   .then(function(r){return r.json();})
-  .then(function(data){hideTyping();var reply=data.reply||'Desculpe, tente novamente.';addMsg('bot',reply);chatHistory.push({role:'assistant',content:reply});if(mode==='bot')renderQuick();})
+  .then(function(data){
+    hideTyping();
+    var reply=data.reply||'Desculpe, tente novamente.';
+    addMsg('bot',reply);
+    chatHistory.push({role:'assistant',content:reply});
+    lastMsgCount++; // contabilizar resposta do bot
+    if(mode==='bot')renderQuick();
+  })
   .catch(function(){hideTyping();addMsg('bot','Erro de conexao. Tente novamente.');})
   .finally(function(){isLoading=false;sendBtn.disabled=false;chatInput.focus();});
 }
@@ -249,8 +273,9 @@ function sendMsg(text){
 humanBtn.addEventListener('click',function(){
   if(mode!=='bot')return;
   setMode('waiting');addMsg('system','Solicitando atendente...');
+  lastMsgCount+=2; // system msgs
   fetch('/api/support/request-human',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({conversationId:conversationId})})
-  .then(function(r){return r.json();}).then(function(data){addMsg('system',data.message||'Aguardando...');})
+  .then(function(r){return r.json();}).then(function(data){addMsg('system',data.message||'Aguardando...');lastMsgCount++;})
   .catch(function(){addMsg('system','Erro. Tente novamente.');setMode('bot');});
 });
 
