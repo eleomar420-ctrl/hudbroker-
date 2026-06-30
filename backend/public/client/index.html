@@ -965,14 +965,14 @@ html, body { height: 100%; overflow: hidden; }
         </div>
 
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
-          <button class="dep-shortcut" onclick="setDepAmount(10)">R$ 10</button>
-          <button class="dep-shortcut" onclick="setDepAmount(25)">R$ 25</button>
-          <button class="dep-shortcut" onclick="setDepAmount(50)">R$ 50</button>
+          <button class="dep-shortcut" onclick="setDepAmount(75)">R$ 75</button>
           <button class="dep-shortcut" onclick="setDepAmount(100)">R$ 100</button>
           <button class="dep-shortcut" onclick="setDepAmount(200)">R$ 200</button>
           <button class="dep-shortcut" onclick="setDepAmount(500)">R$ 500</button>
           <button class="dep-shortcut" onclick="setDepAmount(1000)">R$ 1.000</button>
           <button class="dep-shortcut" onclick="setDepAmount(2000)">R$ 2.000</button>
+          <button class="dep-shortcut" onclick="setDepAmount(5000)">R$ 5.000</button>
+          <button class="dep-shortcut" onclick="setDepAmount(10000)">R$ 10.000</button>
         </div>
 
         <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:10px 12px;font-size:11px;color:#999;line-height:1.4;">
@@ -1571,8 +1571,8 @@ async function generateDepositPix() {
   }
   const rawAmount = document.getElementById('depAmount').value.replace(',', '.');
   const amount = parseFloat(rawAmount);
-  if (!amount || amount < 1) {
-    showToast('Informe um valor mínimo de R$ 1,00', 'error');
+  if (!amount || amount < 75) {
+    showToast('Valor mínimo de depósito: R$ 75,00', 'error');
     return;
   }
   const btn = document.getElementById('depGenerateBtn');
