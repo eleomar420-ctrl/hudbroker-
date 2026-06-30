@@ -237,6 +237,9 @@ async function loadUser() {
     document.getElementById('regDate').textContent = new Date(userData.created_at).toLocaleDateString('pt-BR');
     document.getElementById('profileId').textContent = userData.id ? String(Math.abs(userData.id.split('').reduce(function(a,c){return ((a<<5)-a)+c.charCodeAt(0)},0))).slice(-7) : '---';
 
+    var tabs = document.querySelectorAll('.v-tab');
+
+    // Status geral
     if (userData.kyc_status === 'approved') {
       document.getElementById('statusIcon').className = 'status-icon approved';
       document.getElementById('statusIcon').innerHTML = '<span class="material-icons-outlined" style="font-size:14px;">check</span>';
@@ -244,10 +247,22 @@ async function loadUser() {
     } else if (userData.kyc_status === 'pending_review') {
       document.getElementById('statusIcon').className = 'status-icon review';
       document.getElementById('statusIcon').innerHTML = '<span class="material-icons-outlined" style="font-size:14px;">schedule</span>';
-      document.getElementById('statusText').textContent = 'Em análise';
+      document.getElementById('statusText').textContent = 'Em analise';
     }
 
+    // Step 0: Email verificado
+    if (userData.email_verified) {
+      tabs[0].classList.add('done');
+      document.getElementById('step0').innerHTML = '<div style="text-align:center;padding:40px 20px;"><span class="material-icons-outlined" style="font-size:56px;color:#08c58a;">verified</span><h3 style="color:#08c58a;margin:12px 0 6px;font-family:Space Grotesk,sans-serif;">E-mail verificado!</h3><p style="color:#888;font-size:13px;">Seu e-mail <strong style="color:#333;">' + userData.email + '</strong> foi confirmado com sucesso.</p></div>';
+      // Auto ir pro proximo step nao completo
+      if (!(userData.data_updated || userData.document)) {
+        showStep(1, tabs[1]);
+      }
+    }
+
+    // Step 1: Dados pessoais
     if (userData.data_updated || userData.document) {
+      tabs[1].classList.add('done');
       document.getElementById('vName').value = userData.name || '';
       document.getElementById('vName').disabled = true;
       document.getElementById('vLastName').value = userData.last_name || '';
@@ -257,9 +272,22 @@ async function loadUser() {
       document.getElementById('vBirth').value = userData.birthdate || '';
       document.getElementById('vBirth').disabled = true;
       document.querySelector('.data-btn').disabled = true;
-      document.querySelector('.data-btn').textContent = 'Dados já salvos';
-      document.querySelector('.data-btn').style.opacity = '0.5';
+      document.querySelector('.data-btn').textContent = 'Dados salvos';
+      document.querySelector('.data-btn').style.background = '#08c58a';
+      document.querySelector('.data-btn').style.opacity = '1';
+      // Auto ir pra docs se email ja verificado
+      if (userData.email_verified) {
+        showStep(2, tabs[2]);
+      }
     }
+
+    // Step 2: Documentos / KYC aprovado
+    if (userData.kyc_status === 'approved') {
+      tabs[2].classList.add('done');
+    }
+
+    // Carregar docs existentes
+    loadUploadedDocs();
   } catch(e) {}
 }
 
