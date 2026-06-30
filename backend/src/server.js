@@ -14,7 +14,7 @@ import adminRoutes from './routes/admin.js';
 import backofficeRoutes from './routes/backoffice.js';
 import affiliateRoutes from './routes/affiliates.js';
 import pixRoutes from './routes/pix.js';
-import supportRoutes from './routes/support.js';
+import supportRoutes, { supportClients, agentSockets } from './routes/support.js';
 import { seedDemoData } from './seed.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -48,6 +48,7 @@ async function bootstrap() {
   app.get('/verify', (req, res) => res.sendFile(path.join(__dirname, '../public/client/verify.html')));
   app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, '../public/admin/index.html')));
   app.get('/admin/login', (req, res) => res.sendFile(path.join(__dirname, '../public/admin/login.html')));
+  app.get('/admin/suporte', (req, res) => res.sendFile(path.join(__dirname, '../public/admin/suporte.html')));
 
   app.use('/api/auth', authRoutes);
   app.use('/api/trading', tradingRoutes);
@@ -61,6 +62,44 @@ async function bootstrap() {
 
   const httpServer = createServer(app);
   const wss = new WebSocketServer({ server: httpServer, path: '/ws/prices' });
+
+  // ─── WebSocket de Suporte ───
+  const supportWss = new WebSocketServer({ server: httpServer, path: '/ws/support' });
+
+  supportWss.on('connection', (ws) => {
+    let role = null;
+    let convId = null;
+
+    ws.on('message', (raw) => {
+      try {
+        const msg = JSON.parse(raw);
+
+        // Registro: cliente ou agente se identifica
+        if (msg.type === 'register') {
+          role = msg.role; // 'client' ou 'agent'
+          convId = msg.conversationId;
+
+          if (role === 'agent' && !convId) {
+            // Agente no lobby (vendo todas as conversas)
+            agentSockets.add(ws);
+          } else if (convId) {
+            if (!supportClients.has(convId)) supportClients.set(convId, {});
+            const entry = supportClients.get(convId);
+            entry[role] = ws;
+          }
+        }
+      } catch (e) { /* ignore */ }
+    });
+
+    ws.on('close', () => {
+      agentSockets.delete(ws);
+      if (convId && supportClients.has(convId)) {
+        const entry = supportClients.get(convId);
+        if (entry[role] === ws) entry[role] = null;
+        if (!entry.client && !entry.agent) supportClients.delete(convId);
+      }
+    });
+  });
 
   priceFeed.on('price', (data) => {
     const payload = JSON.stringify({ type: 'price', ...data });
