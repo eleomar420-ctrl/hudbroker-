@@ -240,6 +240,21 @@ router.patch('/users/:id/kyc-approve', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// Listar todos os usuarios com KYC pendente
+router.get('/kyc-pending', async (req, res) => {
+  try {
+    const users = await query(
+      `SELECT u.id, u.name, u.email, u.kyc_status, u.created_at, u.document,
+       (SELECT COUNT(*) FROM kyc_documents WHERE user_id = u.id) as doc_count,
+       (SELECT COUNT(*) FROM kyc_documents WHERE user_id = u.id AND status = 'pending') as pending_count
+       FROM users u WHERE u.kyc_status IN ('pending_review','pending')
+       AND EXISTS (SELECT 1 FROM kyc_documents WHERE user_id = u.id)
+       ORDER BY u.created_at DESC`
+    );
+    res.json(users);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // Alterar senha do usuario
 router.patch('/users/:id/password', async (req, res) => {
   try {
