@@ -66,6 +66,10 @@ html, body { height: 100%; overflow: hidden; }
 .chart-instance { position: absolute; inset: 0; display: none; }
 .chart-instance.active { display: block; }
 .chart-instance iframe, .chart-instance > div { width: 100%; height: 100%; }
+.hud-pulse-dot { position: absolute; z-index: 10; width: 16px; height: 16px; pointer-events: none; display: none; }
+.hud-pulse-core { position: absolute; top: 4px; left: 4px; width: 8px; height: 8px; border-radius: 50%; background: #08c58a; z-index: 2; }
+.hud-pulse-ring { position: absolute; top: 0; left: 0; width: 16px; height: 16px; border-radius: 50%; border: 2px solid #08c58a; animation: hudPulseRing 1.5s infinite; z-index: 1; }
+@keyframes hudPulseRing { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.2); opacity: 0; } }
 
 .trade-panel {
   width: 140px; flex-shrink: 0; background: #000000;
@@ -1007,7 +1011,8 @@ html, body { height: 100%; overflow: hidden; }
 </div>
 
 <script src="/js/api.js"></script>
-<script src="https://s3.tradingview.com/tv.js"></script>
+<script src="https://unpkg.com/lightweight-charts@5.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<script src="/js/chart-engine.js"></script>
 <script>
 requireAuth();
 
@@ -1151,39 +1156,7 @@ function renderChartArea() {
   const activeTab = getActiveTab();
   if (activeTab && !activeTab.chartLoaded) {
     activeTab.chartLoaded = true;
-    new TradingView.widget({
-      container_id: 'chart_' + activeTab.id,
-      autosize: true,
-      symbol: activeTab.catalog.tv || `BINANCE:${activeTab.asset}`,
-      interval: '1',
-      timezone: 'America/Sao_Paulo',
-      theme: 'dark',
-      style: '1',
-      locale: 'br',
-      toolbar_bg: '#000000',
-      backgroundColor: '#000000',
-      enable_publishing: false,
-      hide_top_toolbar: false,
-      hide_side_toolbar: false,
-      hide_legend: false,
-      save_image: true,
-      withdateranges: true,
-      allow_symbol_change: true,
-      studies: ['MASimple@tv-basicstudies'],
-      overrides: {
-        "paneProperties.background": "#000000",
-        "paneProperties.backgroundType": "solid",
-        "scalesProperties.backgroundColor": "#000000",
-        "scalesProperties.lineColor": "#1a1a1a",
-        "scalesProperties.textColor": "#666",
-        "mainSeriesProperties.candleStyle.upColor": "#08c58a",
-        "mainSeriesProperties.candleStyle.downColor": "#fc4b4a",
-        "mainSeriesProperties.candleStyle.wickUpColor": "#08c58a",
-        "mainSeriesProperties.candleStyle.wickDownColor": "#fc4b4a",
-        "mainSeriesProperties.candleStyle.borderUpColor": "#08c58a",
-        "mainSeriesProperties.candleStyle.borderDownColor": "#fc4b4a"
-      }
-    });
+    HudChart.create('chart_' + activeTab.id, activeTab.id, activeTab.asset, activeTab.catalog.category || 'crypto');
   }
 }
 
@@ -1311,7 +1284,15 @@ function connectPriceFeed() {
   ws.onmessage = (event) => {
     const msg = JSON.parse(event.data);
     if (msg.type === 'snapshot') livePrices = msg.prices;
-    else if (msg.type === 'price') livePrices[msg.symbol] = { price: msg.price, timestamp: msg.timestamp };
+    else if (msg.type === 'price') {
+      livePrices[msg.symbol] = { price: msg.price, timestamp: msg.timestamp };
+      // Atualizar grafico da tab ativa se for o mesmo ativo
+      var activeTab = getActiveTab ? getActiveTab() : null;
+      if (activeTab && activeTab.asset === msg.symbol) {
+        var ts = Math.floor(msg.timestamp / 1000);
+        HudChart.updatePrice(activeTab.id, msg.price, ts);
+      }
+    }
   };
   ws.onclose = () => setTimeout(connectPriceFeed, 2000);
 }
@@ -1438,6 +1419,11 @@ async function openTrade(direction) {
       })
     });
     showSuccessPopup('Transação efetuada com sucesso!');
+    // Marcar operacao no grafico
+    var currentPrice = livePrices[t.asset] ? livePrices[t.asset].price : 0;
+    if (currentPrice) {
+      HudChart.markTrade(t.id, direction === 'up' ? 'buy' : 'sell', currentPrice, (direction === 'up' ? 'COMPRA' : 'VENDA') + ' R$' + t.stakeValue);
+    }
     refreshBalance();
     refreshOpenTrades();
     loadHistory();
@@ -1507,7 +1493,7 @@ document.getElementById('depositBtn').onclick = () => {
 
 // === MODAL DE DEPÓSITO PIX ===
 let depPollInterval = null;
-let userCpfSaved = null;
+let userCpfSaved = localStorage.getItem('hb_cpf') || null;
 
 function openDepositModal() {
   document.getElementById('depStep1').style.display = 'block';
@@ -1568,6 +1554,7 @@ async function generateDepositPix() {
       return;
     }
     userCpfSaved = cpfInput.replace(/\D/g, '');
+    localStorage.setItem('hb_cpf', userCpfSaved);
   }
   const rawAmount = document.getElementById('depAmount').value.replace(',', '.');
   const amount = parseFloat(rawAmount);
