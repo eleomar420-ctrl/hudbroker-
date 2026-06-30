@@ -93,6 +93,21 @@ export async function initDb() {
     CREATE INDEX IF NOT EXISTS idx_support_msg_conv ON support_messages(conversation_id);
   `);
 
+  // Tabela KYC documents
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS kyc_documents (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id),
+      doc_type TEXT NOT NULL,
+      file_data TEXT,
+      file_name TEXT,
+      status TEXT NOT NULL DEFAULT 'pending',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS idx_kyc_user ON kyc_documents(user_id);
+    CREATE INDEX IF NOT EXISTS idx_kyc_status ON kyc_documents(status);
+  `);
+
   console.log('[db] Schema PostgreSQL inicializado/verificado');
 }
 
