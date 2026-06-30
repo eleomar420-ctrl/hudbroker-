@@ -730,7 +730,7 @@ html, body { height: 100%; overflow: hidden; }
           <button class="profile-popup-item" onclick="closeProfilePopup();openDepositModal();"><span class="material-icons-outlined">arrow_upward</span>Depositar</button>
           <button class="profile-popup-item" onclick="window.location.href='/withdraw'"><span class="material-icons-outlined">arrow_downward</span>Sacar</button>
           <button class="profile-popup-item" onclick="closeProfilePopup();openHistoryPanel();"><span class="material-icons-outlined">history</span>Histórico</button>
-          <button class="profile-popup-item" onclick="showToast('Suporte em breve')"><span class="material-icons-outlined">chat</span>Suporte</button>
+          <button class="profile-popup-item" onclick="closeProfilePopup();openSupportChat()"><span class="material-icons-outlined">chat</span>Suporte</button>
           <button class="profile-popup-item" onclick="logout()"><span class="material-icons-outlined">logout</span>Sair</button>
         </div>
       </div>
@@ -865,7 +865,7 @@ html, body { height: 100%; overflow: hidden; }
   <!-- Footer bar desktop -->
   <div class="desktop-footer" id="desktopFooter">
     <div class="footer-left">
-      <button class="footer-support-btn" onclick="showToast('Suporte via email')"><span class="material-icons-outlined" style="font-size:13px;vertical-align:middle;margin-right:3px;">chat</span>SUPORTE</button>
+      <button class="footer-support-btn" onclick="openSupportChat()"><span class="material-icons-outlined" style="font-size:13px;vertical-align:middle;margin-right:3px;">chat</span>SUPORTE</button>
       <span class="footer-email">support@hudbroker.com</span>
       <span class="footer-slogan">CONTE CONOSCO, SEMPRE QUE PRECISAR</span>
     </div>
@@ -2353,5 +2353,5 @@ document.querySelectorAll('.m2-nav-btn').forEach(function(btn) {
   </div>
 </div>
 
+<script src="/js/support-chat.js"></script>
 </body>
-</html>
