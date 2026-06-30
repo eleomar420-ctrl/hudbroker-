@@ -240,9 +240,9 @@ a{text-decoration:none;color:inherit;}
     </div>
     <div class="footer-col">
       <h4>Suporte</h4>
-      <a href="#">Central de ajuda</a>
-      <a href="#">Contato</a>
-      <a href="#">FAQ</a>
+      <a href="#" onclick="openSupportChat();return false;">Central de ajuda</a>
+      <a href="#" onclick="openSupportChat();return false;">Contato</a>
+      <a href="#" onclick="openSupportChat();return false;">FAQ</a>
     </div>
     <div class="footer-col">
       <h4>Legal</h4>
@@ -266,5 +266,5 @@ document.querySelectorAll('a[href^="#"]').forEach(function(a){
   a.onclick=function(e){e.preventDefault();var t=document.querySelector(this.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth'});};
 });
 </script>
+<script src="/js/support-chat.js"></script>
 </body>
-</html>
