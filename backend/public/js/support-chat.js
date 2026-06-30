@@ -8,9 +8,9 @@ var QUICK_FAQS=[
 'Como sacar?',
 'Como operar?',
 'Valores minimos?',
-'Verificar minha conta?',
-'Deposito demorando',
-'Esqueci minha senha'
+'Conta demo?',
+'Quais ativos?',
+'Verificar conta'
 ];
 
 var style=document.createElement('style');
@@ -172,7 +172,27 @@ function setMode(m){
   if(m==='bot'){titleEl.textContent='Suporte';statusEl.textContent='Online';humanBtn.className='sup-human-btn';humanBtn.textContent='Falar com humano';humanBar.style.display='block';}
   else if(m==='waiting'){titleEl.textContent='Aguardando...';statusEl.textContent='Na fila';humanBtn.className='sup-human-btn waiting';humanBtn.textContent='Aguardando atendente...';quickFaqs.innerHTML='';}
   else if(m==='active'){titleEl.textContent='Atendente';statusEl.textContent='Ao vivo';humanBar.style.display='none';quickFaqs.innerHTML='';}
-  else if(m==='closed'){titleEl.textContent='Encerrado';statusEl.textContent='Finalizado';humanBar.style.display='none';quickFaqs.innerHTML='';stopPolling();}
+  else if(m==='closed'){
+    titleEl.textContent='Encerrado';statusEl.textContent='Finalizado';humanBar.style.display='none';quickFaqs.innerHTML='';stopPolling();
+    // Botao para nova conversa
+    var resetDiv=document.createElement('div');
+    resetDiv.style.cssText='padding:12px 10px;text-align:center;';
+    resetDiv.innerHTML='<button style="width:100%;padding:10px;border-radius:8px;border:none;background:var(--brand,#e8a23d);color:#000;font-weight:600;font-size:12px;cursor:pointer;font-family:Inter,sans-serif;" id="supNewChat">Iniciar nova conversa</button>';
+    messagesEl.parentNode.appendChild(resetDiv);
+    var newChatBtn=document.getElementById('supNewChat');
+    if(newChatBtn){newChatBtn.addEventListener('click',function(){
+      // Resetar tudo
+      conversationId=null;chatHistory=[];lastMsgCount=0;mode='bot';
+      messagesEl.innerHTML='';quickFaqs.innerHTML='';
+      if(resetDiv.parentNode)resetDiv.parentNode.removeChild(resetDiv);
+      chatArea.classList.remove('open');
+      emailBox.style.display='flex';
+      titleEl.textContent='Suporte';statusEl.textContent='Online';
+      humanBar.style.display='block';humanBtn.className='sup-human-btn';humanBtn.textContent='Falar com humano';
+      emailInput.value=userEmail;
+      emailInput.focus();
+    });}
+  }
 }
 
 emailBtn.addEventListener('click',startChat);
