@@ -67,8 +67,8 @@ HudChart.create = function(containerId, tabId, asset, category) {
   container.appendChild(wrap);
 
   var chart = LightweightCharts.createChart(wrap, {
-    width: wrap.clientWidth,
-    height: wrap.clientHeight,
+    width: wrap.clientWidth || container.clientWidth || 600,
+    height: (wrap.clientHeight || container.clientHeight || 400) - 36,
     layout: {
       background: { type: 'solid', color: '#000000' },
       textColor: '#555',
@@ -146,9 +146,11 @@ HudChart.create = function(containerId, tabId, asset, category) {
 
   // Responsivo
   var ro = new ResizeObserver(function(){
-    chart.applyOptions({ width: wrap.clientWidth, height: wrap.clientHeight });
+    var w = wrap.clientWidth || container.clientWidth;
+    var h = wrap.clientHeight || (container.clientHeight - 36);
+    if (w > 0 && h > 0) chart.applyOptions({ width: w, height: h });
   });
-  ro.observe(wrap);
+  ro.observe(container);
 
   return charts[tabId];
 };
