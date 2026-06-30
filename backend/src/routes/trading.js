@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto';
 import { query, queryOne, run, withTransaction } from '../db/index.js';
 import { authRequired, requireRole } from '../middleware/auth.js';
 import { openTrade, getOpenTrades, getTradeHistory } from '../services/tradeEngine.js';
+import { sendVerificationCodeEmail } from '../services/emailService.js';
 import { processFirstDeposit } from '../services/commissionEngine.js';
 
 const router = Router();
@@ -215,6 +216,58 @@ router.patch('/withdrawals/:id/cancel', async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// ─── Enviar codigo de verificacao de email ───
+router.post('/send-email-code', async (req, res) => {
+  try {
+    const userId = req.auth.id;
+    const user = await queryOne('SELECT email, email_verified FROM users WHERE id = $1', [userId]);
+    if (!user) return res.status(404).json({ error: 'Usuario nao encontrado' });
+    if (user.email_verified) return res.json({ ok: true, message: 'Email ja verificado' });
+
+    // Gerar codigo de 6 digitos
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutos
+
+    await run('UPDATE users SET email_code = $1, email_code_expires = $2 WHERE id = $3', [code, expires, userId]);
+
+    // Enviar email
+    await sendVerificationCodeEmail(user.email, code);
+
+    res.json({ ok: true, message: 'Codigo enviado para ' + user.email });
+  } catch (err) {
+    console.error('[email-code]', err);
+    res.status(500).json({ error: 'Erro ao enviar codigo' });
+  }
+});
+
+// ─── Verificar codigo de email ───
+router.post('/verify-email-code', async (req, res) => {
+  try {
+    const userId = req.auth.id;
+    const { code } = req.body;
+    if (!code) return res.status(400).json({ error: 'Codigo obrigatorio' });
+
+    const user = await queryOne('SELECT email_code, email_code_expires, email_verified FROM users WHERE id = $1', [userId]);
+    if (!user) return res.status(404).json({ error: 'Usuario nao encontrado' });
+    if (user.email_verified) return res.json({ ok: true, message: 'Email ja verificado' });
+
+    if (!user.email_code || user.email_code !== code) {
+      return res.status(400).json({ error: 'Codigo incorreto' });
+    }
+
+    if (new Date() > new Date(user.email_code_expires)) {
+      return res.status(400).json({ error: 'Codigo expirado. Solicite um novo.' });
+    }
+
+    await run('UPDATE users SET email_verified = true, email_code = NULL, email_code_expires = NULL WHERE id = $1', [userId]);
+
+    res.json({ ok: true, message: 'Email verificado com sucesso!' });
+  } catch (err) {
+    console.error('[verify-code]', err);
+    res.status(500).json({ error: 'Erro ao verificar codigo' });
   }
 });
 
