@@ -889,7 +889,8 @@ html, body { height: 100%; overflow: hidden; }
     <button class="menu-item" data-action="tournaments"><span class="material-icons-outlined">emoji_events</span><span>Torneios</span></button>
     <button class="menu-item" data-action="copytrade"><span class="material-icons-outlined">sensors</span><span>Copy Trade</span></button>
     <button class="menu-item" data-action="signals"><span class="material-icons-outlined">podcasts</span><span>Sinais</span></button>
-    <button class="menu-item" data-action="promocode"><span class="material-icons-outlined">local_activity</span><span>Código</span></button>
+    <button class="menu-item" data-action="promocode"><span class="material-icons-outlined">local_activity</span><span>Codigo</span></button>
+    <button class="menu-item" data-action="support"><span class="material-icons-outlined">chat</span><span>Suporte</span></button>
     <button class="menu-item menu-item-logout" id="sideMenuLogout"><span class="material-icons-outlined">logout</span><span>Sair</span></button>
     </div>
   </div>
@@ -1686,6 +1687,8 @@ document.querySelectorAll('.menu-item[data-action]').forEach(item => {
       openHistoryPanel();
     } else if (action === 'account') {
       openAccountPanel();
+    } else if (action === 'support') {
+      openSupportChat();
     } else {
       showToast('Em breve');
     }
