@@ -52,8 +52,8 @@ router.get('/charges', authRequired, requireRole('client'), async (req, res) => 
 router.post('/charge', authRequired, requireRole('client'), async (req, res) => {
   try {
     var { amount } = req.body;
-    if (!amount || amount < 1) {
-      return res.status(400).json({ error: 'Valor mínimo de R$ 1,00' });
+    if (!amount || amount < 75) {
+      return res.status(400).json({ error: 'Valor mínimo de depósito: R$ 75,00' });
     }
 
     var externalId = 'hud-' + randomUUID().replace(/-/g, '').slice(0, 20);
