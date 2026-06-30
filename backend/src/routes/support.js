@@ -12,7 +12,6 @@ const FAQ = [
   { keywords: ['operar','trade','trading','operação','abrir operação','como operar','comprar','vender'], q: 'Como faço para operar na plataforma?', a: 'Após fazer login e ter saldo, acesse a tela de trading. Escolha o ativo (ex: EUR/USD), defina o valor da operação, selecione o tempo de expiração e clique em "Comprar" (se acredita que vai subir) ou "Vender" (se acredita que vai cair). Ao final do tempo, se sua previsão estiver correta, você recebe o lucro.' },
   { keywords: ['lucro','ganho','rendimento','payout','quanto ganho','porcentagem'], q: 'Qual é a porcentagem de lucro por operação?', a: 'A porcentagem de lucro (payout) varia de acordo com o ativo e o horário do mercado, podendo chegar até 95%. O valor exato é exibido na tela de operação antes de você confirmar.' },
   { keywords: ['verificar','verificação','documento','identidade','kyc','selfie','comprovar'], q: 'Preciso verificar minha conta?', a: 'Sim, para realizar saques é necessário verificar sua identidade. Acesse "Minha Conta" > "Verificação" e envie uma foto do seu documento (RG ou CNH) e uma selfie. A análise leva até 48 horas.' },
-  { keywords: ['afiliado','afiliados','indicação','indicar','comissão','link de afiliado','parceiro'], q: 'Como funciona o programa de afiliados?', a: 'Você pode indicar amigos e ganhar comissão sobre as operações deles. Acesse o painel de afiliados para obter seu link exclusivo. As comissões são calculadas automaticamente e você pode sacá-las a qualquer momento.' },
   { keywords: ['conta','cadastro','registrar','criar conta','abrir conta'], q: 'Como crio minha conta?', a: 'Clique em "Criar Conta" na página inicial, preencha seu nome, e-mail e senha. Você receberá um e-mail de confirmação. Após confirmar, sua conta estará pronta para uso.' },
   { keywords: ['senha','esqueci','redefinir','trocar senha','recuperar'], q: 'Esqueci minha senha, o que faço?', a: 'Na tela de login, clique em "Esqueci minha senha". Informe o e-mail cadastrado e enviaremos um link para redefinição. Verifique também a caixa de spam.' },
   { keywords: ['mínimo','valor mínimo','mínimo depósito','mínimo saque','mínimo operação'], q: 'Quais são os valores mínimos?', a: 'Depósito mínimo: R$ 30,00. Saque mínimo: R$ 50,00. Operação mínima: R$ 5,00. Esses valores garantem uma boa experiência na plataforma.' },
@@ -53,7 +52,6 @@ INFORMAÇÕES:
 - Tempos: 30s, 1min, 5min, 15min, 30min
 - Plataforma 24/7
 - KYC necessário para saques
-- Programa de afiliados com comissões
 - Email: support@hudbroker.com`;
 
 // ─── Mapa de WebSockets conectados ───
