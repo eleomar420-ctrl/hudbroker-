@@ -32,6 +32,11 @@ export async function sendWelcomeEmail(to, name) {
   await sendEmail(to, 'Bem-vindo ao HudBroker!', baseTemplate(content));
 }
 
+export async function sendVerificationCodeEmail(to, code) {
+  var content = '<h2 style="color:#fff;margin:0 0 16px;font-size:22px;">Verifique seu e-mail</h2><p style="color:#ccc;font-size:14px;line-height:1.7;margin:0 0 16px;">Use o codigo abaixo para verificar seu e-mail na plataforma HudBroker.</p><div style="text-align:center;padding:24px;background:#0a0e17;border-radius:8px;border:1px solid #1c2040;margin:0 0 20px;"><div style="color:#888;font-size:12px;margin-bottom:8px;">Seu codigo de verificacao:</div><div style="color:#e8a23d;font-size:36px;font-weight:800;letter-spacing:8px;">' + code + '</div></div><p style="color:#888;font-size:12px;line-height:1.6;margin:0;">Este codigo expira em <strong style="color:#ccc;">10 minutos</strong>. Se voce nao solicitou essa verificacao, ignore este e-mail.</p>';
+  await sendEmail(to, 'Codigo de verificacao - HudBroker', baseTemplate(content));
+}
+
 export async function sendPasswordResetEmail(to, tempPassword) {
   var content = '<h2 style="color:#fff;margin:0 0 16px;font-size:22px;">Restaure seu acesso</h2><p style="color:#ccc;font-size:14px;line-height:1.7;margin:0 0 16px;">Ola, <strong style="color:#fff;">' + to + '</strong>.</p><p style="color:#ccc;font-size:14px;line-height:1.7;margin:0 0 20px;">Recebemos seu pedido de restauracao de acesso. Por favor, utilize a senha temporaria abaixo. Lembre-se de alterar sua senha apos acessar pela primeira vez com a senha provisoria.</p><div style="text-align:center;padding:20px;background:#0a0e17;border-radius:8px;border:1px solid #1c2040;margin:0 0 20px;"><div style="color:#888;font-size:12px;margin-bottom:6px;">Nova senha:</div><div style="color:#e8a23d;font-size:28px;font-weight:800;letter-spacing:2px;">' + tempPassword + '</div></div><div style="text-align:center;margin:24px 0;"><a href="' + SITE_URL + '/login" style="display:inline-block;padding:14px 40px;background:linear-gradient(135deg,#e8a23d,#d4922f);color:#000;border-radius:6px;font-size:15px;font-weight:700;text-decoration:none;">ACESSAR SITE</a></div>';
   await sendEmail(to, 'Restaure seu acesso - HudBroker', baseTemplate(content));
