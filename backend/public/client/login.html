@@ -2,274 +2,177 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>HudBroker — Retirada de Fundos</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>HudBroker — Entrar</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:#f4f4f6;color:#333;font-family:'Inter',sans-serif;min-height:100vh;}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 32px;background:#fff;border-bottom:1px solid #e8e8e8;}
-.topbar-brand{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;text-decoration:none;color:#222;}
-.topbar-brand span{color:#e8a23d;}
-.topbar-right{display:flex;align-items:center;gap:14px;}
-.topbar-right a{color:#fff;text-decoration:none;font-size:13px;font-weight:600;padding:8px 20px;background:#e8a23d;border:none;border-radius:4px;}
-.topbar-right a:hover{background:#d4922f;}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#0c0f1a; color:#fff; font-family:'Inter',sans-serif; min-height:100vh; }
 
-.shell{max-width:900px;margin:30px auto;padding:0 20px;}
-.page-h{text-align:center;font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:800;margin-bottom:8px;color:#222;}
-.page-sub{text-align:center;font-size:13px;color:#999;margin-bottom:28px;max-width:600px;margin-left:auto;margin-right:auto;}
+.topbar { display:flex; align-items:center; justify-content:space-between; padding:16px 32px; background:rgba(0,0,0,0.4); }
+.topbar-brand { font-family:'Space Grotesk',sans-serif; font-size:24px; font-weight:700; color:#fff; text-decoration:none; }
+.topbar-brand span { color:#e8a23d; }
+.topbar-nav { display:flex; align-items:center; gap:20px; }
+.topbar-btn-enter { color:#fff; text-decoration:none; font-size:14px; font-weight:500; }
+.topbar-btn-create { background:#e8a23d; color:#000; padding:8px 20px; border-radius:4px; text-decoration:none; font-size:14px; font-weight:600; }
 
-/* Two panel layout */
-.withdraw-card{background:#fff;border:1px solid #e8e8e8;border-radius:12px;overflow:hidden;display:flex;box-shadow:0 2px 8px rgba(0,0,0,0.04);min-height:360px;margin-bottom:28px;}
+.login-shell { max-width:500px; margin:60px auto; padding:0 20px; }
 
-/* Left - method selector */
-.method-list{width:220px;border-right:1px solid #f0f0f0;flex-shrink:0;padding:8px 0;}
-.method-item{display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;transition:all 0.15s;border:none;background:none;width:100%;text-align:left;font-family:'Inter',sans-serif;color:#555;}
-.method-item:hover{background:rgba(255,255,255,0.02);color:#ccc;}
-.method-item.active{background:rgba(8,197,138,0.06);color:#333;border-left:3px solid #08c58a;}
-.method-icon{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.method-icon img{width:22px;height:22px;}
-.method-name{font-size:13px;font-weight:500;}
-.method-time{font-size:10px;color:#555;}
+.register-row { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; background:rgba(255,255,255,0.03); border:1px solid #2a2a3a; border-radius:6px; margin-bottom:24px; }
+.register-row-text { font-size:14px; color:#ccc; }
+.register-row-btn { padding:8px 16px; border:1px solid #fff; background:none; color:#fff; border-radius:4px; font-size:13px; font-weight:500; cursor:pointer; text-decoration:none; }
+.register-row-btn:hover { background:rgba(255,255,255,0.08); }
 
-/* Right - form or success */
-.withdraw-right{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;}
+.divider-text { text-align:center; font-size:14px; font-weight:600; color:#fff; letter-spacing:2px; margin-bottom:20px; position:relative; }
+.divider-text::before, .divider-text::after { content:''; position:absolute; top:50%; width:30%; height:1px; background:#2a2a3a; }
+.divider-text::before { left:0; }
+.divider-text::after { right:0; }
 
-/* Form state */
-.wf-balance{text-align:center;margin-bottom:20px;}
-.wf-balance-label{font-size:12px;color:#999;}
-.wf-balance-val{font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;color:#222;}
-.wf-field{width:100%;max-width:380px;margin-bottom:12px;}
-.wf-input{width:100%;background:#f5f5f5;border:1px solid #ddd;color:#333;border-radius:6px;padding:13px 14px;font-size:14px;font-family:'Inter',sans-serif;}
-.wf-input:focus{outline:none;border-color:#ccc;}
-.wf-input::placeholder{color:#999;}
-.wf-row{display:flex;align-items:center;width:100%;max-width:380px;margin-bottom:12px;}
-.wf-row .wf-input{border-radius:6px 0 0 6px;border-right:none;}
-.wf-suffix{color:#555;background:#e8e8e8;border:1px solid #ddd;border-radius:0 6px 6px 0;padding:13px 14px;font-size:12px;color:#888;font-weight:600;white-space:nowrap;display:flex;align-items:center;gap:4px;}
-.wf-info{font-size:12px;color:#888;margin-bottom:16px;}
-.wf-info strong{color:#e8a23d;}
-.wf-btn{width:100%;max-width:380px;padding:14px;background:#e8a23d;color:#000;border:none;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;}
-.wf-btn:hover{background:#d4922f;}
-.wf-btn:disabled{opacity:0.5;cursor:default;}
+.form-group { margin-bottom:12px; }
+.form-input { width:100%; background:#1a1e2e; border:1px solid #2a2e3e; color:#fff; border-radius:4px; padding:14px; font-size:14px; font-family:'Inter',sans-serif; outline:none; }
+.form-input:focus { border-color:#e8a23d; }
+.form-input::placeholder { color:#666; }
 
-/* Success state */
-.success-view{display:none;text-align:center;}
-.success-view.show{display:block;}
-.form-view{display:block;}
-.form-view.hide{display:none;}
-.success-circle{width:80px;height:80px;border-radius:50%;border:3px solid #08c58a;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
-.success-circle .material-icons-outlined{font-size:40px;color:#08c58a;}
-.success-text{font-size:15px;color:#555;margin-bottom:20px;}
-.success-btn{padding:12px 28px;background:#e8a23d;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;}
+.btn-login { width:100%; display:flex; align-items:center; justify-content:center; gap:8px; padding:14px; background:#e8a23d; color:#000; border:none; border-radius:4px; font-size:15px; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif; margin-top:4px; }
+.btn-login:hover { background:#d4922f; }
+.btn-login:disabled { opacity:0.5; cursor:default; }
 
-/* History table */
-.history-card{background:#fff;border:1px solid #e8e8e8;box-shadow:0 2px 8px rgba(0,0,0,0.04);border-radius:10px;overflow:hidden;padding:20px;}
-.history-title{text-align:center;font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;margin-bottom:16px;color:#333;}
-table{width:100%;border-collapse:collapse;}
-th{text-align:left;padding:10px 14px;font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #e8a23d;}
-td{padding:10px 14px;font-size:12px;border-bottom:1px solid #f0f0f0;}
-.b-pending{color:#e8a23d;}
-.b-approved{color:#08c58a;}
-.b-rejected{color:#fc4b4a;}
-.btn-cancel{padding:5px 14px;border:1px solid #ccc;background:#fff;color:#555;border-radius:4px;font-size:11px;cursor:pointer;font-family:"Inter",sans-serif;}.btn-cancel:hover{background:#f5f5f5;border-color:#999;color:#333;}
-.empty-msg{text-align:center;color:#999;padding:20px;font-size:13px;}
+.btn-forgot { width:100%; padding:12px; background:rgba(255,255,255,0.06); color:#ccc; border:none; border-radius:4px; font-size:13px; cursor:pointer; margin-top:8px; font-family:'Inter',sans-serif; }
+.btn-forgot:hover { background:rgba(255,255,255,0.1); color:#fff; }
 
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:8px;font-size:13px;z-index:999;background:#333;color:#fff;border:1px solid #555;}
-.toast.error{border-color:#fc4b4a;color:#fc4b4a;}
+.toast { position:fixed; top:20px; left:50%; transform:translateX(-50%); padding:10px 20px; border-radius:8px; font-size:13px; z-index:999; background:#1a1a2e; color:#fff; border:1px solid #333; }
+.toast.error { border-color:#e53935; color:#e53935; }
 
-
-/* Mobile history cards */
-.history-cards{display:none;}
-.h-card{border:1px solid #e8e8e8;border-radius:8px;padding:14px;margin-bottom:10px;background:#fff;}
-.h-card-top{display:flex;justify-content:space-between;margin-bottom:6px;}
-.h-card-date{font-size:12px;color:#333;}
-.h-card-method{font-size:10px;color:#999;}
-.h-card-vals{text-align:right;font-size:13px;font-weight:600;color:#333;}
-.h-card-commission{font-size:11px;color:#999;font-weight:400;}
-.h-card-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
-.h-card-status{font-size:12px;font-weight:600;}
-.h-card-cancel{width:36px;height:36px;border:1px solid #ccc;border-radius:6px;background:#fff;color:#fc4b4a;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.h-card-cancel:hover{background:#fef2f2;border-color:#fc4b4a;}
-
-@media(max-width:600px){
-  .history-table{display:none;}
-  .history-cards{display:block;}
-}
-@media(max-width:600px){
-  .topbar{padding:12px 16px;}
-  .topbar-brand{font-size:20px;}
-  .shell{margin:16px auto;padding:0 12px;}
-  .page-h{font-size:20px;margin-bottom:6px;}
-  .page-sub{font-size:11px;margin-bottom:16px;padding:0 4px;}
-  .withdraw-card{flex-direction:column;min-height:auto;}
-  .method-list{width:100%;border-right:none;border-bottom:1px solid #e0e0e0;display:flex;overflow-x:auto;padding:0;flex-shrink:0;}
-  .method-item{flex-shrink:0;border-left:none !important;border-bottom:3px solid transparent;padding:10px 14px;}
-  .method-item.active{border-bottom-color:#08c58a;border-left:none !important;background:rgba(8,197,138,0.06);}
-  .withdraw-right{padding:20px 14px;}
-  .wf-balance-val{font-size:24px;}
-  .wf-field,.wf-row{max-width:100%;}
-  .wf-btn{max-width:100%;}
-  .wf-input{font-size:14px;padding:12px;}
-  .wf-info{font-size:11px;text-align:center;}
-  .history-card{padding:14px;}
-  .history-title{font-size:14px;}
-  th{padding:8px 10px;font-size:9px;}
-  td{padding:8px 10px;font-size:11px;}
+@media(max-width:480px) {
+  .topbar { padding:12px 16px; }
+  .topbar-brand { font-size:20px; }
+  .login-shell { margin:30px auto; }
 }
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <a href="/trade" class="topbar-brand"><img src="/img/logo-dark.png" alt="HudBroker" style="height:32px;"></a>
-  <div class="topbar-right">
-    <a href="/trade">Negociar</a>
+  <a href="/" class="topbar-brand"><img src="/img/logo-dark.png" alt="HudBroker" style="height:32px;"></a>
+  <div class="topbar-nav">
+    <a href="/login" class="topbar-btn-enter">Entrar</a>
+    <a href="/register" class="topbar-btn-create">Criar Conta</a>
   </div>
 </div>
 
-<div class="shell">
-  <div class="page-h">Retirada de fundos</div>
-  <div class="page-sub">Você tem 1 retirada(s) gratuita(s) por mês. O número de retiradas será contado automaticamente no início do próximo mês.</div>
-
-  <div class="withdraw-card">
-    <!-- Left: method list -->
-    <div class="method-list">
-      <button class="method-item active">
-        <div class="method-icon"><img src="/img/pix-logo.png" alt="PIX"></div>
-        <div><div class="method-name">PIX (CPF)</div><div class="method-time">1 - 3 dias úteis</div></div>
-      </button>
-    </div>
-
-    <!-- Right: form / success -->
-    <div class="withdraw-right">
-      <!-- Form -->
-      <div class="form-view" id="formView">
-        <div class="wf-balance">
-          <div class="wf-balance-label">Saldo disponível</div>
-          <div class="wf-balance-val" id="userBalance">R$ 0,00</div>
-        </div>
-        <div class="wf-field">
-          <div class="wf-row">
-            <input type="number" class="wf-input" id="withdrawAmount" placeholder="Valor desejado" step="0.01" min="150">
-            <div class="wf-suffix">&#128176; BRL</div>
-          </div>
-        </div>
-        <div class="wf-field">
-          <input type="text" class="wf-input" id="withdrawPixKey" placeholder="Chave PIX">
-        </div>
-        <div class="wf-info">Valor mínimo de saque: R$ 150,00 &nbsp; <strong>Taxa: 10%</strong></div>
-        <button class="wf-btn" id="btnWithdraw" onclick="requestWithdraw()">&#10004; Sacar</button>
-      </div>
-
-      <!-- Success -->
-      <div class="success-view" id="successView">
-        <div class="success-circle"><span class="material-icons-outlined">check</span></div>
-        <div class="success-text">Sua solicitação de retirada foi aceita</div>
-        <button class="success-btn" onclick="newRequest()">Nova solicitação</button>
-      </div>
-    </div>
+<div class="login-shell">
+  <div class="register-row">
+    <span class="register-row-text">Nao possui uma conta?</span>
+    <a href="/register" class="register-row-btn">Abra agora</a>
   </div>
 
-  <!-- History -->
-  <div class="history-card">
-    <div class="history-title">Solicitações de retirada</div>
-    <div class="history-table"><table>
-      <thead><tr><th>Data</th><th>Valor</th><th>Comissao</th><th>Status</th><th>Comentario</th><th></th></tr></thead>
-      <tbody id="historyBody"><tr><td colspan="6" class="empty-msg">Nenhuma solicitação</td></tr></tbody>
-    </table></div>
-    <div class="history-cards" id="historyCards"></div>
-  </div>
+  <div class="divider-text">ACESSE SUA CONTA</div>
+
+  <form id="loginForm">
+    <div class="form-group">
+      <input type="email" class="form-input" id="loginEmail" placeholder="E-mail" required>
+    </div>
+    <div class="form-group">
+      <input type="password" class="form-input" id="loginPassword" placeholder="Senha" required>
+    </div>
+    <button type="submit" class="btn-login" id="btnLogin">&#10004; Acessar</button>
+    <button type="button" class="btn-forgot" onclick="showForgotModal()">Esqueci minha senha</button>
+    <div id="forgotModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:center;justify-content:center;">
+      <div style="background:#10142a;border:1px solid #1c2040;border-radius:10px;padding:28px;width:360px;max-width:90vw;">
+        <div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:6px;">Esqueci minha senha</div>
+        <div style="font-size:13px;color:#888;margin-bottom:16px;">Digite seu email e enviaremos uma senha temporária.</div>
+        <input type="email" id="forgotEmail" placeholder="Seu email" style="width:100%;background:#0a0e17;border:1px solid #1c2040;color:#fff;border-radius:6px;padding:11px;font-size:14px;margin-bottom:12px;">
+        <button onclick="sendForgot()" id="forgotBtn" style="width:100%;padding:12px;background:#e8a23d;color:#000;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;">Enviar</button>
+        <div id="forgotMsg" style="font-size:12px;margin-top:10px;display:none;"></div>
+        <button onclick="document.getElementById('forgotModal').style.display='none'" style="width:100%;padding:10px;background:none;border:1px solid #1c2040;color:#888;border-radius:6px;font-size:13px;cursor:pointer;margin-top:8px;">Cancelar</button>
+      </div>
+    </div>
+  </form>
 </div>
 
-<script src="/js/api.js"></script>
+<script src="/js/api.js">
+function showForgotModal() {
+  document.getElementById('forgotModal').style.display = 'flex';
+  document.getElementById('forgotEmail').value = '';
+  document.getElementById('forgotMsg').style.display = 'none';
+}
+async function sendForgot() {
+  var email = document.getElementById('forgotEmail').value;
+  if (!email) { return; }
+  var btn = document.getElementById('forgotBtn');
+  var msg = document.getElementById('forgotMsg');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  try {
+    var res = await fetch('/api/auth/forgot-password', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email})});
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    msg.style.display = 'block'; msg.style.color = '#08c58a';
+    msg.textContent = 'Senha temporária enviada para seu email!';
+    setTimeout(function(){ document.getElementById('forgotModal').style.display='none'; }, 3000);
+  } catch(e) {
+    msg.style.display = 'block'; msg.style.color = '#fc4b4a';
+    msg.textContent = e.message || 'Erro ao enviar';
+  } finally { btn.disabled = false; btn.textContent = 'Enviar'; }
+}
+</script>
 <script>
-requireAuth('/login');
+(async function() {
+  var params = new URLSearchParams(location.search);
+  var ref = params.get('ref');
+  if (ref && !localStorage.getItem('hb_click_id')) {
+    try {
+      var result = await apiFetch('/affiliates/track', { method: 'POST', body: JSON.stringify({ refCode: ref }) });
+      localStorage.setItem('hb_click_id', result.clickId);
+    } catch(e) {}
+  }
+})();
 
-async function loadBalance() {
-  try {
-    var user = await apiFetch('/trading/me');
-    document.getElementById('userBalance').textContent = Number(user.balance || 0).toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
-  } catch(e) {}
-}
-
-async function loadHistory() {
-  try {
-    var rows = await apiFetch('/trading/withdrawals');
-    if (!rows.length) {
-      document.getElementById('historyBody').innerHTML = '<tr><td colspan="6" class="empty-msg">Nenhuma solicitação</td></tr>';
-      document.getElementById('historyCards').innerHTML = '<div class="empty-msg">Nenhuma solicitação</div>';
-      return;
-    }
-    document.getElementById('historyBody').innerHTML = rows.map(function(w) {
-      var d = new Date(w.created_at);
-      var dateStr = d.toLocaleDateString('pt-BR') + ', ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
-      var statusClass = w.status === 'approved' ? 'b-approved' : w.status === 'rejected' ? 'b-rejected' : w.status === 'cancelled' ? 'b-rejected' : 'b-pending';
-      var statusText = w.status === 'approved' ? 'Aprovado' : w.status === 'rejected' ? 'Rejeitado' : w.status === 'cancelled' ? 'Cancelado pelo usuário' : 'Em andamento';
-      var cancelBtn = w.status === 'pending' ? '<button class="btn-cancel" onclick="cancelWithdraw(\'' + w.id + '\')">Cancelar</button>' : '';
-      return '<tr><td>' + dateStr + '<br><span style="font-size:10px;color:#555;">PIX (CPF)</span></td><td>R$ ' + Number(w.amount).toLocaleString('pt-BR', {minimumFractionDigits:2}) + '</td><td>R$ ' + Number(w.tax || 0).toLocaleString('pt-BR', {minimumFractionDigits:2}) + '</td><td class="' + statusClass + '">' + statusText + '</td><td>--</td><td>' + cancelBtn + '</td></tr>';
-    }).join('');
-    // Mobile cards
-    document.getElementById('historyCards').innerHTML = rows.map(function(w) {
-      var d = new Date(w.created_at);
-      var dateStr = d.toLocaleDateString('pt-BR') + ', ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
-      var sc = w.status === 'approved' ? 'b-approved' : w.status === 'rejected' ? 'b-rejected' : w.status === 'cancelled' ? 'b-rejected' : 'b-pending';
-      var st = w.status === 'approved' ? 'Fundos enviados' : w.status === 'rejected' ? 'Rejeitado' : w.status === 'cancelled' ? 'Cancelado pelo usuário' : 'Em andamento';
-      var cx = w.status === 'pending' ? '<button class="h-card-cancel" onclick="cancelWithdraw(\'' + w.id + '\')">&#10005;</button>' : '';
-      return '<div class="h-card"><div class="h-card-top"><div><div class="h-card-date">' + dateStr + '</div><div class="h-card-method">PIX (CPF)</div></div><div><div class="h-card-vals">R$ ' + Number(w.amount).toLocaleString('pt-BR',{minimumFractionDigits:2}) + '</div><div class="h-card-commission">R$ ' + Number(w.tax||0).toLocaleString('pt-BR',{minimumFractionDigits:2}) + '</div></div></div><div class="h-card-bottom"><span class="h-card-status ' + sc + '">' + st + '</span>' + cx + '</div></div>';
-    }).join('');
-  } catch(e) {}
-}
-
-async function requestWithdraw() {
-  var amount = Number(document.getElementById('withdrawAmount').value);
-  var pixKey = document.getElementById('withdrawPixKey').value.trim();
-  var btn = document.getElementById('btnWithdraw');
-
-  if (!amount || amount < 150) { showToast('Valor mínimo: R$ 150,00', 'error'); return; }
-  if (!pixKey) { showToast('Informe sua chave PIX', 'error'); return; }
+document.getElementById('loginForm').onsubmit = async function(e) {
+  e.preventDefault();
+  var btn = document.getElementById('btnLogin');
+  var email = document.getElementById('loginEmail').value.trim();
+  var password = document.getElementById('loginPassword').value;
 
   btn.disabled = true;
-  btn.textContent = 'Processando...';
+  btn.innerHTML = 'Entrando...';
 
   try {
-    await apiFetch('/trading/withdraw', {
+    var data = await apiFetch('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ amount: amount, pixKey: pixKey })
+      body: JSON.stringify({ email: email, password: password })
     });
-    document.getElementById('formView').classList.add('hide');
-    document.getElementById('successView').classList.add('show');
-    loadBalance();
-    loadHistory();
-  } catch(e) {
-    showToast(e.message || 'Erro ao solicitar saque', 'error');
+    setToken(data.token);
+    window.location.href = '/trade';
+  } catch(err) {
+    showToast(err.message || 'Email ou senha incorretos', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '&#10004; Acessar';
   }
-  btn.disabled = false;
-  btn.innerHTML = '&#10004; Sacar';
-}
+};
 
-function newRequest() {
-  document.getElementById('formView').classList.remove('hide');
-  document.getElementById('successView').classList.remove('show');
-  document.getElementById('withdrawAmount').value = '';
-  document.getElementById('withdrawPixKey').value = '';
-  loadBalance();
+function showForgotModal() {
+  document.getElementById('forgotModal').style.display = 'flex';
+  document.getElementById('forgotEmail').value = '';
+  document.getElementById('forgotMsg').style.display = 'none';
 }
-
-async function cancelWithdraw(id) {
-  
+async function sendForgot() {
+  var email = document.getElementById('forgotEmail').value;
+  if (!email) { return; }
+  var btn = document.getElementById('forgotBtn');
+  var msg = document.getElementById('forgotMsg');
+  btn.disabled = true; btn.textContent = 'Enviando...';
   try {
-    await apiFetch('/trading/withdrawals/' + id + '/cancel', { method: 'PATCH' });
-    showToast('Saque cancelado. Saldo devolvido.');
-    loadBalance();
-    loadHistory();
+    var res = await fetch('/api/auth/forgot-password', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email})});
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    msg.style.display = 'block'; msg.style.color = '#08c58a';
+    msg.textContent = 'Senha temporária enviada para seu email!';
+    setTimeout(function(){ document.getElementById('forgotModal').style.display='none'; }, 3000);
   } catch(e) {
-    showToast(e.message || 'Erro ao cancelar', 'error');
-  }
+    msg.style.display = 'block'; msg.style.color = '#fc4b4a';
+    msg.textContent = e.message || 'Erro ao enviar';
+  } finally { btn.disabled = false; btn.textContent = 'Enviar'; }
 }
-
-loadBalance();
-loadHistory();
 </script>
 </body>
 </html>
