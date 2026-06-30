@@ -73,7 +73,8 @@ HudChart.create = function(containerId, tabId, asset, category) {
     category: category,
     pulseEl: null,
     priceLine: null,
-    tradeMarkers: []
+    tradeMarkers: [],
+    markersRef: null
   };
 
   // Criar o pulse dot
@@ -254,9 +255,14 @@ HudChart.markTrade = function(tabId, type, price, label) {
   };
 
   info.tradeMarkers.push(marker);
-  // Ordenar por tempo
   info.tradeMarkers.sort(function(a, b) { return a.time - b.time; });
-  info.series.setMarkers(info.tradeMarkers);
+
+  // v5 API: usar createSeriesMarkers
+  if (info.markersRef) {
+    info.markersRef.setMarkers(info.tradeMarkers);
+  } else {
+    info.markersRef = LightweightCharts.createSeriesMarkers(info.series, info.tradeMarkers);
+  }
 
   // Adicionar linha de preco de entrada
   if (info.priceLine) {
@@ -287,6 +293,10 @@ HudChart.changeInterval = function(tabId, interval) {
   var info = charts[tabId];
   if (!info) return;
   info.tradeMarkers = [];
+  if (info.markersRef) {
+    info.markersRef.setMarkers([]);
+    info.markersRef = null;
+  }
   if (info.priceLine) {
     info.series.removePriceLine(info.priceLine);
     info.priceLine = null;
