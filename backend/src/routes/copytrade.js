@@ -10,7 +10,8 @@ router.get('/masters', async (req, res) => {
   try {
     var masters = await query(
       `SELECT m.*, u.name as user_name, u.email,
-       (SELECT COUNT(*) FROM copy_trade_followers WHERE master_id = m.id AND is_active = true) as followers_count
+       (SELECT COUNT(*) FROM copy_trade_followers WHERE master_id = m.id AND is_active = true) as real_followers_count,
+       COALESCE(m.display_followers, (SELECT COUNT(*) FROM copy_trade_followers WHERE master_id = m.id AND is_active = true)) as followers_count
        FROM copy_trade_masters m LEFT JOIN users u ON m.user_id = u.id
        WHERE m.is_active = true ORDER BY m.win_rate DESC`
     );
@@ -124,6 +125,7 @@ router.patch('/admin/masters/:id', async (req, res) => {
     if (total_trades !== undefined) { updates.push('total_trades = $' + idx); values.push(Number(total_trades)); idx++; }
     if (name !== undefined) { updates.push('name = $' + idx); values.push(name); idx++; }
     if (description !== undefined) { updates.push('description = $' + idx); values.push(description); idx++; }
+    if (req.body.display_followers !== undefined) { updates.push('display_followers = $' + idx); values.push(Number(req.body.display_followers)); idx++; }
 
     if (updates.length === 0) return res.json({ ok: true });
 
