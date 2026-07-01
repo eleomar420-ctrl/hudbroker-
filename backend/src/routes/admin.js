@@ -205,6 +205,14 @@ router.get('/access-logs', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// Logs de acesso de um usuario especifico
+router.get('/users/:id/access-logs', async (req, res) => {
+  try {
+    var logs = await query('SELECT * FROM access_logs WHERE user_id = $1 ORDER BY created_at DESC LIMIT 50', [req.params.id]);
+    res.json(logs);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // Depositos de um usuario
 router.get('/users/:id/deposits', async (req, res) => {
   try {
