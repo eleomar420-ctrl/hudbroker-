@@ -24,12 +24,15 @@ a{text-decoration:none;color:inherit;}
 .main{margin-left:220px;flex:1;padding:20px 28px;overflow-y:auto;min-height:100vh;}
 .pg-title{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;margin-bottom:20px;}
 .dash-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
-.dash-card{background:#10142a;border:1px solid #1c2040;border-radius:10px;padding:18px;}
-.dash-num{font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:800;margin-bottom:2px;}
-.dash-num.gold{color:#e8a23d;}.dash-num.green{color:#08c58a;}.dash-num.red{color:#fc4b4a;}
-.dash-label{font-size:12px;color:#666;margin-bottom:10px;}
-.dash-sub{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-top:1px solid #1c2040;}
-.dash-sub-label{color:#555;}.dash-sub-val{color:#ccc;font-weight:600;}
+.dash-card{background:#10142a;border:1px solid #1c2040;border-radius:12px;padding:20px;}
+.dash-num{font-family:'Space Grotesk',sans-serif;font-size:36px;font-weight:800;margin-bottom:2px;color:#fff;}
+.dash-num.gold{color:#e8a23d;}.dash-num.green{color:#08c58a;}.dash-num.red{color:#fc4b4a;}.dash-num.blue{color:#5b8def;}
+.dash-label{font-size:13px;color:#666;margin-bottom:12px;}
+.dash-sub{display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-top:1px solid #1c2040;align-items:center;}
+.dash-sub-dot{width:6px;height:6px;border-radius:50%;margin-right:6px;display:inline-block;}
+.dash-sub-dot.green{background:#08c58a;}.dash-sub-dot.blue{background:#5b8def;}.dash-sub-dot.gold{background:#e8a23d;}
+.dash-sub-label{color:#555;display:flex;align-items:center;}.dash-sub-val{color:#ccc;font-weight:600;}
+.dash-sub-val .ftd-badge{background:rgba(91,141,239,0.15);color:#5b8def;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;margin-right:6px;}
 .tbl-wrap{background:#10142a;border:1px solid #1c2040;border-radius:10px;overflow:hidden;}
 .tbl-head{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #1c2040;}
 .tbl-title{font-size:15px;font-weight:600;}
@@ -95,10 +98,34 @@ tr{cursor:pointer;transition:background 0.1s;}tr:hover{background:rgba(255,255,2
 <div class="tab act" id="t-dashboard">
   <div class="pg-title">Dashboard</div>
   <div class="dash-row">
-    <div class="dash-card"><div class="dash-num gold" id="dUsers">--</div><div class="dash-label">Cadastros</div><div class="dash-sub"><span class="dash-sub-label">Hoje</span><span class="dash-sub-val" id="dToday">--</span></div></div>
-    <div class="dash-card"><div class="dash-num green" id="dDepTotal">--</div><div class="dash-label">Depósitos</div><div class="dash-sub"><span class="dash-sub-label">Pagos</span><span class="dash-sub-val" id="dDepCount">--</span></div></div>
-    <div class="dash-card"><div class="dash-num" id="dTrades">--</div><div class="dash-label">Operações</div><div class="dash-sub"><span class="dash-sub-label">Hoje</span><span class="dash-sub-val" id="dTradesToday">--</span></div></div>
-    <div class="dash-card"><div class="dash-num red" id="dBalance">--</div><div class="dash-label">Saldo clientes</div></div>
+    <div class="dash-card">
+      <div class="dash-num gold" id="dUsers">--</div>
+      <div class="dash-label">Cadastros</div>
+      <div class="dash-sub"><span class="dash-sub-label"><span class="dash-sub-dot green"></span>Hoje</span><span class="dash-sub-val" id="dToday">--</span></div>
+      <div class="dash-sub"><span class="dash-sub-label"><span class="dash-sub-dot blue"></span>Periodo</span><span class="dash-sub-val" id="dPeriod">--</span></div>
+      <div class="dash-sub"><span class="dash-sub-label"><span class="dash-sub-dot gold"></span>FTD (Periodo)</span><span class="dash-sub-val"><span class="ftd-badge" id="dFtdCount">--</span><span id="dFtdTotal">--</span></span></div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-num green" id="dDepTotal">--</div>
+      <div class="dash-label">Depositos</div>
+      <div class="dash-sub"><span class="dash-sub-label"><span class="dash-sub-dot green"></span>Pagos</span><span class="dash-sub-val" id="dDepCount">--</span></div>
+      <div class="dash-sub"><span class="dash-sub-label"><span class="dash-sub-dot blue"></span>Hoje</span><span class="dash-sub-val" id="dDepToday">--</span></div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-num blue" id="dTrades">--</div>
+      <div class="dash-label">Operacoes</div>
+      <div class="dash-sub"><span class="dash-sub-label"><span class="dash-sub-dot green"></span>Hoje</span><span class="dash-sub-val" id="dTradesToday">--</span></div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-num" id="dBalance">--</div>
+      <div class="dash-label">Saldo Clientes</div>
+      <div class="dash-sub"><span class="dash-sub-label"><span class="dash-sub-dot green"></span>Saques pagos</span><span class="dash-sub-val" id="dWithTotal">--</span></div>
+      <div class="dash-sub"><span class="dash-sub-label"><span class="dash-sub-dot gold"></span>Saques pendentes</span><span class="dash-sub-val" id="dWithPending">--</span></div>
+    </div>
+  </div>
+  <div class="tbl-wrap">
+    <div class="tbl-head"><div class="tbl-title">Movimentacoes Recentes</div></div>
+    <table><thead><tr><th>#</th><th>Data</th><th>Titulo</th><th>Tipo</th></tr></thead><tbody id="txBody"></tbody></table>
   </div>
 </div>
 <div class="tab" id="t-users"><div class="pg-title">Usuários</div><div class="tbl-wrap"><div class="tbl-head"><div class="tbl-title">Todos os Usuários</div><input class="tbl-search" id="uSearch" placeholder="Buscar..." oninput="filterU()"></div><table><thead><tr><th>Nome</th><th>Email</th><th>Saldo Real</th><th>Saldo Demo</th><th>Status</th><th>Cadastro</th></tr></thead><tbody id="uBody"></tbody></table></div></div>
@@ -231,13 +258,28 @@ function showUdTab(n,el){
 async function loadDash(){
   try{var s=await apiFetch('/admin/stats');
   document.getElementById('dUsers').textContent=s.users;
-  document.getElementById('dToday').textContent=s.trades.today;
+  document.getElementById('dToday').textContent=s.usersToday;
+  document.getElementById('dPeriod').textContent=s.usersPeriod;
+  document.getElementById('dFtdCount').textContent=s.ftd.count;
+  document.getElementById('dFtdTotal').textContent=fmt(s.ftd.total);
   document.getElementById('dDepTotal').textContent=fmt(s.deposits.total);
   document.getElementById('dDepCount').textContent=s.deposits.count;
+  document.getElementById('dDepToday').textContent=fmt(s.depositsToday.total);
   document.getElementById('dTrades').textContent=s.trades.total;
   document.getElementById('dTradesToday').textContent=s.trades.today;
   document.getElementById('dBalance').textContent=fmt(s.totalBalance);
+  document.getElementById('dWithTotal').textContent=fmt(s.withdrawals.total);
+  document.getElementById('dWithPending').textContent=s.pendingWithdrawals.count+' ('+fmt(s.pendingWithdrawals.total)+')';
   }catch(e){}
+  // Carregar movimentacoes
+  try{var tx=await apiFetch('/admin/transactions');
+  document.getElementById('txBody').innerHTML=tx.map(function(t,i){
+    var dt=new Date(t.created_at);
+    var dateStr=dt.toLocaleDateString('pt-BR')+' '+dt.toLocaleTimeString('pt-BR');
+    var title=(t.name||t.email||'--')+' - '+(t.tipo==='entrada'?'Deposito':'Saque')+' de '+fmt(t.amount);
+    var badge=t.tipo==='entrada'?'<span class="badge b-paid">entrada</span>':'<span class="badge b-pending" style="background:rgba(252,75,74,0.1);color:#fc4b4a;">saida</span>';
+    return '<tr><td>'+(i+1)+'</td><td>'+dateStr+'</td><td><strong>'+title+'</strong></td><td>'+badge+'</td></tr>';
+  }).join('');}catch(e){}
 }
 
 async function loadUsers(){try{allUsers=await apiFetch('/admin/users');renderU(allUsers);}catch(e){}}
