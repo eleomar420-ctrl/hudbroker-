@@ -164,7 +164,7 @@ tr{cursor:pointer;transition:background 0.1s;}tr:hover{background:rgba(255,255,2
   <div class="pg-title">Logs de Acesso</div>
   <div class="tbl-wrap">
     <div class="tbl-head"><div class="tbl-title">Ultimos Acessos</div></div>
-    <table><thead><tr><th>#</th><th>Data</th><th>Email</th><th>IP</th><th>User Agent</th><th>Referer</th><th>Tipo</th></tr></thead><tbody id="logBody"></tbody></table>
+    <table><thead><tr><th>#</th><th>Data</th><th>Email</th><th>IP</th><th>Cidade</th><th>Provedor</th><th>User Agent</th><th>Referer</th><th>Tipo</th></tr></thead><tbody id="logBody"></tbody></table>
   </div>
 </div>
 <div class="tab" id="t-config">
@@ -230,7 +230,7 @@ tr{cursor:pointer;transition:background 0.1s;}tr:hover{background:rgba(255,255,2
     </div>
     <div class="ud-panel" id="p-udlogs">
       <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Logs de Acesso</div>
-      <table style="width:100%;font-size:11px;"><thead><tr><th style="text-align:left;padding:6px;color:#555;">#</th><th style="text-align:left;padding:6px;color:#555;">Data</th><th style="text-align:left;padding:6px;color:#555;">IP</th><th style="text-align:left;padding:6px;color:#555;">User Agent</th><th style="text-align:left;padding:6px;color:#555;">Referer</th><th style="text-align:left;padding:6px;color:#555;">Tipo</th></tr></thead><tbody id="udLogBody"><tr><td colspan="6" style="text-align:center;color:#555;padding:20px;">Carregando...</td></tr></tbody></table>
+      <table style="width:100%;font-size:11px;"><thead><tr><th style="text-align:left;padding:6px;color:#555;">#</th><th style="text-align:left;padding:6px;color:#555;">Data</th><th style="text-align:left;padding:6px;color:#555;">IP</th><th style="text-align:left;padding:6px;color:#555;">Cidade</th><th style="text-align:left;padding:6px;color:#555;">Provedor</th><th style="text-align:left;padding:6px;color:#555;">User Agent</th><th style="text-align:left;padding:6px;color:#555;">Tipo</th></tr></thead><tbody id="udLogBody"><tr><td colspan="7" style="text-align:center;color:#555;padding:20px;">Carregando...</td></tr></tbody></table>
     </div>
   </div>
 </div>
@@ -433,9 +433,11 @@ async function loadLogs(){
     document.getElementById('logBody').innerHTML=logs.map(function(l,i){
       var dt=new Date(l.created_at);
       var dateStr=dt.toLocaleDateString('pt-BR')+' '+dt.toLocaleTimeString('pt-BR');
-      var ua=(l.user_agent||'').substring(0,40)+'...';
-      var ref=(l.referer||'--').substring(0,30);
-      return '<tr><td>'+(i+1)+'</td><td style="font-size:11px;">'+dateStr+'</td><td>'+l.email+'</td><td style="font-size:11px;color:#888;">'+l.ip+'</td><td style="font-size:10px;color:#555;">'+ua+'</td><td style="font-size:10px;color:#555;">'+ref+'</td><td><span class="badge b-paid">'+l.tipo+'</span></td></tr>';
+      var ua=(l.user_agent||'').substring(0,35)+'...';
+      var ref=(l.referer||'--').substring(0,25);
+      var loc=(l.city||'-')+'/'+(l.country||'-');
+      var prov=(l.provider||'-');
+      return '<tr><td>'+(i+1)+'</td><td style="font-size:11px;">'+dateStr+'</td><td>'+l.email+'</td><td style="font-size:11px;color:#888;">'+l.ip+'</td><td style="font-size:11px;">'+loc+'</td><td style="font-size:11px;color:#888;">'+prov+'</td><td style="font-size:10px;color:#555;">'+ua+'</td><td style="font-size:10px;color:#555;">'+ref+'</td><td><span class="badge b-paid">'+l.tipo+'</span></td></tr>';
     }).join('');
   }catch(e){}
 }
@@ -445,15 +447,16 @@ async function loadUserLogs(){
   try{
     var logs=await apiFetch('/admin/users/'+curUser.id+'/access-logs');
     var body=document.getElementById('udLogBody');
-    if(!logs||logs.length===0){body.innerHTML='<tr><td colspan="6" style="text-align:center;color:#555;padding:20px;">Nenhum log de acesso</td></tr>';return;}
+    if(!logs||logs.length===0){body.innerHTML='<tr><td colspan="7" style="text-align:center;color:#555;padding:20px;">Nenhum log de acesso</td></tr>';return;}
     body.innerHTML=logs.map(function(l,i){
       var dt=new Date(l.created_at);
       var dateStr=dt.toLocaleDateString('pt-BR')+' '+dt.toLocaleTimeString('pt-BR');
-      var ua=(l.user_agent||'').substring(0,50)+'...';
-      var ref=(l.referer||'--');
-      return '<tr style="border-bottom:1px solid #1c2040;"><td style="padding:8px;color:#888;">'+(i+1)+'</td><td style="padding:8px;">'+dateStr+'</td><td style="padding:8px;color:#888;font-size:10px;">'+l.ip+'</td><td style="padding:8px;color:#555;font-size:10px;">'+ua+'</td><td style="padding:8px;color:#555;font-size:10px;">'+ref+'</td><td style="padding:8px;"><span class="badge b-paid">'+l.tipo+'</span></td></tr>';
+      var ua=(l.user_agent||'').substring(0,40)+'...';
+      var loc=(l.city||'-')+'/'+(l.country||'-');
+      var prov=(l.provider||'-');
+      return '<tr style="border-bottom:1px solid #1c2040;"><td style="padding:8px;color:#888;">'+(i+1)+'</td><td style="padding:8px;">'+dateStr+'</td><td style="padding:8px;color:#888;font-size:10px;">'+l.ip+'</td><td style="padding:8px;">'+loc+'</td><td style="padding:8px;color:#888;font-size:10px;">'+prov+'</td><td style="padding:8px;color:#555;font-size:10px;">'+ua+'</td><td style="padding:8px;"><span class="badge b-paid">'+l.tipo+'</span></td></tr>';
     }).join('');
-  }catch(e){document.getElementById('udLogBody').innerHTML='<tr><td colspan="6" style="text-align:center;color:#555;padding:20px;">Erro ao carregar</td></tr>';}
+  }catch(e){document.getElementById('udLogBody').innerHTML='<tr><td colspan="7" style="text-align:center;color:#555;padding:20px;">Erro ao carregar</td></tr>';}
 }
 
 async function openKycModal(userId, email){
