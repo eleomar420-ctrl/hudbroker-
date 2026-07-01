@@ -319,8 +319,8 @@ async function openDetail(id){
     document.getElementById('rKyc').textContent=u.kyc_status||'pendente';
     document.getElementById('rCountry').textContent=u.country||'BR';
     document.getElementById('rStatus').textContent=u.status||'active';
-    // Check copy trade master status
-    checkCopyTradeStatus(u.id);
+    // Check copy trade master status (non-blocking)
+    try { checkCopyTradeStatus(u.id); } catch(ctErr) {}
     document.getElementById('rBal').textContent=fmt(u.balance);
     document.getElementById('rDemo').textContent=fmt(u.demo_balance);
     document.getElementById('eEmail').value=u.email||'';
@@ -465,8 +465,10 @@ var ctMasterData = null;
 
 async function checkCopyTradeStatus(userId) {
   var btn = document.getElementById('ctToggleBtn');
+  if (!btn) return;
   try {
     var masters = await apiFetch('/copytrade/admin/masters');
+    if (!Array.isArray(masters)) { btn.textContent='ATIVAR';btn.style.background='rgba(232,162,61,0.15)';btn.style.color='#e8a23d';ctMasterData=null;return; }
     ctMasterData = masters.find(function(m) { return m.user_id === userId; });
     if (ctMasterData && ctMasterData.is_active) {
       btn.textContent = 'ATIVO';
