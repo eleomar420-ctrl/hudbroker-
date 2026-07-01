@@ -254,6 +254,41 @@ html, body { height: 100%; overflow: hidden; }
 /* Painel de Histórico — janela flutuante */
 .history-panel { display: none; position: fixed; left: 72px; top: 0; bottom: 0; width: 240px; background: #000000; z-index: 96; flex-direction: column; border-right: 1px solid var(--border); box-shadow: 4px 0 20px rgba(0,0,0,0.4); }
 .history-panel.open { display: flex; }
+.copytrade-panel { display: none; position: fixed; left: 72px; top: 0; bottom: 0; width: 320px; background: #000000; z-index: 96; flex-direction: column; border-right: 1px solid var(--border); box-shadow: 4px 0 20px rgba(0,0,0,0.4); overflow-y: auto; }
+.copytrade-panel.open { display: flex; }
+.ct-header { display:flex;align-items:center;gap:8px;padding:12px;border-bottom:1px solid var(--border);flex-shrink:0; }
+.ct-header .back-btn { background:none;border:none;color:#fff;cursor:pointer;font-size:16px;padding:4px; }
+.ct-header h2 { font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;flex:1; }
+.ct-tabs { display:flex;border-bottom:1px solid var(--border); }
+.ct-tab { flex:1;padding:10px;text-align:center;font-size:11px;font-weight:600;color:#555;cursor:pointer;border:none;background:none;font-family:'Inter',sans-serif;border-bottom:2px solid transparent; }
+.ct-tab:hover { color:#aaa; }
+.ct-tab.act { color:var(--brand);border-bottom-color:var(--brand); }
+.ct-content { flex:1;overflow-y:auto;padding:12px; }
+.ct-master-card { background:var(--bg-elevated);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px; }
+.ct-master-top { display:flex;align-items:center;gap:10px;margin-bottom:10px; }
+.ct-master-avatar { width:40px;height:40px;border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;color:#000;flex-shrink:0; }
+.ct-master-info { flex:1; }
+.ct-master-name { font-weight:600;font-size:13px; }
+.ct-master-desc { font-size:10px;color:#888;margin-top:2px; }
+.ct-master-stats { display:flex;gap:8px;margin-bottom:10px; }
+.ct-stat { flex:1;text-align:center;padding:6px;background:#0a0a0a;border-radius:6px; }
+.ct-stat-val { font-size:14px;font-weight:700;color:var(--brand); }
+.ct-stat-label { font-size:9px;color:#555;margin-top:2px; }
+.ct-follow-btn { width:100%;padding:10px;border-radius:8px;border:none;font-weight:600;font-size:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s; }
+.ct-follow-btn.follow { background:var(--brand);color:#000; }
+.ct-follow-btn.follow:hover { opacity:0.85; }
+.ct-follow-btn.unfollow { background:rgba(252,75,74,0.1);color:#fc4b4a;border:1px solid rgba(252,75,74,0.2); }
+.ct-config { margin-top:8px;padding:10px;background:#0a0a0a;border-radius:8px;display:none; }
+.ct-config.open { display:block; }
+.ct-config label { font-size:10px;color:#888;display:block;margin-bottom:4px;font-weight:600; }
+.ct-config select, .ct-config input { width:100%;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--bg-elevated);color:#fff;font-size:12px;font-family:'Inter',sans-serif;margin-bottom:8px; }
+.ct-config select:focus, .ct-config input:focus { border-color:var(--brand);outline:none; }
+.ct-log-item { padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:11px;display:flex;justify-content:space-between;align-items:center; }
+.ct-log-asset { font-weight:600; }
+.ct-log-result { font-weight:700; }
+.ct-log-win { color:#08c58a; }
+.ct-log-loss { color:#fc4b4a; }
+.ct-empty { text-align:center;color:#555;padding:30px 10px;font-size:12px; }
 .history-header {
   display: flex; align-items: center; gap: 8px; padding: 10px 10px;
   border-bottom: 1px solid var(--border); flex-shrink: 0; background: #000000;
@@ -500,6 +535,7 @@ html, body { height: 100%; overflow: hidden; }
   .side-menu { width: 72px; max-width: 72px; }
   .trade-shell { margin-left: 0; background:#111728; height:100vh; height:100dvh; display:flex; flex-direction:column; }
   .history-panel { left: 0; width: 100vw; }
+  .copytrade-panel { left: 0; width: 100vw; }
   .assets-screen { background: #0a0e17; top: 0; left: 0; width: 100%; max-width: none; border-left: none; box-shadow: none; }
   .assets-screen-header { padding: 14px 16px; }
   .assets-screen-header h1 { font-size: 16px; font-weight: 600; }
@@ -892,6 +928,28 @@ html, body { height: 100%; overflow: hidden; }
       <button class="footer-icon-btn" id="footerFullscreenBtn" title="Tela cheia">⛶</button>
       <span class="footer-clock" id="footerClock">HORA ATUAL <strong>--:--:--</strong></span>
     </div>
+  </div>
+</div>
+
+<!-- Copy Trade Panel -->
+<div class="copytrade-panel" id="copyTradePanel">
+  <div class="ct-header">
+    <button class="back-btn" onclick="closeCopyTrade()">&larr;</button>
+    <h2>Copy Trade</h2>
+  </div>
+  <div class="ct-tabs">
+    <button class="ct-tab act" onclick="showCtTab('traders',this)">Traders</button>
+    <button class="ct-tab" onclick="showCtTab('ativos',this)">Meus Ativos</button>
+    <button class="ct-tab" onclick="showCtTab('historico',this)">Historico</button>
+  </div>
+  <div class="ct-content" id="ctTraders" style="display:block;">
+    <div class="ct-empty">Carregando traders...</div>
+  </div>
+  <div class="ct-content" id="ctAtivos" style="display:none;">
+    <div class="ct-empty">Carregando...</div>
+  </div>
+  <div class="ct-content" id="ctHistorico" style="display:none;">
+    <div class="ct-empty">Carregando...</div>
   </div>
 </div>
 
@@ -1707,6 +1765,8 @@ document.querySelectorAll('.menu-item[data-action]').forEach(item => {
       openAccountPanel();
     } else if (action === 'support') {
       openSupportChat();
+    } else if (action === 'copytrade') {
+      openCopyTrade();
     } else {
       showToast('Em breve');
     }
@@ -1719,6 +1779,151 @@ function openAssetsScreen() {
 }
 function closeAssetsScreen() {
   document.getElementById('assetsScreen').classList.remove('open');
+}
+
+// ─── Copy Trade ───
+function openCopyTrade() {
+  document.getElementById('copyTradePanel').classList.add('open');
+  loadCtMasters();
+}
+function closeCopyTrade() {
+  document.getElementById('copyTradePanel').classList.remove('open');
+}
+function showCtTab(tab, el) {
+  document.querySelectorAll('.ct-tab').forEach(function(t) { t.classList.remove('act'); });
+  el.classList.add('act');
+  document.getElementById('ctTraders').style.display = tab === 'traders' ? 'block' : 'none';
+  document.getElementById('ctAtivos').style.display = tab === 'ativos' ? 'block' : 'none';
+  document.getElementById('ctHistorico').style.display = tab === 'historico' ? 'block' : 'none';
+  if (tab === 'ativos') loadCtMyFollows();
+  if (tab === 'historico') loadCtHistory();
+}
+
+async function loadCtMasters() {
+  try {
+    var masters = await apiFetch('/copytrade/masters');
+    var myFollows = await apiFetch('/copytrade/my-follows');
+    var followedIds = myFollows.filter(function(f) { return f.is_active; }).map(function(f) { return f.master_id; });
+
+    var el = document.getElementById('ctTraders');
+    if (!masters || masters.length === 0) {
+      el.innerHTML = '<div class="ct-empty"><span class="material-icons-outlined" style="font-size:40px;color:#333;display:block;margin-bottom:8px;">sensors</span>Nenhum trader disponivel no momento.<br>Em breve teremos traders profissionais aqui.</div>';
+      return;
+    }
+    el.innerHTML = masters.map(function(m) {
+      var isFollowing = followedIds.indexOf(m.id) >= 0;
+      var initial = (m.name || '?')[0].toUpperCase();
+      var winRate = m.win_rate ? m.win_rate.toFixed(0) : '0';
+      var btnClass = isFollowing ? 'unfollow' : 'follow';
+      var btnText = isFollowing ? 'Parar de copiar' : 'Copiar Trader';
+      var configDisplay = isFollowing ? '' : 'style="display:none"';
+
+      return '<div class="ct-master-card">' +
+        '<div class="ct-master-top">' +
+          '<div class="ct-master-avatar">' + initial + '</div>' +
+          '<div class="ct-master-info"><div class="ct-master-name">' + m.name + '</div><div class="ct-master-desc">' + (m.description || 'Trader profissional') + '</div></div>' +
+        '</div>' +
+        '<div class="ct-master-stats">' +
+          '<div class="ct-stat"><div class="ct-stat-val">' + winRate + '%</div><div class="ct-stat-label">Win Rate</div></div>' +
+          '<div class="ct-stat"><div class="ct-stat-val">' + (m.total_trades || 0) + '</div><div class="ct-stat-label">Operacoes</div></div>' +
+          '<div class="ct-stat"><div class="ct-stat-val">' + (m.followers_count || 0) + '</div><div class="ct-stat-label">Copiando</div></div>' +
+        '</div>' +
+        '<div class="ct-config ' + (isFollowing ? 'open' : '') + '" id="ctConfig_' + m.id + '">' +
+          '<label>Modo de valor</label>' +
+          '<select id="ctMode_' + m.id + '" onchange="toggleCtAmount(\'' + m.id + '\')">' +
+            '<option value="fixed"' + (isFollowing ? '' : ' selected') + '>Valor fixo por operacao</option>' +
+            '<option value="percent">Porcentagem da banca</option>' +
+          '</select>' +
+          '<div id="ctFixedDiv_' + m.id + '"><label>Valor por operacao (R$)</label><input type="number" id="ctFixed_' + m.id + '" value="10" min="5" placeholder="R$ 10"></div>' +
+          '<div id="ctPercentDiv_' + m.id + '" style="display:none"><label>Porcentagem da banca (%)</label><input type="number" id="ctPercent_' + m.id + '" value="5" min="1" max="20" placeholder="5%"></div>' +
+        '</div>' +
+        '<button class="ct-follow-btn ' + btnClass + '" onclick="' + (isFollowing ? 'ctUnfollow(\'' + m.id + '\')' : 'ctFollow(\'' + m.id + '\')') + '">' + btnText + '</button>' +
+      '</div>';
+    }).join('');
+  } catch (e) {
+    document.getElementById('ctTraders').innerHTML = '<div class="ct-empty">Erro ao carregar traders</div>';
+  }
+}
+
+function toggleCtAmount(masterId) {
+  var mode = document.getElementById('ctMode_' + masterId).value;
+  document.getElementById('ctFixedDiv_' + masterId).style.display = mode === 'fixed' ? 'block' : 'none';
+  document.getElementById('ctPercentDiv_' + masterId).style.display = mode === 'percent' ? 'block' : 'none';
+}
+
+async function ctFollow(masterId) {
+  var config = document.getElementById('ctConfig_' + masterId);
+  if (!config.classList.contains('open')) {
+    config.classList.add('open');
+    return;
+  }
+  var mode = document.getElementById('ctMode_' + masterId).value;
+  var fixed = parseFloat(document.getElementById('ctFixed_' + masterId).value) || 10;
+  var percent = parseFloat(document.getElementById('ctPercent_' + masterId).value) || 5;
+
+  try {
+    await apiFetch('/copytrade/follow', {
+      method: 'POST',
+      body: JSON.stringify({ masterId: masterId, stakeMode: mode, fixedAmount: fixed, percentAmount: percent })
+    });
+    showToast('Copy Trade ativado!');
+    loadCtMasters();
+  } catch (e) { showToast(e.message || 'Erro', 'error'); }
+}
+
+async function ctUnfollow(masterId) {
+  if (!confirm('Parar de copiar este trader?')) return;
+  try {
+    await apiFetch('/copytrade/unfollow', { method: 'POST', body: JSON.stringify({ masterId: masterId }) });
+    showToast('Copy Trade desativado');
+    loadCtMasters();
+  } catch (e) { showToast('Erro', 'error'); }
+}
+
+async function loadCtMyFollows() {
+  try {
+    var follows = await apiFetch('/copytrade/my-follows');
+    var el = document.getElementById('ctAtivos');
+    if (!follows || follows.length === 0) {
+      el.innerHTML = '<div class="ct-empty">Voce nao esta copiando nenhum trader.<br>Va na aba "Traders" pra comecar.</div>';
+      return;
+    }
+    el.innerHTML = follows.map(function(f) {
+      var status = f.is_active ? '<span style="color:#08c58a;">Ativo</span>' : '<span style="color:#fc4b4a;">Parado</span>';
+      return '<div class="ct-master-card">' +
+        '<div class="ct-master-top">' +
+          '<div class="ct-master-avatar">' + (f.master_name || '?')[0] + '</div>' +
+          '<div class="ct-master-info"><div class="ct-master-name">' + (f.master_name || 'Trader') + '</div><div class="ct-master-desc">' + status + ' | ' + f.total_copied + ' operacoes copiadas</div></div>' +
+        '</div>' +
+        '<div class="ct-master-stats">' +
+          '<div class="ct-stat"><div class="ct-stat-val">' + (f.win_rate || 0).toFixed(0) + '%</div><div class="ct-stat-label">Win Rate</div></div>' +
+          '<div class="ct-stat"><div class="ct-stat-val">' + f.total_copied + '</div><div class="ct-stat-label">Copiadas</div></div>' +
+          '<div class="ct-stat"><div class="ct-stat-val">R$' + (f.stake_mode === 'fixed' ? f.fixed_amount : f.percent_amount + '%') + '</div><div class="ct-stat-label">Por trade</div></div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } catch (e) { document.getElementById('ctAtivos').innerHTML = '<div class="ct-empty">Erro ao carregar</div>'; }
+}
+
+async function loadCtHistory() {
+  try {
+    var logs = await apiFetch('/copytrade/my-history');
+    var el = document.getElementById('ctHistorico');
+    if (!logs || logs.length === 0) {
+      el.innerHTML = '<div class="ct-empty">Nenhuma operacao copiada ainda.</div>';
+      return;
+    }
+    el.innerHTML = logs.map(function(l) {
+      var dir = l.direction === 'up' ? '⬆️' : '⬇️';
+      var dt = new Date(l.created_at).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+      var resultClass = l.result === 'won' ? 'ct-log-win' : l.result === 'lost' ? 'ct-log-loss' : '';
+      var profitText = l.profit ? (l.profit > 0 ? '+' : '') + 'R$' + l.profit.toFixed(2) : '--';
+      return '<div class="ct-log-item">' +
+        '<div><span class="ct-log-asset">' + dir + ' ' + (l.asset || '') + '</span><br><span style="color:#555;font-size:9px;">' + dt + ' | via ' + (l.master_name || 'Trader') + '</span></div>' +
+        '<div class="ct-log-result ' + resultClass + '">R$' + l.stake.toFixed(2) + '<br><span style="font-size:10px;">' + profitText + '</span></div>' +
+      '</div>';
+    }).join('');
+  } catch (e) { document.getElementById('ctHistorico').innerHTML = '<div class="ct-empty">Erro ao carregar</div>'; }
 }
 function toggleAssetSearch(){
   var el = document.getElementById('assetsSearchInput');
