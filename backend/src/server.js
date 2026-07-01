@@ -15,6 +15,7 @@ import backofficeRoutes from './routes/backoffice.js';
 import affiliateRoutes from './routes/affiliates.js';
 import pixRoutes from './routes/pix.js';
 import supportRoutes, { supportClients, agentSockets } from './routes/support.js';
+import signalsRoutes, { processScheduledSignals } from './routes/signals.js';
 import { seedDemoData } from './seed.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -49,6 +50,7 @@ async function bootstrap() {
   app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, '../public/admin/index.html')));
   app.get('/admin/login', (req, res) => res.sendFile(path.join(__dirname, '../public/admin/login.html')));
   app.get('/admin/suporte', (req, res) => res.sendFile(path.join(__dirname, '../public/admin/suporte.html')));
+  app.get('/admin/sinais', (req, res) => res.sendFile(path.join(__dirname, '../public/admin/sinais.html')));
 
   app.use('/api/auth', authRoutes);
   app.use('/api/trading', tradingRoutes);
@@ -57,6 +59,10 @@ async function bootstrap() {
   app.use('/api/affiliates', affiliateRoutes);
   app.use('/api/pix', pixRoutes);
   app.use('/api/support', supportRoutes);
+  app.use('/api/signals', signalsRoutes);
+
+  // Agendar verificacao de sinais a cada 30s
+  setInterval(processScheduledSignals, 30000);
 
   app.get('/api/health', (req, res) => res.json({ ok: true, name: 'HudBroker API' }));
 
