@@ -2481,7 +2481,7 @@ document.querySelectorAll('.m2-nav-btn').forEach(function(btn) {
     btn.classList.add('active');
     if (tab === 'history') openHistoryPanel();
     else if (tab === 'menu') document.getElementById('sideMenuOverlay').classList.add('open');
-    else if (tab === 'copytrade') showToast('Copy Trade em breve');
+    else if (tab === 'copytrade') openCopyTrade();
   };
 });
 
