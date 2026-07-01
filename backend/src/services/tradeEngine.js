@@ -57,6 +57,12 @@ export async function openTrade({ userId, accountType = 'demo', asset, direction
   const timer = setTimeout(() => resolveTrade(tradeId), durationSeconds * 1000);
   pendingTimers.set(tradeId, timer);
 
+  // Disparar copy trade (se for master)
+  try {
+    const { executeCopyTrades } = await import('../routes/copytrade.js');
+    executeCopyTrades(userId, tradeId, asset, direction, durationSeconds, payoutPct, accountType);
+  } catch(e) {}
+
   return { tradeId, entryPrice, expiresAt: expiresAt.toISOString() };
 }
 
