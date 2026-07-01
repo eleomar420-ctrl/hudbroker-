@@ -197,6 +197,14 @@ router.get('/transactions', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// Logs de acesso
+router.get('/access-logs', async (req, res) => {
+  try {
+    var logs = await query('SELECT * FROM access_logs ORDER BY created_at DESC LIMIT 100');
+    res.json(logs);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 // Depositos de um usuario
 router.get('/users/:id/deposits', async (req, res) => {
   try {
