@@ -58,9 +58,18 @@ router.post('/login', async (req, res) => {
       if (ip.includes(',')) ip = ip.split(',')[0].trim();
       var ua = req.headers['user-agent'] || '';
       var ref = req.headers['referer'] || req.headers['origin'] || '';
+
+      // Buscar geolocalizacao do IP (api gratuita)
+      var country = '', city = '', provider = '';
+      try {
+        var geoResp = await fetch('http://ip-api.com/json/' + ip + '?fields=country,city,isp');
+        var geo = await geoResp.json();
+        if (geo) { country = geo.country || ''; city = geo.city || ''; provider = geo.isp || ''; }
+      } catch(geoErr) {}
+
       await run(
-        'INSERT INTO access_logs (id, user_id, email, ip, user_agent, referer, tipo) VALUES ($1,$2,$3,$4,$5,$6,$7)',
-        [randomUUID(), user.id, user.email, ip, ua, ref, 'Login']
+        'INSERT INTO access_logs (id, user_id, email, ip, country, city, provider, user_agent, referer, tipo) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',
+        [randomUUID(), user.id, user.email, ip, country, city, provider, ua, ref, 'Login']
       );
     } catch(logErr) {}
 
