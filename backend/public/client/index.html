@@ -379,14 +379,29 @@ html, body { height: 100%; overflow: hidden; }
 /* Trade Result Popup */
 .trade-result-popup {
   position: fixed; bottom: 80px; left: 90px; z-index: 150;
-  padding: 14px 20px; border-radius: 8px; font-size: 14px; font-weight: 600;
-  font-family: var(--font-mono); display: flex; align-items: center; gap: 10px;
-  animation: slideInResult 0.3s ease-out; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  padding: 20px 28px; border-radius: 14px; font-family: var(--font-display);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  animation: slideInResult 0.4s cubic-bezier(0.16,1,0.3,1);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6); min-width: 180px; text-align: center;
+  backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.06);
 }
-.trade-result-popup.win { background: rgba(81,168,93,0.95); color: #fff; }
-.trade-result-popup.loss { background: rgba(229,57,53,0.95); color: #fff; }
-.trade-result-popup.draw { background: rgba(232,162,61,0.95); color: #fff; }
-@keyframes slideInResult { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.trade-result-popup .tr-icon {
+  width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; overflow: hidden; margin-bottom: 2px;
+}
+.trade-result-popup .tr-icon img { width: 100%; height: 100%; }
+.trade-result-popup .tr-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.7; }
+.trade-result-popup .tr-amount { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+.trade-result-popup.win { background: rgba(13,17,28,0.95); }
+.trade-result-popup.win .tr-amount { color: #08c58a; }
+.trade-result-popup.win .tr-label { color: #08c58a; }
+.trade-result-popup.loss { background: rgba(13,17,28,0.95); }
+.trade-result-popup.loss .tr-amount { color: #fc4b4a; }
+.trade-result-popup.loss .tr-label { color: #fc4b4a; }
+.trade-result-popup.draw { background: rgba(13,17,28,0.95); }
+.trade-result-popup.draw .tr-amount { color: #e8a23d; }
+.trade-result-popup.draw .tr-label { color: #e8a23d; }
+@keyframes slideInResult { from { transform: translateY(30px) scale(0.9); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
 
 
 /* Account Panel */
@@ -2021,18 +2036,33 @@ function showTradeResultPopup(trade) {
   const won = trade.status === 'won';
   const draw = trade.status === 'draw';
   const resultClass = won ? 'win' : draw ? 'draw' : 'loss';
-  const icon = won ? '✓' : draw ? '↔' : '✕';
-  const label = won ? 'WIN' : draw ? 'EMPATE' : 'LOSS';
-  const amount = trade.result_amount != null ? (trade.result_amount > 0 ? '+' : '') + formatMoney(trade.result_amount) : '';
-  const asset = (trade.asset || '').toUpperCase();
+  const label = 'RESULTADO';
+  const amount = trade.result_amount != null ? (trade.result_amount > 0 ? 'R$ +' : 'R$ ') + Math.abs(trade.result_amount).toFixed(2).replace('.', ',') : '';
+  const asset = (trade.asset || '').toUpperCase().replace('USDT', '');
+
+  // Buscar icone do ativo
+  var catalog = findCatalog(trade.asset);
+  var iconHtml = '';
+  if (catalog && catalog.icon) {
+    iconHtml = '<div class="tr-icon"><img src="' + catalog.icon + '" alt="' + asset + '"></div>';
+  } else {
+    iconHtml = '<div class="tr-icon" style="background:#1c2040;color:#e8a23d;font-size:16px;font-weight:800;">' + (asset.slice(0,1) || '?') + '</div>';
+  }
 
   el.className = 'trade-result-popup ' + resultClass;
-  el.innerHTML = '<span style="font-size:20px;">' + icon + '</span><div><div>' + label + ' - ' + asset + '</div><div style="font-size:12px;opacity:0.8;">' + amount + '</div></div>';
+  el.innerHTML = iconHtml + '<div class="tr-label">' + label + '</div><div class="tr-amount">' + amount + '</div>';
   document.body.appendChild(el);
 
+  // Som de resultado
+  try {
+    if (won) new Audio('/sounds/win.mp3').play().catch(function(){});
+    else if (!draw) new Audio('/sounds/loss.mp3').play().catch(function(){});
+  } catch(e) {}
+
   setTimeout(() => {
-    el.style.transition = 'opacity 0.5s';
+    el.style.transition = 'opacity 0.5s, transform 0.5s';
     el.style.opacity = '0';
+    el.style.transform = 'translateY(-10px)';
     setTimeout(() => el.remove(), 500);
   }, 5000);
 }
