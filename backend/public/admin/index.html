@@ -88,6 +88,7 @@ tr{cursor:pointer;transition:background 0.1s;}tr:hover{background:rgba(255,255,2
     <button class="side-btn" onclick="showTab('withdrawals',this)"><span class="material-icons-outlined">payments</span>Saques</button>
     <button class="side-btn" onclick="showTab('trades',this)"><span class="material-icons-outlined">candlestick_chart</span>Operações</button>
     <button class="side-btn" onclick="showTab('kyc',this)"><span class="material-icons-outlined">verified_user</span>KYC / Verificação</button>
+    <button class="side-btn" onclick="showTab('logs',this)"><span class="material-icons-outlined">history</span>Logs de Acesso</button>
     <button class="side-btn" onclick="showTab('config',this)"><span class="material-icons-outlined">settings</span>Configurações</button>
     <a href="/admin/suporte" class="side-btn" style="text-decoration:none;"><span class="material-icons-outlined">support_agent</span>Suporte ao vivo</a>
     <a href="/admin/sinais" class="side-btn" style="text-decoration:none;"><span class="material-icons-outlined">campaign</span>Sinais / WhatsApp</a>
@@ -157,6 +158,13 @@ tr{cursor:pointer;transition:background 0.1s;}tr:hover{background:rgba(255,255,2
       <button id="kycApproveAll" onclick="kycApproveUser('approved')" style="flex:1;padding:12px;border-radius:8px;border:none;background:#08c58a;color:#fff;font-weight:600;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;">Aprovar Conta</button>
       <button id="kycRejectAll" onclick="kycApproveUser('rejected')" style="flex:1;padding:12px;border-radius:8px;border:none;background:#fc4b4a;color:#fff;font-weight:600;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;">Rejeitar Conta</button>
     </div>
+  </div>
+</div>
+<div class="tab" id="t-logs">
+  <div class="pg-title">Logs de Acesso</div>
+  <div class="tbl-wrap">
+    <div class="tbl-head"><div class="tbl-title">Ultimos Acessos</div></div>
+    <table><thead><tr><th>#</th><th>Data</th><th>Email</th><th>IP</th><th>User Agent</th><th>Referer</th><th>Tipo</th></tr></thead><tbody id="logBody"></tbody></table>
   </div>
 </div>
 <div class="tab" id="t-config">
@@ -242,6 +250,7 @@ function showTab(n,el){
   if(n==='withdrawals')loadW();
   if(n==='trades')loadTr();
   if(n==='kyc')loadKycPending();
+  if(n==='logs')loadLogs();
 }
 
 function showUdTab(n,el){
@@ -410,6 +419,19 @@ async function loadKycPending(){
       return '<tr><td>'+(u.name||'--')+'</td><td>'+u.email+'</td><td style="font-size:11px;color:#888;">'+(u.document||'--')+'</td><td>'+u.doc_count+'</td><td><span class="badge b-pending">'+u.pending_count+'</span></td><td><span class="badge b-pending">'+u.kyc_status+'</span></td><td><button onclick="openKycModal(\''+u.id+'\',\''+u.email+'\')" style="padding:6px 14px;border-radius:4px;border:none;background:rgba(232,162,61,0.1);color:#e8a23d;cursor:pointer;font-size:11px;font-weight:600;font-family:Inter,sans-serif;">Analisar</button></td></tr>';
     }).join('');
   }catch(e){console.error('Erro KYC:',e);}
+}
+
+async function loadLogs(){
+  try{
+    var logs=await apiFetch('/admin/access-logs');
+    document.getElementById('logBody').innerHTML=logs.map(function(l,i){
+      var dt=new Date(l.created_at);
+      var dateStr=dt.toLocaleDateString('pt-BR')+' '+dt.toLocaleTimeString('pt-BR');
+      var ua=(l.user_agent||'').substring(0,40)+'...';
+      var ref=(l.referer||'--').substring(0,30);
+      return '<tr><td>'+(i+1)+'</td><td style="font-size:11px;">'+dateStr+'</td><td>'+l.email+'</td><td style="font-size:11px;color:#888;">'+l.ip+'</td><td style="font-size:10px;color:#555;">'+ua+'</td><td style="font-size:10px;color:#555;">'+ref+'</td><td><span class="badge b-paid">'+l.tipo+'</span></td></tr>';
+    }).join('');
+  }catch(e){}
 }
 
 async function openKycModal(userId, email){
