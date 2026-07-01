@@ -204,6 +204,7 @@ export async function initDb() {
     CREATE INDEX IF NOT EXISTS idx_ctf_master ON copy_trade_followers(master_id);
     CREATE INDEX IF NOT EXISTS idx_ctf_user ON copy_trade_followers(user_id);
     CREATE INDEX IF NOT EXISTS idx_ctl_master ON copy_trade_log(master_id);
+    ALTER TABLE copy_trade_masters ADD COLUMN IF NOT EXISTS display_followers INTEGER;
   `);
 
   console.log('[db] Schema PostgreSQL inicializado/verificado');
