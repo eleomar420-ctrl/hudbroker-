@@ -132,6 +132,22 @@ export async function initDb() {
     CREATE INDEX IF NOT EXISTS idx_signals_scheduled ON signals(scheduled_at);
   `);
 
+  // Tabela de logs de acesso
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS access_logs (
+      id TEXT PRIMARY KEY,
+      user_id TEXT REFERENCES users(id),
+      email TEXT,
+      ip TEXT,
+      user_agent TEXT,
+      referer TEXT,
+      tipo TEXT NOT NULL DEFAULT 'login',
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS idx_access_logs_user ON access_logs(user_id);
+    CREATE INDEX IF NOT EXISTS idx_access_logs_date ON access_logs(created_at);
+  `);
+
   console.log('[db] Schema PostgreSQL inicializado/verificado');
 }
 
