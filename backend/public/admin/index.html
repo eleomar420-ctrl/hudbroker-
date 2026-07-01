@@ -204,7 +204,7 @@ tr{cursor:pointer;transition:background 0.1s;}tr:hover{background:rgba(255,255,2
   <div class="ud-content">
     <div class="ud-panel act" id="p-resumo"><div class="ud-grid3">
       <div class="ud-box"><div class="ud-box-title">Dados Cadastrais</div><div class="ud-row"><span class="ud-row-label">Nome</span><span class="ud-row-val" id="rNome">--</span></div><div class="ud-row"><span class="ud-row-label">Telefone</span><span class="ud-row-val" id="rPhone">--</span></div><div class="ud-row"><span class="ud-row-label">E-mail</span><span class="ud-row-val" id="rEmail">--</span></div><div class="ud-row"><span class="ud-row-label">Documento</span><span class="ud-row-val" id="rDoc">--</span></div></div>
-      <div class="ud-box"><div class="ud-box-title">Detalhes</div><div class="ud-row"><span class="ud-row-label">Cadastro</span><span class="ud-row-val" id="rCad">--</span></div><div class="ud-row"><span class="ud-row-label">KYC</span><span class="ud-row-val" id="rKyc">--</span></div><div class="ud-row"><span class="ud-row-label">País</span><span class="ud-row-val" id="rCountry">BR</span></div><div class="ud-row"><span class="ud-row-label">Status</span><span class="ud-row-val" id="rStatus">--</span></div></div>
+      <div class="ud-box"><div class="ud-box-title">Detalhes</div><div class="ud-row"><span class="ud-row-label">Cadastro</span><span class="ud-row-val" id="rCad">--</span></div><div class="ud-row"><span class="ud-row-label">KYC</span><span class="ud-row-val" id="rKyc">--</span></div><div class="ud-row"><span class="ud-row-label">País</span><span class="ud-row-val" id="rCountry">BR</span></div><div class="ud-row"><span class="ud-row-label">Status</span><span class="ud-row-val" id="rStatus">--</span></div><div class="ud-row"><span class="ud-row-label">Copy Trade</span><span class="ud-row-val" id="rCopyTrade"><button id="ctToggleBtn" onclick="toggleCopyTradeMaster()" style="padding:4px 12px;border-radius:4px;border:none;font-size:10px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">--</button></span></div></div>
       <div class="ud-box"><div class="ud-box-title">Financeiro</div><div class="ud-row"><span class="ud-row-label">Saldo Real</span><span class="ud-row-val" style="color:#08c58a;" id="rBal">R$ 0</span></div><div class="ud-row"><span class="ud-row-label">Saldo Demo</span><span class="ud-row-val" id="rDemo">R$ 0</span></div><div class="ud-row"><span class="ud-row-label">Depósitos</span><span class="ud-row-val" style="color:#08c58a;" id="rDepT">R$ 0</span></div><div class="ud-row"><span class="ud-row-label">Saques</span><span class="ud-row-val" style="color:#fc4b4a;" id="rSaqT">R$ 0</span></div></div>
     </div></div>
     <div class="ud-panel" id="p-editar"><div style="max-width:400px;">
@@ -319,6 +319,8 @@ async function openDetail(id){
     document.getElementById('rKyc').textContent=u.kyc_status||'pendente';
     document.getElementById('rCountry').textContent=u.country||'BR';
     document.getElementById('rStatus').textContent=u.status||'active';
+    // Check copy trade master status
+    checkCopyTradeStatus(u.id);
     document.getElementById('rBal').textContent=fmt(u.balance);
     document.getElementById('rDemo').textContent=fmt(u.demo_balance);
     document.getElementById('eEmail').value=u.email||'';
@@ -444,6 +446,65 @@ async function loadLogs(){
 
 async function loadUserLogs(){
   if(!curUser)return;
+
+var ctMasterData = null;
+
+async function checkCopyTradeStatus(userId) {
+  var btn = document.getElementById('ctToggleBtn');
+  try {
+    var masters = await apiFetch('/copytrade/admin/masters');
+    ctMasterData = masters.find(function(m) { return m.user_id === userId; });
+    if (ctMasterData && ctMasterData.is_active) {
+      btn.textContent = 'ATIVO';
+      btn.style.background = 'rgba(8,197,138,0.15)';
+      btn.style.color = '#08c58a';
+    } else if (ctMasterData && !ctMasterData.is_active) {
+      btn.textContent = 'DESATIVADO';
+      btn.style.background = 'rgba(252,75,74,0.15)';
+      btn.style.color = '#fc4b4a';
+    } else {
+      btn.textContent = 'ATIVAR';
+      btn.style.background = 'rgba(232,162,61,0.15)';
+      btn.style.color = '#e8a23d';
+      ctMasterData = null;
+    }
+  } catch (e) {
+    btn.textContent = 'ATIVAR';
+    btn.style.background = 'rgba(232,162,61,0.15)';
+    btn.style.color = '#e8a23d';
+    ctMasterData = null;
+  }
+}
+
+async function toggleCopyTradeMaster() {
+  if (!curUser) return;
+  if (!ctMasterData) {
+    // Criar master
+    var name = prompt('Nome do trader (aparece no Copy Trade):', curUser.name || '');
+    if (!name) return;
+    var desc = prompt('Descricao curta:', 'Trader profissional');
+    try {
+      await apiFetch('/copytrade/admin/masters', { method: 'POST', body: JSON.stringify({ userId: curUser.id, name: name, description: desc || '' }) });
+      showToast('Copy Trade ATIVADO para ' + name);
+      checkCopyTradeStatus(curUser.id);
+    } catch (e) { showToast('Erro: ' + e.message, 'error'); }
+  } else if (ctMasterData.is_active) {
+    // Desativar
+    if (!confirm('Desativar Copy Trade para este usuario?')) return;
+    try {
+      await apiFetch('/copytrade/admin/masters/' + ctMasterData.id, { method: 'PATCH', body: JSON.stringify({ is_active: false }) });
+      showToast('Copy Trade DESATIVADO');
+      checkCopyTradeStatus(curUser.id);
+    } catch (e) { showToast('Erro', 'error'); }
+  } else {
+    // Reativar
+    try {
+      await apiFetch('/copytrade/admin/masters/' + ctMasterData.id, { method: 'PATCH', body: JSON.stringify({ is_active: true }) });
+      showToast('Copy Trade REATIVADO');
+      checkCopyTradeStatus(curUser.id);
+    } catch (e) { showToast('Erro', 'error'); }
+  }
+}
   try{
     var logs=await apiFetch('/admin/users/'+curUser.id+'/access-logs');
     var body=document.getElementById('udLogBody');
