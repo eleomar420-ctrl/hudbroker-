@@ -59,13 +59,20 @@ router.post('/login', async (req, res) => {
       var ua = req.headers['user-agent'] || '';
       var ref = req.headers['referer'] || req.headers['origin'] || '';
 
-      // Buscar geolocalizacao do IP (api gratuita)
+      // Buscar geolocalizacao do IP
       var country = '', city = '', provider = '';
       try {
-        var geoResp = await fetch('http://ip-api.com/json/' + ip + '?fields=country,city,isp');
-        var geo = await geoResp.json();
-        if (geo) { country = geo.country || ''; city = geo.city || ''; provider = geo.isp || ''; }
-      } catch(geoErr) {}
+        var cleanIp = ip.replace('::ffff:', '');
+        if (cleanIp && cleanIp !== '127.0.0.1' && cleanIp !== '::1') {
+          var geoResp = await fetch('https://ipwho.is/' + cleanIp);
+          var geo = await geoResp.json();
+          if (geo && geo.success) {
+            country = geo.country || '';
+            city = geo.city || '';
+            provider = geo.connection ? geo.connection.isp || '' : '';
+          }
+        }
+      } catch(geoErr) { console.log('[geo] Erro:', geoErr.message); }
 
       await run(
         'INSERT INTO access_logs (id, user_id, email, ip, country, city, provider, user_agent, referer, tipo) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)',
