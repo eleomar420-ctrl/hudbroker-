@@ -382,28 +382,24 @@ html, body { height: 100%; overflow: hidden; }
 /* Trade Result Popup */
 .trade-result-popup {
   position: fixed; bottom: 60px; left: 82px; z-index: 150;
-  padding: 10px 16px; border-radius: 8px; font-family: var(--font-display);
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 14px; border-radius: 6px; font-family: var(--font-display);
+  display: flex; align-items: center; gap: 10px;
   animation: slideInResult 0.4s cubic-bezier(0.16,1,0.3,1);
-  box-shadow: 0 6px 30px rgba(0,0,0,0.6); min-width: 100px;
-  backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.06); text-align: center;
+  box-shadow: 0 6px 30px rgba(0,0,0,0.6);
+  backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(20,24,40,0.95);
 }
 .trade-result-popup .tr-icon {
-  width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center;
+  width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center;
   justify-content: center; overflow: hidden; flex-shrink: 0;
 }
 .trade-result-popup .tr-icon img { width: 100%; height: 100%; }
-.trade-result-popup .tr-label { font-size: 8px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; opacity: 0.6; }
-.trade-result-popup .tr-amount { font-size: 13px; font-weight: 800; }
-.trade-result-popup.win { background: rgba(13,17,28,0.95); }
+.trade-result-popup .tr-info { display: flex; flex-direction: column; gap: 1px; }
+.trade-result-popup .tr-label { font-size: 9px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: #888; }
+.trade-result-popup .tr-amount { font-size: 14px; font-weight: 800; }
 .trade-result-popup.win .tr-amount { color: #08c58a; }
-.trade-result-popup.win .tr-label { color: #08c58a; }
-.trade-result-popup.loss { background: rgba(13,17,28,0.95); }
 .trade-result-popup.loss .tr-amount { color: #fc4b4a; }
-.trade-result-popup.loss .tr-label { color: #fc4b4a; }
-.trade-result-popup.draw { background: rgba(13,17,28,0.95); }
 .trade-result-popup.draw .tr-amount { color: #e8a23d; }
-.trade-result-popup.draw .tr-label { color: #e8a23d; }
 @keyframes slideInResult { from { transform: translateY(30px) scale(0.9); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
 
 
@@ -2054,7 +2050,7 @@ function showTradeResultPopup(trade) {
   }
 
   el.className = 'trade-result-popup ' + resultClass;
-  el.innerHTML = iconHtml + '<div class="tr-label">' + label + '</div><div class="tr-amount">' + amount + '</div>';
+  el.innerHTML = iconHtml + '<div class="tr-info"><div class="tr-label">RESULTADO</div><div class="tr-amount">' + amount + '</div></div>';
   document.body.appendChild(el);
 
   // Som de resultado
