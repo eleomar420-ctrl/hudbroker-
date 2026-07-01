@@ -197,6 +197,7 @@ tr{cursor:pointer;transition:background 0.1s;}tr:hover{background:rgba(255,255,2
       <button class="ud-tab" onclick="showUdTab('udsaques',this)">Saques</button>
       <button class="ud-tab" onclick="showUdTab('udops',this)">Operações</button>
       <button class="ud-tab" onclick="showUdTab('udkyc',this)">KYC</button>
+      <button class="ud-tab" onclick="showUdTab('udlogs',this)">Logs de Acesso</button>
       <button class="ud-tab del" onclick="if(confirm('Excluir usuário?'))deleteUser()">Excluir</button>
     </div>
   </div>
@@ -226,6 +227,10 @@ tr{cursor:pointer;transition:background 0.1s;}tr:hover{background:rgba(255,255,2
         <div style="display:flex;gap:8px;"><button class="btn-s btn-grn" onclick="approveKyc()">Aprovar Conta</button><button class="btn-s btn-red" onclick="rejectKyc()">Rejeitar Conta</button></div>
       </div>
       <div style="border-top:1px solid #1c2040;padding-top:16px;" id="kycDocsContent">Carregando...</div>
+    </div>
+    <div class="ud-panel" id="p-udlogs">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Logs de Acesso</div>
+      <table style="width:100%;font-size:11px;"><thead><tr><th style="text-align:left;padding:6px;color:#555;">#</th><th style="text-align:left;padding:6px;color:#555;">Data</th><th style="text-align:left;padding:6px;color:#555;">IP</th><th style="text-align:left;padding:6px;color:#555;">User Agent</th><th style="text-align:left;padding:6px;color:#555;">Referer</th><th style="text-align:left;padding:6px;color:#555;">Tipo</th></tr></thead><tbody id="udLogBody"><tr><td colspan="6" style="text-align:center;color:#555;padding:20px;">Carregando...</td></tr></tbody></table>
     </div>
   </div>
 </div>
@@ -262,6 +267,7 @@ function showUdTab(n,el){
   if(n==='udsaques')loadUserWithdrawals();
   if(n==='udops')loadUserTrades();
   if(n==='udkyc')loadUserKyc();
+  if(n==='udlogs')loadUserLogs();
 }
 
 async function loadDash(){
@@ -432,6 +438,22 @@ async function loadLogs(){
       return '<tr><td>'+(i+1)+'</td><td style="font-size:11px;">'+dateStr+'</td><td>'+l.email+'</td><td style="font-size:11px;color:#888;">'+l.ip+'</td><td style="font-size:10px;color:#555;">'+ua+'</td><td style="font-size:10px;color:#555;">'+ref+'</td><td><span class="badge b-paid">'+l.tipo+'</span></td></tr>';
     }).join('');
   }catch(e){}
+}
+
+async function loadUserLogs(){
+  if(!curUser)return;
+  try{
+    var logs=await apiFetch('/admin/users/'+curUser.id+'/access-logs');
+    var body=document.getElementById('udLogBody');
+    if(!logs||logs.length===0){body.innerHTML='<tr><td colspan="6" style="text-align:center;color:#555;padding:20px;">Nenhum log de acesso</td></tr>';return;}
+    body.innerHTML=logs.map(function(l,i){
+      var dt=new Date(l.created_at);
+      var dateStr=dt.toLocaleDateString('pt-BR')+' '+dt.toLocaleTimeString('pt-BR');
+      var ua=(l.user_agent||'').substring(0,50)+'...';
+      var ref=(l.referer||'--');
+      return '<tr style="border-bottom:1px solid #1c2040;"><td style="padding:8px;color:#888;">'+(i+1)+'</td><td style="padding:8px;">'+dateStr+'</td><td style="padding:8px;color:#888;font-size:10px;">'+l.ip+'</td><td style="padding:8px;color:#555;font-size:10px;">'+ua+'</td><td style="padding:8px;color:#555;font-size:10px;">'+ref+'</td><td style="padding:8px;"><span class="badge b-paid">'+l.tipo+'</span></td></tr>';
+    }).join('');
+  }catch(e){document.getElementById('udLogBody').innerHTML='<tr><td colspan="6" style="text-align:center;color:#555;padding:20px;">Erro ao carregar</td></tr>';}
 }
 
 async function openKycModal(userId, email){
