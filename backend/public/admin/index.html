@@ -474,22 +474,69 @@ async function checkCopyTradeStatus(userId) {
       btn.textContent = 'ATIVO';
       btn.style.background = 'rgba(8,197,138,0.15)';
       btn.style.color = '#08c58a';
+      showCtEditForm(ctMasterData);
     } else if (ctMasterData && !ctMasterData.is_active) {
       btn.textContent = 'DESATIVADO';
       btn.style.background = 'rgba(252,75,74,0.15)';
       btn.style.color = '#fc4b4a';
+      hideCtEditForm();
     } else {
       btn.textContent = 'ATIVAR';
       btn.style.background = 'rgba(232,162,61,0.15)';
       btn.style.color = '#e8a23d';
       ctMasterData = null;
+      hideCtEditForm();
     }
   } catch (e) {
     btn.textContent = 'ATIVAR';
     btn.style.background = 'rgba(232,162,61,0.15)';
     btn.style.color = '#e8a23d';
     ctMasterData = null;
+    hideCtEditForm();
   }
+}
+
+function showCtEditForm(master) {
+  var container = document.getElementById('ctEditContainer');
+  if (!container) {
+    // Criar container dinamicamente dentro do resumo
+    var resumo = document.getElementById('p-resumo');
+    if (!resumo) return;
+    container = document.createElement('div');
+    container.id = 'ctEditContainer';
+    resumo.appendChild(container);
+  }
+  container.style.display = 'block';
+  container.innerHTML = '<div class="ud-box" style="margin-top:16px;border:1px solid rgba(232,162,61,0.2);"><div class="ud-box-title" style="color:#e8a23d;">Copy Trade - Editar Perfil</div>' +
+    '<div class="ed-field" style="margin-bottom:8px;"><label style="font-size:10px;color:#888;">Nome do Trader</label><input type="text" id="ctEditName" value="' + (master.name || '') + '" style="width:100%;padding:6px 8px;border-radius:4px;border:1px solid #1c2040;background:#0b0e18;color:#fff;font-size:12px;"></div>' +
+    '<div class="ed-field" style="margin-bottom:8px;"><label style="font-size:10px;color:#888;">Descricao</label><input type="text" id="ctEditDesc" value="' + (master.description || '') + '" style="width:100%;padding:6px 8px;border-radius:4px;border:1px solid #1c2040;background:#0b0e18;color:#fff;font-size:12px;"></div>' +
+    '<div style="display:flex;gap:8px;margin-bottom:8px;">' +
+      '<div class="ed-field" style="flex:1;"><label style="font-size:10px;color:#888;">Win Rate (%)</label><input type="number" id="ctEditWinRate" value="' + (master.win_rate || 0) + '" min="0" max="100" style="width:100%;padding:6px 8px;border-radius:4px;border:1px solid #1c2040;background:#0b0e18;color:#fff;font-size:12px;"></div>' +
+      '<div class="ed-field" style="flex:1;"><label style="font-size:10px;color:#888;">Total Operacoes</label><input type="number" id="ctEditTrades" value="' + (master.total_trades || 0) + '" min="0" style="width:100%;padding:6px 8px;border-radius:4px;border:1px solid #1c2040;background:#0b0e18;color:#fff;font-size:12px;"></div>' +
+    '</div>' +
+    '<button onclick="saveCtEdit()" style="width:100%;padding:8px;border-radius:6px;border:none;background:#e8a23d;color:#000;font-weight:600;font-size:12px;cursor:pointer;font-family:Inter,sans-serif;">Salvar alteracoes</button>' +
+  '</div>';
+}
+
+function hideCtEditForm() {
+  var container = document.getElementById('ctEditContainer');
+  if (container) container.style.display = 'none';
+}
+
+async function saveCtEdit() {
+  if (!ctMasterData) return;
+  try {
+    await apiFetch('/copytrade/admin/masters/' + ctMasterData.id, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        name: document.getElementById('ctEditName').value,
+        description: document.getElementById('ctEditDesc').value,
+        win_rate: Number(document.getElementById('ctEditWinRate').value),
+        total_trades: Number(document.getElementById('ctEditTrades').value)
+      })
+    });
+    showToast('Copy Trade atualizado!');
+  } catch (e) { showToast('Erro ao salvar', 'error'); }
 }
 
 async function toggleCopyTradeMaster() {
