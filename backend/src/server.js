@@ -7,6 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { initDb } from './db/index.js';
+import { authRequired } from './middleware/auth.js';
 import { priceFeed } from './services/priceFeed.js';
 import authRoutes from './routes/auth.js';
 import tradingRoutes from './routes/trading.js';
@@ -16,6 +17,7 @@ import affiliateRoutes from './routes/affiliates.js';
 import pixRoutes from './routes/pix.js';
 import supportRoutes, { supportClients, agentSockets } from './routes/support.js';
 import signalsRoutes, { processScheduledSignals } from './routes/signals.js';
+import copyTradeRoutes from './routes/copytrade.js';
 import { seedDemoData } from './seed.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -60,6 +62,7 @@ async function bootstrap() {
   app.use('/api/pix', pixRoutes);
   app.use('/api/support', supportRoutes);
   app.use('/api/signals', signalsRoutes);
+  app.use('/api/copytrade', authRequired, copyTradeRoutes);
 
   // Agendar verificacao de sinais a cada 30s
   setInterval(processScheduledSignals, 30000);
