@@ -151,16 +151,49 @@ router.patch('/withdrawals/:id/reject', async (req, res) => {
 router.get('/stats', async (req, res) => {
   try {
     const totalUsers = await queryOne('SELECT COUNT(*) as count FROM users WHERE role = $1', ['client']);
+    const todayUsers = await queryOne("SELECT COUNT(*) as count FROM users WHERE role = 'client' AND created_at >= CURRENT_DATE");
+    const periodUsers = await queryOne("SELECT COUNT(*) as count FROM users WHERE role = 'client' AND created_at >= now() - interval '30 days'");
     const totalDeposits = await queryOne("SELECT COUNT(*) as count, COALESCE(SUM(amount),0) as total FROM pix_charges WHERE status = 'paid'");
+    const todayDeposits = await queryOne("SELECT COUNT(*) as count, COALESCE(SUM(amount),0) as total FROM pix_charges WHERE status = 'paid' AND created_at >= CURRENT_DATE");
     const totalTrades = await queryOne('SELECT COUNT(*) as count FROM trades');
     const todayTrades = await queryOne("SELECT COUNT(*) as count FROM trades WHERE opened_at >= CURRENT_DATE");
     const totalBalance = await queryOne('SELECT COALESCE(SUM(balance),0) as total FROM users');
+    const totalWithdrawals = await queryOne("SELECT COUNT(*) as count, COALESCE(SUM(amount),0) as total FROM withdrawals WHERE status = 'approved'");
+    const pendingWithdrawals = await queryOne("SELECT COUNT(*) as count, COALESCE(SUM(amount),0) as total FROM withdrawals WHERE status = 'pending'");
+    // FTD - First Time Deposits (usuarios que fizeram primeiro deposito no periodo)
+    const ftdPeriod = await queryOne("SELECT COUNT(DISTINCT user_id) as count, COALESCE(SUM(amount),0) as total FROM pix_charges WHERE status = 'paid' AND created_at >= now() - interval '30 days'");
     res.json({
       users: Number(totalUsers.count),
+      usersToday: Number(todayUsers.count),
+      usersPeriod: Number(periodUsers.count),
       deposits: { count: Number(totalDeposits.count), total: Number(totalDeposits.total) },
+      depositsToday: { count: Number(todayDeposits.count), total: Number(todayDeposits.total) },
       trades: { total: Number(totalTrades.count), today: Number(todayTrades.count) },
-      totalBalance: Number(totalBalance.total)
+      totalBalance: Number(totalBalance.total),
+      withdrawals: { count: Number(totalWithdrawals.count), total: Number(totalWithdrawals.total) },
+      pendingWithdrawals: { count: Number(pendingWithdrawals.count), total: Number(pendingWithdrawals.total) },
+      ftd: { count: Number(ftdPeriod.count), total: Number(ftdPeriod.total) }
     });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Movimentacoes (entradas e saidas)
+router.get('/transactions', async (req, res) => {
+  try {
+    var entries = await query(
+      `SELECT 'entrada' as tipo, p.amount, p.created_at, u.name, u.email, p.id as ref_id
+       FROM pix_charges p LEFT JOIN users u ON p.user_id = u.id
+       WHERE p.status = 'paid'
+       ORDER BY p.created_at DESC LIMIT 50`
+    );
+    var exits = await query(
+      `SELECT 'saida' as tipo, w.amount, w.created_at, u.name, u.email, w.id as ref_id
+       FROM withdrawals w LEFT JOIN users u ON w.user_id = u.id
+       WHERE w.status = 'approved'
+       ORDER BY w.created_at DESC LIMIT 50`
+    );
+    var all = [...entries, ...exits].sort(function(a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+    res.json(all.slice(0, 50));
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
