@@ -139,6 +139,9 @@ export async function initDb() {
       user_id TEXT REFERENCES users(id),
       email TEXT,
       ip TEXT,
+      country TEXT,
+      city TEXT,
+      provider TEXT,
       user_agent TEXT,
       referer TEXT,
       tipo TEXT NOT NULL DEFAULT 'login',
@@ -146,6 +149,13 @@ export async function initDb() {
     );
     CREATE INDEX IF NOT EXISTS idx_access_logs_user ON access_logs(user_id);
     CREATE INDEX IF NOT EXISTS idx_access_logs_date ON access_logs(created_at);
+  `);
+
+  // Adicionar colunas de geo se nao existirem
+  await pool.query(`
+    ALTER TABLE access_logs ADD COLUMN IF NOT EXISTS country TEXT;
+    ALTER TABLE access_logs ADD COLUMN IF NOT EXISTS city TEXT;
+    ALTER TABLE access_logs ADD COLUMN IF NOT EXISTS provider TEXT;
   `);
 
   console.log('[db] Schema PostgreSQL inicializado/verificado');
