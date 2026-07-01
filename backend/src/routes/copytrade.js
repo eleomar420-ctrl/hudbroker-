@@ -114,8 +114,21 @@ router.get('/admin/masters', async (req, res) => {
 // ─── ADMIN: Ativar/desativar master ───
 router.patch('/admin/masters/:id', async (req, res) => {
   try {
-    var { is_active } = req.body;
-    await run('UPDATE copy_trade_masters SET is_active = $1 WHERE id = $2', [is_active, req.params.id]);
+    var { is_active, win_rate, total_trades, name, description } = req.body;
+    var updates = [];
+    var values = [];
+    var idx = 1;
+
+    if (is_active !== undefined) { updates.push('is_active = $' + idx); values.push(is_active); idx++; }
+    if (win_rate !== undefined) { updates.push('win_rate = $' + idx); values.push(Number(win_rate)); idx++; }
+    if (total_trades !== undefined) { updates.push('total_trades = $' + idx); values.push(Number(total_trades)); idx++; }
+    if (name !== undefined) { updates.push('name = $' + idx); values.push(name); idx++; }
+    if (description !== undefined) { updates.push('description = $' + idx); values.push(description); idx++; }
+
+    if (updates.length === 0) return res.json({ ok: true });
+
+    values.push(req.params.id);
+    await run('UPDATE copy_trade_masters SET ' + updates.join(', ') + ' WHERE id = $' + idx, values);
     res.json({ ok: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -123,61 +136,62 @@ router.patch('/admin/masters/:id', async (req, res) => {
 // ─── Funcao chamada quando um master abre trade ───
 export async function executeCopyTrades(masterUserId, tradeId, asset, direction, durationSeconds, payoutPct, accountType) {
   try {
-    // Encontrar o master
     var master = await queryOne('SELECT * FROM copy_trade_masters WHERE user_id = $1 AND is_active = true', [masterUserId]);
     if (!master) return;
 
-    // So copiar se for conta real
     if (accountType !== 'real') return;
 
-    // Encontrar todos os seguidores ativos
     var followers = await query(
       'SELECT f.*, u.balance FROM copy_trade_followers f LEFT JOIN users u ON f.user_id = u.id WHERE f.master_id = $1 AND f.is_active = true',
       [master.id]
     );
 
+    console.log('[copy-trade] Master:', masterUserId, '| Seguidores:', followers.length);
+
     for (var follower of followers) {
       try {
-        // Calcular stake do seguidor
-        var stake = 0;
-        if (follower.stake_mode === 'fixed') {
-          stake = follower.fixed_amount || 5;
+        // Calcular stake do SEGUIDOR (nunca usar o stake do master)
+        var followerStake = 0;
+        if (follower.stake_mode === 'percent') {
+          followerStake = (Number(follower.balance) || 0) * (Number(follower.percent_amount) || 5) / 100;
         } else {
-          stake = (follower.balance || 0) * (follower.percent_amount || 5) / 100;
+          // Modo fixo: usar o valor que o lead configurou
+          followerStake = Number(follower.fixed_amount) || 5;
         }
 
-        // Validar
-        if (stake <= 0 || stake > (follower.balance || 0)) continue;
-        stake = Math.floor(stake * 100) / 100; // arredondar pra 2 casas
+        console.log('[copy-trade] Seguidor:', follower.user_id, '| Modo:', follower.stake_mode, '| Valor config:', follower.fixed_amount, '| Stake calculado:', followerStake, '| Saldo:', follower.balance);
 
-        // Abrir trade para o seguidor
+        if (followerStake <= 0) continue;
+        if (followerStake > (Number(follower.balance) || 0)) {
+          console.log('[copy-trade] Saldo insuficiente para', follower.user_id);
+          continue;
+        }
+        followerStake = Math.floor(followerStake * 100) / 100;
+
         var result = await openTrade({
           userId: follower.user_id,
           accountType: 'real',
           asset: asset,
           direction: direction,
-          stake: stake,
+          stake: followerStake,
           durationSeconds: durationSeconds,
           payoutPct: payoutPct
         });
 
-        // Registrar no log
         await run(
           `INSERT INTO copy_trade_log (id, master_trade_id, follower_trade_id, master_id, follower_id, asset, direction, stake)
            VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
-          [randomUUID(), tradeId, result.tradeId, master.id, follower.user_id, asset, direction, stake]
+          [randomUUID(), tradeId, result.tradeId, master.id, follower.user_id, asset, direction, followerStake]
         );
 
-        // Atualizar contagem
         await run('UPDATE copy_trade_followers SET total_copied = total_copied + 1 WHERE id = $1', [follower.id]);
 
-        console.log('[copy-trade] Copiado para', follower.user_id, '- stake:', stake);
+        console.log('[copy-trade] OK! Copiado para', follower.user_id, '- stake:', followerStake);
       } catch (followerErr) {
         console.error('[copy-trade] Erro seguidor', follower.user_id, followerErr.message);
       }
     }
 
-    // Atualizar stats do master
     await run('UPDATE copy_trade_masters SET total_trades = total_trades + 1 WHERE id = $1', [master.id]);
 
   } catch (err) {
