@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HudBroker - Sinais</title>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#0b0e18;color:#e0e0e0;font-family:'Inter',sans-serif;display:flex;height:100vh;overflow:hidden;}
+.side{width:260px;background:#10142a;border-right:1px solid #1c2040;display:flex;flex-direction:column;flex-shrink:0;}
+.side-header{padding:16px;border-bottom:1px solid #1c2040;display:flex;align-items:center;}
+.side-back{color:#8b92a3;text-decoration:none;font-size:12px;display:flex;align-items:center;gap:4px;padding:10px 16px;border-bottom:1px solid #1c2040;}
+.side-back:hover{color:#e8a23d;}
+.side-status{padding:12px 16px;border-bottom:1px solid #1c2040;font-size:11px;}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;}
+.status-on{background:#08c58a;}
+.status-off{background:#fc4b4a;}
+.side-menu{flex:1;padding:8px;display:flex;flex-direction:column;gap:4px;}
+.side-menu button{padding:10px 14px;border-radius:8px;border:none;background:transparent;color:#888;cursor:pointer;font-size:12px;font-family:'Inter',sans-serif;text-align:left;display:flex;align-items:center;gap:8px;transition:all 0.15s;}
+.side-menu button:hover{background:rgba(255,255,255,0.03);color:#ccc;}
+.side-menu button.act{background:rgba(232,162,61,0.1);color:#e8a23d;}
+.side-menu button .material-icons-outlined{font-size:18px;}
+
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* Tabs */
+.tab-view{flex:1;overflow-y:auto;padding:24px;display:none;}
+.tab-view.act{display:block;}
+
+/* Create Signal Form */
+.form-card{background:#10142a;border:1px solid #1c2040;border-radius:12px;padding:24px;max-width:600px;}
+.form-title{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;margin-bottom:16px;}
+.form-row{display:flex;gap:12px;margin-bottom:12px;}
+.form-group{flex:1;display:flex;flex-direction:column;gap:4px;}
+.form-label{font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;}
+.form-input,.form-select,.form-textarea{padding:10px 12px;border-radius:8px;border:1px solid #1c2040;background:#0b0e18;color:#e0e0e0;font-size:13px;font-family:'Inter',sans-serif;outline:none;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:#e8a23d;}
+.form-textarea{resize:vertical;min-height:80px;}
+.form-select{cursor:pointer;}
+.form-btn{padding:12px 24px;border-radius:8px;border:none;font-weight:600;font-size:13px;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:6px;transition:opacity 0.15s;}
+.form-btn:hover{opacity:0.85;}
+.btn-send{background:#e8a23d;color:#000;}
+.btn-schedule{background:#10142a;color:#e8a23d;border:1px solid #e8a23d;}
+.btn-preview{background:#1c2040;color:#888;}
+
+/* Signal Preview */
+.preview-box{background:#0b0e18;border:1px solid #1c2040;border-radius:8px;padding:16px;margin-top:12px;font-size:13px;line-height:1.7;white-space:pre-wrap;color:#ccc;display:none;}
+
+/* Signals List */
+.sig-list{display:flex;flex-direction:column;gap:10px;max-width:800px;}
+.sig-card{background:#10142a;border:1px solid #1c2040;border-radius:10px;padding:16px;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;}
+.sig-content{flex:1;font-size:12px;line-height:1.6;white-space:pre-wrap;color:#ccc;max-height:120px;overflow:hidden;}
+.sig-meta{flex-shrink:0;text-align:right;display:flex;flex-direction:column;gap:6px;align-items:flex-end;}
+.sig-badge{padding:3px 10px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;}
+.b-sent{background:rgba(8,197,138,0.1);color:#08c58a;}
+.b-scheduled{background:rgba(232,162,61,0.1);color:#e8a23d;}
+.b-pending{background:rgba(100,100,255,0.1);color:#8888ff;}
+.b-failed{background:rgba(252,75,74,0.1);color:#fc4b4a;}
+.b-draft{background:rgba(100,100,100,0.1);color:#888;}
+.sig-time{font-size:10px;color:#555;}
+.sig-actions{display:flex;gap:4px;}
+.sig-action{padding:4px 10px;border-radius:4px;border:none;font-size:10px;cursor:pointer;font-family:'Inter',sans-serif;}
+.sig-send{background:rgba(8,197,138,0.1);color:#08c58a;}
+.sig-del{background:rgba(252,75,74,0.1);color:#fc4b4a;}
+
+/* Type Switch */
+.type-switch{display:flex;gap:2px;background:#0b0e18;border-radius:8px;padding:2px;margin-bottom:16px;max-width:300px;}
+.type-btn{flex:1;padding:8px;border-radius:6px;border:none;background:transparent;color:#888;cursor:pointer;font-size:12px;font-weight:600;font-family:'Inter',sans-serif;transition:all 0.15s;}
+.type-btn.act{background:#e8a23d;color:#000;}
+
+.empty-msg{text-align:center;color:#555;padding:60px 20px;font-size:13px;}
+</style>
+</head>
+<body>
+
+<div class="side">
+  <div class="side-header">
+    <img src="/img/logo-white.png" alt="HudBroker" style="height:26px;">
+  </div>
+  <a href="/admin" class="side-back"><span class="material-icons-outlined" style="font-size:16px;">arrow_back</span> Voltar ao Admin</a>
+  <div class="side-status" id="connStatus">
+    <span class="status-dot status-off"></span> WhatsApp desconectado
+  </div>
+  <div class="side-menu">
+    <button class="act" onclick="showView('create',this)"><span class="material-icons-outlined">add_circle</span>Novo Sinal</button>
+    <button onclick="showView('scheduled',this)"><span class="material-icons-outlined">schedule</span>Agendados</button>
+    <button onclick="showView('history',this)"><span class="material-icons-outlined">history</span>Historico</button>
+    <button onclick="showView('marketing',this)"><span class="material-icons-outlined">campaign</span>Marketing</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- CREATE SIGNAL -->
+  <div class="tab-view act" id="v-create">
+    <div class="form-card">
+      <div class="form-title">Novo Sinal de Trading</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <span class="form-label">Ativo</span>
+          <select class="form-select" id="sigAsset">
+            <option value="BTC/USDT">BTC/USDT</option>
+            <option value="ETH/USDT">ETH/USDT</option>
+            <option value="SOL/USDT">SOL/USDT</option>
+            <option value="BNB/USDT">BNB/USDT</option>
+            <option value="XRP/USDT">XRP/USDT</option>
+            <option value="ADA/USDT">ADA/USDT</option>
+            <option value="DOGE/USDT">DOGE/USDT</option>
+            <option value="LTC/USDT">LTC/USDT</option>
+            <option value="AVAX/USDT">AVAX/USDT</option>
+            <option value="LINK/USDT">LINK/USDT</option>
+            <option value="SUI/USDT">SUI/USDT</option>
+            <option value="XLM/USDT">XLM/USDT</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <span class="form-label">Direcao</span>
+          <select class="form-select" id="sigDirection">
+            <option value="buy">COMPRA</option>
+            <option value="sell">VENDA</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <span class="form-label">Tempo de Expiracao</span>
+          <select class="form-select" id="sigExpiration">
+            <option value="30 segundos">30 segundos</option>
+            <option value="1 minuto" selected>1 minuto</option>
+            <option value="5 minutos">5 minutos</option>
+            <option value="15 minutos">15 minutos</option>
+            <option value="30 minutos">30 minutos</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <span class="form-label">Confianca</span>
+          <select class="form-select" id="sigConfidence">
+            <option value="high">Alta</option>
+            <option value="medium">Media</option>
+            <option value="low">Baixa</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:12px;">
+        <span class="form-label">Observacao (opcional)</span>
+        <input class="form-input" id="sigNotes" placeholder="Ex: Indicador deu sinal forte">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <span class="form-label">Grupo WhatsApp</span>
+          <select class="form-select" id="sigGroup">
+            <option value="">Selecione o grupo</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <span class="form-label">Agendar para</span>
+          <input type="datetime-local" class="form-input" id="sigSchedule">
+        </div>
+      </div>
+
+      <div id="sigPreview" class="preview-box"></div>
+
+      <div style="display:flex;gap:8px;margin-top:16px;">
+        <button class="form-btn btn-preview" onclick="previewSignal()"><span class="material-icons-outlined" style="font-size:16px;">visibility</span> Preview</button>
+        <button class="form-btn btn-send" onclick="createSignal('send')"><span class="material-icons-outlined" style="font-size:16px;">send</span> Enviar Agora</button>
+        <button class="form-btn btn-schedule" onclick="createSignal('schedule')"><span class="material-icons-outlined" style="font-size:16px;">schedule</span> Agendar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHEDULED -->
+  <div class="tab-view" id="v-scheduled">
+    <div class="form-title" style="margin-bottom:16px;">Sinais Agendados</div>
+    <div class="sig-list" id="scheduledList">
+      <div class="empty-msg">Carregando...</div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="tab-view" id="v-history">
+    <div class="form-title" style="margin-bottom:16px;">Historico de Envios</div>
+    <div class="sig-list" id="historyList">
+      <div class="empty-msg">Carregando...</div>
+    </div>
+  </div>
+
+  <!-- MARKETING -->
+  <div class="tab-view" id="v-marketing">
+    <div class="form-card">
+      <div class="form-title">Mensagem de Marketing</div>
+
+      <div class="form-group" style="margin-bottom:12px;">
+        <span class="form-label">Mensagem</span>
+        <textarea class="form-textarea" id="mktMessage" rows="6" placeholder="Digite sua mensagem de marketing..."></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <span class="form-label">Grupo WhatsApp</span>
+          <select class="form-select" id="mktGroup">
+            <option value="">Selecione o grupo</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <span class="form-label">Agendar para</span>
+          <input type="datetime-local" class="form-input" id="mktSchedule">
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:16px;">
+        <button class="form-btn btn-send" onclick="sendMarketing('send')"><span class="material-icons-outlined" style="font-size:16px;">send</span> Enviar Agora</button>
+        <button class="form-btn btn-schedule" onclick="sendMarketing('schedule')"><span class="material-icons-outlined" style="font-size:16px;">schedule</span> Agendar</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+var token = localStorage.getItem('hb_token');
+async function apiFetch(url, opts) {
+  opts = opts || {};
+  opts.headers = opts.headers || {};
+  opts.headers['Content-Type'] = 'application/json';
+  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+  var r = await fetch('/api' + url, opts);
+  if (!r.ok) { var e = await r.json().catch(function(){return{}}); throw new Error(e.error || 'Erro'); }
+  return r.json();
+}
+
+function showView(name, btn) {
+  document.querySelectorAll('.tab-view').forEach(function(v) { v.classList.remove('act'); });
+  document.getElementById('v-' + name).classList.add('act');
+  document.querySelectorAll('.side-menu button').forEach(function(b) { b.classList.remove('act'); });
+  if (btn) btn.classList.add('act');
+  if (name === 'scheduled') loadScheduled();
+  if (name === 'history') loadHistory();
+}
+
+// ─── Check WhatsApp status ───
+async function checkStatus() {
+  try {
+    var data = await apiFetch('/signals/status');
+    var el = document.getElementById('connStatus');
+    if (data.connected) {
+      el.innerHTML = '<span class="status-dot status-on"></span> WhatsApp conectado';
+    } else {
+      el.innerHTML = '<span class="status-dot status-off"></span> WhatsApp desconectado';
+    }
+  } catch(e) {}
+}
+
+// ─── Load WhatsApp groups ───
+async function loadGroups() {
+  try {
+    var groups = await apiFetch('/signals/groups');
+    var opts = '<option value="">Selecione o grupo</option>';
+    if (Array.isArray(groups)) {
+      groups.forEach(function(g) {
+        var name = g.subject || g.name || g.id;
+        var id = g.id || g.jid || '';
+        opts += '<option value="' + id + '">' + name + '</option>';
+      });
+    }
+    document.getElementById('sigGroup').innerHTML = opts;
+    document.getElementById('mktGroup').innerHTML = opts;
+  } catch(e) {}
+}
+
+// ─── Preview signal ───
+function previewSignal() {
+  var dir = document.getElementById('sigDirection').value === 'buy' ? '⬆️ COMPRA' : '⬇️ VENDA';
+  var conf = {high: '🔥 Alta', medium: '⚡ Media', low: '💡 Baixa'}[document.getElementById('sigConfidence').value];
+  var notes = document.getElementById('sigNotes').value;
+  var msg = '📊 *SINAL DE ENTRADA*\n\n';
+  msg += '🪙 Ativo: *' + document.getElementById('sigAsset').value + '*\n';
+  msg += '📍 Direcao: *' + dir + '*\n';
+  msg += '⏱ Tempo: *' + document.getElementById('sigExpiration').value + '*\n';
+  msg += '🎯 Confianca: ' + conf + '\n';
+  if (notes) msg += '\n💬 ' + notes + '\n';
+  msg += '\n🏦 Opere na HudBroker: https://hud-broker.com';
+  var el = document.getElementById('sigPreview');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+// ─── Create signal ───
+async function createSignal(action) {
+  var data = {
+    type: 'signal',
+    asset: document.getElementById('sigAsset').value,
+    direction: document.getElementById('sigDirection').value,
+    expiration: document.getElementById('sigExpiration').value,
+    confidence: document.getElementById('sigConfidence').value,
+    notes: document.getElementById('sigNotes').value,
+    group_id: document.getElementById('sigGroup').value
+  };
+  if (action === 'schedule') {
+    var sched = document.getElementById('sigSchedule').value;
+    if (!sched) { alert('Selecione data e hora para agendar'); return; }
+    data.scheduled_at = new Date(sched).toISOString();
+  }
+  try {
+    var result = await apiFetch('/signals', { method: 'POST', body: JSON.stringify(data) });
+    alert(result.status === 'sent' ? 'Sinal enviado!' : result.status === 'scheduled' ? 'Sinal agendado!' : 'Sinal salvo como rascunho');
+    document.getElementById('sigNotes').value = '';
+    document.getElementById('sigPreview').style.display = 'none';
+  } catch(e) { alert('Erro: ' + e.message); }
+}
+
+// ─── Send marketing ───
+async function sendMarketing(action) {
+  var data = {
+    type: 'marketing',
+    message: document.getElementById('mktMessage').value,
+    group_id: document.getElementById('mktGroup').value
+  };
+  if (!data.message) { alert('Digite a mensagem'); return; }
+  if (action === 'schedule') {
+    var sched = document.getElementById('mktSchedule').value;
+    if (!sched) { alert('Selecione data e hora'); return; }
+    data.scheduled_at = new Date(sched).toISOString();
+  }
+  try {
+    var result = await apiFetch('/signals', { method: 'POST', body: JSON.stringify(data) });
+    alert(result.status === 'sent' ? 'Mensagem enviada!' : result.status === 'scheduled' ? 'Mensagem agendada!' : 'Salva como rascunho');
+    document.getElementById('mktMessage').value = '';
+  } catch(e) { alert('Erro: ' + e.message); }
+}
+
+// ─── Load scheduled ───
+async function loadScheduled() {
+  try {
+    var signals = await apiFetch('/signals');
+    var scheduled = signals.filter(function(s) { return s.status === 'scheduled'; });
+    var el = document.getElementById('scheduledList');
+    if (scheduled.length === 0) { el.innerHTML = '<div class="empty-msg">Nenhum sinal agendado</div>'; return; }
+    el.innerHTML = scheduled.map(renderCard).join('');
+  } catch(e) {}
+}
+
+// ─── Load history ───
+async function loadHistory() {
+  try {
+    var signals = await apiFetch('/signals');
+    var history = signals.filter(function(s) { return s.status !== 'scheduled'; });
+    var el = document.getElementById('historyList');
+    if (history.length === 0) { el.innerHTML = '<div class="empty-msg">Nenhum envio ainda</div>'; return; }
+    el.innerHTML = history.map(renderCard).join('');
+  } catch(e) {}
+}
+
+function renderCard(s) {
+  var badgeCls = s.status === 'sent' ? 'b-sent' : s.status === 'scheduled' ? 'b-scheduled' : s.status === 'failed' ? 'b-failed' : s.status === 'draft' ? 'b-draft' : 'b-pending';
+  var time = s.scheduled_at ? new Date(s.scheduled_at).toLocaleString('pt-BR') : new Date(s.created_at).toLocaleString('pt-BR');
+  var actions = '';
+  if (s.status === 'scheduled' || s.status === 'draft' || s.status === 'failed') {
+    actions = '<button class="sig-action sig-send" onclick="sendNow(\''+s.id+'\')">Enviar</button>';
+  }
+  actions += '<button class="sig-action sig-del" onclick="deleteSig(\''+s.id+'\')">Excluir</button>';
+  return '<div class="sig-card"><div class="sig-content">'+s.content+'</div><div class="sig-meta"><span class="sig-badge '+badgeCls+'">'+s.status+'</span><span class="sig-time">'+time+'</span><div class="sig-actions">'+actions+'</div></div></div>';
+}
+
+async function sendNow(id) {
+  try {
+    await apiFetch('/signals/' + id + '/send', { method: 'POST' });
+    alert('Enviado!');
+    loadScheduled();
+    loadHistory();
+  } catch(e) { alert('Erro: ' + e.message); }
+}
+
+async function deleteSig(id) {
+  if (!confirm('Excluir este sinal?')) return;
+  try {
+    await apiFetch('/signals/' + id, { method: 'DELETE' });
+    loadScheduled();
+    loadHistory();
+  } catch(e) {}
+}
+
+// Init
+checkStatus();
+loadGroups();
+</script>
+</body>
+</html>
