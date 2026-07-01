@@ -158,6 +158,54 @@ export async function initDb() {
     ALTER TABLE access_logs ADD COLUMN IF NOT EXISTS provider TEXT;
   `);
 
+  // Copy Trade
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS copy_trade_masters (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id),
+      name TEXT NOT NULL,
+      description TEXT,
+      avatar_url TEXT,
+      win_rate DOUBLE PRECISION DEFAULT 0,
+      total_trades INTEGER DEFAULT 0,
+      total_profit DOUBLE PRECISION DEFAULT 0,
+      is_active BOOLEAN DEFAULT true,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+
+    CREATE TABLE IF NOT EXISTS copy_trade_followers (
+      id TEXT PRIMARY KEY,
+      master_id TEXT NOT NULL REFERENCES copy_trade_masters(id),
+      user_id TEXT NOT NULL REFERENCES users(id),
+      stake_mode TEXT NOT NULL DEFAULT 'fixed',
+      fixed_amount DOUBLE PRECISION DEFAULT 5,
+      percent_amount DOUBLE PRECISION DEFAULT 5,
+      is_active BOOLEAN DEFAULT true,
+      total_copied INTEGER DEFAULT 0,
+      total_profit DOUBLE PRECISION DEFAULT 0,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+      UNIQUE(master_id, user_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS copy_trade_log (
+      id TEXT PRIMARY KEY,
+      master_trade_id TEXT NOT NULL,
+      follower_trade_id TEXT NOT NULL,
+      master_id TEXT NOT NULL,
+      follower_id TEXT NOT NULL,
+      asset TEXT,
+      direction TEXT,
+      stake DOUBLE PRECISION,
+      result TEXT,
+      profit DOUBLE PRECISION DEFAULT 0,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_ctf_master ON copy_trade_followers(master_id);
+    CREATE INDEX IF NOT EXISTS idx_ctf_user ON copy_trade_followers(user_id);
+    CREATE INDEX IF NOT EXISTS idx_ctl_master ON copy_trade_log(master_id);
+  `);
+
   console.log('[db] Schema PostgreSQL inicializado/verificado');
 }
 
