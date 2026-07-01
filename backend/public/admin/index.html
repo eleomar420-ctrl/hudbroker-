@@ -518,6 +518,9 @@ async function toggleCopyTradeMaster() {
     } catch (e) { showToast('Erro', 'error'); }
   }
 }
+
+async function loadUserLogs(){
+  if(!curUser)return;
   try{
     var logs=await apiFetch('/admin/users/'+curUser.id+'/access-logs');
     var body=document.getElementById('udLogBody');
