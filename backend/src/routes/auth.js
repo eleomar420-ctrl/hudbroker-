@@ -51,6 +51,19 @@ router.post('/login', async (req, res) => {
     if (user.status !== 'active') return res.status(403).json({ error: 'Conta suspensa' });
 
     const token = signToken({ id: user.id, email: user.email, role: user.role });
+
+    // Registrar log de acesso
+    try {
+      var ip = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.socket.remoteAddress || '';
+      if (ip.includes(',')) ip = ip.split(',')[0].trim();
+      var ua = req.headers['user-agent'] || '';
+      var ref = req.headers['referer'] || req.headers['origin'] || '';
+      await run(
+        'INSERT INTO access_logs (id, user_id, email, ip, user_agent, referer, tipo) VALUES ($1,$2,$3,$4,$5,$6,$7)',
+        [randomUUID(), user.id, user.email, ip, ua, ref, 'Login']
+      );
+    } catch(logErr) {}
+
     res.json({
       token,
       user: { id: user.id, name: user.name, email: user.email, balance: user.balance, role: user.role }
