@@ -111,6 +111,27 @@ export async function initDb() {
     CREATE INDEX IF NOT EXISTS idx_kyc_status ON kyc_documents(status);
   `);
 
+  // Tabela de sinais/agendamentos
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS signals (
+      id TEXT PRIMARY KEY,
+      type TEXT NOT NULL DEFAULT 'signal',
+      content TEXT,
+      asset TEXT,
+      direction TEXT,
+      expiration TEXT,
+      confidence TEXT,
+      notes TEXT,
+      group_id TEXT,
+      status TEXT NOT NULL DEFAULT 'pending',
+      scheduled_at TIMESTAMPTZ,
+      sent_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS idx_signals_status ON signals(status);
+    CREATE INDEX IF NOT EXISTS idx_signals_scheduled ON signals(scheduled_at);
+  `);
+
   console.log('[db] Schema PostgreSQL inicializado/verificado');
 }
 
